@@ -142,63 +142,62 @@ void RCCore::calc_constraint(Vals & vals) const {
 
 // Public
 RCCore::RCCore() :
-    vals0 (Vals()),
-    vals1 (Vals()),
-    vals2 (Vals())
+    inVals (Vals()),
+    outVals (Vals())
     {}
 
 bool RCCore::setVTop(double in) {
-    vals0.vtop = in;
-    vals0.vtopd = Vals::INPUT;
+    inVals.vtop = in;
+    inVals.vtopd = Vals::INPUT;
     return update();
 }
 bool RCCore::setVBot(double in) {
-    vals0.vbot = in;
-    vals0.vbotd = Vals::INPUT;
+    inVals.vbot = in;
+    inVals.vbotd = Vals::INPUT;
     return update();
 }
 bool RCCore::setVMid(double in) {
-    vals0.vmid = in;
-    vals0.vmidd = Vals::INPUT;
+    inVals.vmid = in;
+    inVals.vmidd = Vals::INPUT;
     return update();
 }
 bool RCCore::setR1(double in) {
-    vals0.r1 = in;
-    vals0.r1d = Vals::INPUT;
+    inVals.r1 = in;
+    inVals.r1d = Vals::INPUT;
     return update();
 }
 bool RCCore::setR2(double in) {
-    vals0.r2 = in;
-    vals0.r2d = Vals::INPUT;
+    inVals.r2 = in;
+    inVals.r2d = Vals::INPUT;
     return update();
 }
 bool RCCore::setCurr(double in) {
-    vals0.curr = in;
-    vals0.currd = Vals::INPUT;
+    inVals.curr = in;
+    inVals.currd = Vals::INPUT;
     return update();
 }
 bool RCCore::setVTop(Vals::dir dir) {
-    vals0.vtopd = dir;
+    inVals.vtopd = dir;
     return update();
 }
 bool RCCore::setVBot(Vals::dir dir) {
-    vals0.vbotd = dir;
+    inVals.vbotd = dir;
     return update();
 }
 bool RCCore::setVMid(Vals::dir dir) {
-    vals0.vmidd = dir;
+    inVals.vmidd = dir;
     return update();
 }
 bool RCCore::setR1(Vals::dir dir) {
-    vals0.r1d = dir;
+    inVals.r1d = dir;
     return update();
 }
 bool RCCore::setR2(Vals::dir dir) {
-    vals0.r2d = dir;
+    inVals.r2d = dir;
     return update();
 }
 bool RCCore::setCurr(Vals::dir dir) {
-    vals0.currd = dir;
+    inVals.currd = dir;
     return update();
 }
 
@@ -206,34 +205,34 @@ bool RCCore::update() {
     // Go through all three calculations
     // keep intermediate results
 
-    calc_constraint(vals0);
+    calc_constraint(inVals);
 
-   if (vals0.constrainedType() != Vals::PROPER) {
+   if (inVals.constrainedType() != Vals::PROPER) {
        std::cout << "Improper input constraint -- won't calculate" << std::endl;
-       vals2 = vals1 = vals0;
-       if (ibridge) ibridge->setState(vals0);
+       outVals = inVals;
+       if (ibridge) ibridge->setState(inVals);
        return false;
    }
     
-    vals2 = vals1 = calc_group(vals0);
-    if (ibridge) ibridge->setState(vals2);
+    outVals = calc_group(inVals);
+    if (ibridge) ibridge->setState(outVals);
     return true;
 }
 
 bool RCCore::update(Vals in) {
     // Go through all three calculations
     // keep intermediate results
-    vals0 = in;
+    inVals = in;
     return update();
 }
 void RCCore::setInput(Vals vals) {
-    vals0 = vals;
+    inVals = vals;
 }
 Vals RCCore::getInput() const {
-    return vals0;
+    return inVals;
 }
 Vals RCCore::getOutput() const {
-    return vals2;
+    return outVals;
 }
 void RCCore::setBridge(const std::shared_ptr<UIBridgeInterface> & b) {
     ibridge = b;

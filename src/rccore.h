@@ -10,20 +10,9 @@ class RCCore
 {
 
 private:
-    Vals vals0; // input from UI
-    Vals vals1; // first set of calculations;
-    Vals vals2; // second set of calculations;
-    //Vals vals3; // final set of calculations;
+    Vals inVals; // input from UI
+    Vals outVals; // second set of calculations;
     std::shared_ptr<UIBridgeInterface> ibridge;
-
-    // void calc_vtop(Vals, double &, Vals::dir &) const;
-    // void calc_vbot(Vals, double &, Vals::dir &) const;
-    // void calc_vmid(Vals, double &, Vals::dir &) const;
-    // void calc_r1(Vals, double &, Vals::dir &) const;
-    // void calc_r2(Vals, double &, Vals::dir &) const;
-    // void calc_ratio(Vals, double &, Vals::dir &) const;
-    // void calc_curr(Vals, double &, Vals::dir &) const;
-    // void verify_loops(Vals, bool &) const;
     Vals calc_group(Vals) const;
     void calc_constraint(Vals &) const;
 

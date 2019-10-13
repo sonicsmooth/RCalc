@@ -9,14 +9,6 @@ Vals::Vals() : vtop(0.0), vbot(0.0), vmid(0.0), r1(0.0), r2(0.0), curr(0.0), rat
                r1d(UNDEFINED), r2d(UNDEFINED), currd(UNDEFINED), 
                ratiod(UNDEFINED), constraint(UNDER) {}
 
-// Vals::Vals(double vt, double vb, double vm, double r1, double r2, double c, double rat,
-//            dir vtd,   dir vbd,   dir vmd,   dir r1d,   dir r2d,   dir cd,   dir ratd,
-//            constype ct) :
-//             vtop(vt), vbot(vb), vmid(vm), r1(r1), r2(r2), curr(c), ratio(rat),
-//             vtopd(vtd), vbotd(vbd), vmidd(vmd), r1d(r1d), r2d(r2d), currd(cd), 
-//             ratiod(ratd), constraint(ct) {}
-
-
 int Vals::numInputs() const {
     return isin(vtopd) + isin(vbotd) + isin(vmidd) +
            isin(r1d)   + isin(r2d)   + isin(currd);

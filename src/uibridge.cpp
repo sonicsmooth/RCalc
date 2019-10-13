@@ -8,10 +8,7 @@
 #include <QPushButton>
 #include "uibridge.h"
 
-UIBridge::UIBridge()
-{
-
-}
+UIBridge::UIBridge(){}
 
 void UIBridge::forceSlider(QSlider *slider, int val) const {
     slider->blockSignals(true);

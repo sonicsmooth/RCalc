@@ -1,5 +1,7 @@
-//#include <QtWidgets/QSlider>
-//#include <QtWidgets/QPlainTextEdit>
+#include <QSlider>
+#include <QLabel>
+#include <QPushButton>
+#include <QPlainTextEdit>
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
