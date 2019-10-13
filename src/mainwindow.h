@@ -32,13 +32,6 @@ public:
     QLabel * R2ValLabel();
     QLabel * RatioValLabel();
     QLabel * CurrValLabel();
-    QLabel * VTopKLabel();
-    QLabel * VBotKLabel();
-    QLabel * VMidKLabel();
-    QLabel * R1KLabel();
-    QLabel * R2KLabel();
-    QLabel * RatioKLabel();
-    QLabel * CurrKLabel();
     QPushButton * VTopButton();
     QPushButton * VBotButton();
     QPushButton * VMidButton();

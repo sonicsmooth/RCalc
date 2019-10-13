@@ -29,20 +29,21 @@ private:
 
 public:
     RCCore();
-    bool set_vtop(double);
-    bool set_vbot(double);
-    bool set_vmid(double);
-    bool set_r1(double);
-    bool set_r2(double);
-    bool set_curr(double);
-    bool set_vtop(Vals::dir);
-    bool set_vbot(Vals::dir);
-    bool set_vmid(Vals::dir);
-    bool set_r1(Vals::dir);
-    bool set_r2(Vals::dir);
-    bool set_curr(Vals::dir);
+    bool setVTop(double);
+    bool setVBot(double);
+    bool setVMid(double);
+    bool setR1(double);
+    bool setR2(double);
+    bool setCurr(double);
+    bool setVTop(Vals::dir);
+    bool setVBot(Vals::dir);
+    bool setVMid(Vals::dir);
+    bool setR1(Vals::dir);
+    bool setR2(Vals::dir);
+    bool setCurr(Vals::dir);
     bool update();     // Given inst.vals0, sets and computes vals3; returns success t/f
     bool update(Vals); // Given Vals, sets and computes everything; returns success t/f
+    void setInput(Vals);
     Vals getInput() const;
     Vals getOutput() const;
     bool inputConstrainedType() const;

@@ -1,7 +1,21 @@
 #include <iomanip>
 #include <string>
 #include <sstream>
+#include <cassert>
 #include "vals.h"
+
+Vals::Vals() : vtop(0.0), vbot(0.0), vmid(0.0), r1(0.0), r2(0.0), curr(0.0), ratio(0.0),
+               vtopd(UNDEFINED), vbotd(UNDEFINED), vmidd(UNDEFINED), 
+               r1d(UNDEFINED), r2d(UNDEFINED), currd(UNDEFINED), 
+               ratiod(UNDEFINED), constraint(UNDER) {}
+
+// Vals::Vals(double vt, double vb, double vm, double r1, double r2, double c, double rat,
+//            dir vtd,   dir vbd,   dir vmd,   dir r1d,   dir r2d,   dir cd,   dir ratd,
+//            constype ct) :
+//             vtop(vt), vbot(vb), vmid(vm), r1(r1), r2(r2), curr(c), ratio(rat),
+//             vtopd(vtd), vbotd(vbd), vmidd(vmd), r1d(r1d), r2d(r2d), currd(cd), 
+//             ratiod(ratd), constraint(ct) {}
+
 
 int Vals::numInputs() const {
     return isin(vtopd) + isin(vbotd) + isin(vmidd) +
@@ -11,8 +25,8 @@ bool Vals::isDefined() const {
     return isdef(vtopd) && isdef(vbotd) && isdef(vmidd) &&
            isdef(r1d)   && isdef(r2d)   && isdef(currd) && isdef(ratiod);
 }
-Vals::constraint Vals::constrainedType() const {
-    return constype;
+Vals::constype Vals::constrainedType() const {
+    return constraint;
 }
 std::string Vals::str() const {
     int nw = 10;
@@ -66,12 +80,15 @@ bool isin(Vals::dir d) {return d == Vals::INPUT;};
 bool isout(Vals::dir d) {return d == Vals::OUTPUT;};
 bool isdef(Vals::dir d) {return d != Vals::UNDEFINED;};
 std::string vstr(Vals::dir d) {
+    assert (d >= Vals::UNDEFINED && d <= Vals::OUTPUT);
     switch (d) {
         case Vals::UNDEFINED: return "undefined";
         case Vals::INPUT: return "input";
         case Vals::OUTPUT: return "output";
     }
-}std::string vstr(Vals::constraint c) {
+}
+std::string vstr(Vals::constype c) {
+    assert (c >= Vals::UNDER && c <= Vals::MIXED);
     switch (c) {
         case Vals::UNDER: return "under constrained";
         case Vals::PROPER: return "properly constrained";

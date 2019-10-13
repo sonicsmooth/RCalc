@@ -30,13 +30,6 @@ QLabel * MainWindow::R1ValLabel() {return ui->R1ValLabel;}
 QLabel * MainWindow::R2ValLabel() {return ui->R2ValLabel;}
 QLabel * MainWindow::RatioValLabel() {return ui->RatioValLabel;}
 QLabel * MainWindow::CurrValLabel() {return ui->CurrValLabel;}
-QLabel * MainWindow::VTopKLabel() {return ui->VTopKLabel;}
-QLabel * MainWindow::VBotKLabel() {return ui->VBotKLabel;}
-QLabel * MainWindow::VMidKLabel() {return ui->VMidKLabel;}
-QLabel * MainWindow::R1KLabel() {return ui->R1KLabel;}
-QLabel * MainWindow::R2KLabel() {return ui->R2KLabel;}
-QLabel * MainWindow::RatioKLabel() {return ui->RatioKLabel;}
-QLabel * MainWindow::CurrKLabel() {return ui->CurrKLabel;}
 QPushButton * MainWindow::VTopButton() {return ui->VTopButton;}
 QPushButton * MainWindow::VBotButton() {return ui->VBotButton;}
 QPushButton * MainWindow::VMidButton() {return ui->VMidButton;}

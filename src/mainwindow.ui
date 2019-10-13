@@ -18,10 +18,15 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>400</y>
+      <y>460</y>
       <width>781</width>
-      <height>251</height>
+      <height>191</height>
      </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Consolas</family>
+     </font>
     </property>
    </widget>
    <widget class="QWidget" name="layoutWidget">
@@ -30,7 +35,7 @@
       <x>10</x>
       <y>10</y>
       <width>781</width>
-      <height>381</height>
+      <height>441</height>
      </rect>
     </property>
     <layout class="QHBoxLayout" name="horizontalLayout_9">
@@ -62,13 +67,6 @@
        </item>
        <item alignment="Qt::AlignHCenter">
         <widget class="QLabel" name="VTopValLabel">
-         <property name="text">
-          <string>TextLabel</string>
-         </property>
-        </widget>
-       </item>
-       <item alignment="Qt::AlignHCenter">
-        <widget class="QLabel" name="VTopKLabel">
          <property name="text">
           <string>TextLabel</string>
          </property>
@@ -125,13 +123,6 @@
          </property>
         </widget>
        </item>
-       <item alignment="Qt::AlignHCenter">
-        <widget class="QLabel" name="VBotKLabel">
-         <property name="text">
-          <string>TextLabel</string>
-         </property>
-        </widget>
-       </item>
        <item>
         <widget class="QPushButton" name="VBotButton">
          <property name="text">
@@ -172,13 +163,6 @@
        </item>
        <item alignment="Qt::AlignHCenter">
         <widget class="QLabel" name="VMidValLabel">
-         <property name="text">
-          <string>TextLabel</string>
-         </property>
-        </widget>
-       </item>
-       <item alignment="Qt::AlignHCenter">
-        <widget class="QLabel" name="VMidKLabel">
          <property name="text">
           <string>TextLabel</string>
          </property>
@@ -229,13 +213,6 @@
          </property>
         </widget>
        </item>
-       <item alignment="Qt::AlignHCenter">
-        <widget class="QLabel" name="R1KLabel">
-         <property name="text">
-          <string>TextLabel</string>
-         </property>
-        </widget>
-       </item>
        <item>
         <widget class="QPushButton" name="R1Button">
          <property name="text">
@@ -276,13 +253,6 @@
        </item>
        <item alignment="Qt::AlignHCenter">
         <widget class="QLabel" name="R2ValLabel">
-         <property name="text">
-          <string>TextLabel</string>
-         </property>
-        </widget>
-       </item>
-       <item alignment="Qt::AlignHCenter">
-        <widget class="QLabel" name="R2KLabel">
          <property name="text">
           <string>TextLabel</string>
          </property>
@@ -333,13 +303,6 @@
          </property>
         </widget>
        </item>
-       <item alignment="Qt::AlignHCenter">
-        <widget class="QLabel" name="CurrKLabel">
-         <property name="text">
-          <string>TextLabel</string>
-         </property>
-        </widget>
-       </item>
        <item>
         <widget class="QPushButton" name="CurrButton">
          <property name="text">
@@ -383,13 +346,6 @@
        </item>
        <item alignment="Qt::AlignHCenter">
         <widget class="QLabel" name="RatioValLabel">
-         <property name="text">
-          <string>TextLabel</string>
-         </property>
-        </widget>
-       </item>
-       <item alignment="Qt::AlignHCenter">
-        <widget class="QLabel" name="RatioKLabel">
          <property name="text">
           <string>TextLabel</string>
          </property>
