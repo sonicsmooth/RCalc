@@ -1,6 +1,8 @@
 #include <iostream>
 #include <iomanip>
 #include <cmath>
+#include <list>
+#include <algorithm>
 #include "rccore.h"
 #include "vals.h"
 
@@ -10,6 +12,8 @@
 // and enable removing something from the middle
 // No need for pop, as we'll access the list entirely
 void RCCore::pushToList(vartype v) {
+    // Move to front if it's already there
+    latest4.remove(v);
     latest4.push_back(v);
     while (latest4.size() > 4)
         latest4.pop_front();
