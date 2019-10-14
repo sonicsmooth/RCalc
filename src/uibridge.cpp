@@ -19,6 +19,7 @@ void UIBridge::forceButton(QPushButton *button, bool val) const {
     button->blockSignals(true);
     button->setChecked(val);
     button->blockSignals(false);
+    button->setText(val ? "Input" : "Output");
 }
 
 void UIBridge::setWindow(MainWindow * mw) {

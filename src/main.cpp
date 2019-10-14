@@ -33,14 +33,6 @@ int main(int argc, char *argv[])
     QObject::connect(w.R2Slider(),   &QSlider::valueChanged, [=](int x) {pcore->setR2  (double(x)/100);});
     QObject::connect(w.CurrSlider(), &QSlider::valueChanged, [=](int x) {pcore->setCurr(double(x)/100);});
 
-    // The button text changes based on its related var being an input or output
-    QObject::connect(w.VTopButton(), &QPushButton::toggled, [&w](bool checked) {w.VTopButton()->setText(checked ? "Input" : "Output");});
-    QObject::connect(w.VBotButton(), &QPushButton::toggled, [&w](bool checked) {w.VBotButton()->setText(checked ? "Input" : "Output");});
-    QObject::connect(w.VMidButton(), &QPushButton::toggled, [&w](bool checked) {w.VMidButton()->setText(checked ? "Input" : "Output");});
-    QObject::connect(w.R1Button(),   &QPushButton::toggled, [&w](bool checked) {w.R1Button  ()->setText(checked ? "Input" : "Output");});
-    QObject::connect(w.R2Button(),   &QPushButton::toggled, [&w](bool checked) {w.R2Button  ()->setText(checked ? "Input" : "Output");});
-    QObject::connect(w.CurrButton(), &QPushButton::toggled, [&w](bool checked) {w.CurrButton()->setText(checked ? "Input" : "Output");});
-
     // The input direction changes based on button input or output -- value goes straight to core input
     QObject::connect(w.VTopButton(), &QPushButton::toggled, [&pcore](bool checked) {pcore->setVTop(checked ? Vals::INPUT : Vals::OUTPUT);});
     QObject::connect(w.VBotButton(), &QPushButton::toggled, [&pcore](bool checked) {pcore->setVBot(checked ? Vals::INPUT : Vals::OUTPUT);});

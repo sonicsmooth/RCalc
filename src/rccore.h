@@ -1,6 +1,8 @@
 #ifndef RCCORE_H
 #define RCCORE_H
 
+#include <queue>
+#include <list>
 #include "uibridgeinterface.h"
 #include "vals.h"
 
@@ -10,9 +12,14 @@ class RCCore
 {
 
 private:
+    typedef enum {VTOP, VBOT, VMID, R1, R2, CURR} vartype;
     Vals inVals; // input from UI
     Vals outVals; // second set of calculations;
     std::shared_ptr<UIBridgeInterface> ibridge;
+    std::list<vartype> latest4; // list of 4 inputs
+
+    void pushToList(vartype);
+    void removeFromList(vartype);
     Vals calc_group(Vals) const;
     void calc_constraint(Vals &) const;
 
@@ -36,6 +43,7 @@ public:
     Vals getInput() const;
     Vals getOutput() const;
     bool inputConstrainedType() const;
+    
 
     void setBridge(std::shared_ptr<UIBridgeInterface> const &);
 };
