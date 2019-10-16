@@ -3,6 +3,7 @@
 #include <cmath>
 #include <list>
 #include <algorithm>
+#include <cassert>
 #include "rccore.h"
 #include "vals.h"
 
@@ -17,26 +18,40 @@ void RCCore::pushToList(vartype v) {
     latest4.push_back(v);
     while (latest4.size() > 4)
         latest4.pop_front();
-    std::cout << "list len from push: " << latest4.size() << std::endl;
+    for (auto &&i : latest4)
+        std::cout << cstr(i) << " ";    
+    std::cout << std::endl;
 }
 void RCCore::removeFromList(vartype v) {
     latest4.remove(v);
-    std::cout << "list len from remove: " << latest4.size() << std::endl;
 }
-
 void RCCore::setBridge(const std::shared_ptr<UIBridgeInterface> & b) {
     ibridge = b;
 }
-
-Vals RCCore::calc_group(Vals invals) const {
+Vals RCCore::swapInputs(Vals vals) const {
+    // Set inputs according to list
+    Vals ovals = vals;
+    auto find = [&](vartype vt) {return std::find(latest4.begin(), latest4.end(), vt) != latest4.end();};
+    ovals.vtopd = find(VTOP) ? Vals::INPUT : Vals::OUTPUT;
+    ovals.vbotd = find(VBOT) ? Vals::INPUT : Vals::OUTPUT;
+    ovals.vmidd = find(VMID) ? Vals::INPUT : Vals::OUTPUT;
+    ovals.r1d   = find(R1)   ? Vals::INPUT : Vals::OUTPUT;
+    ovals.r2d   = find(R2)   ? Vals::INPUT : Vals::OUTPUT;
+    ovals.currd = find(CURR) ? Vals::INPUT : Vals::OUTPUT;
+    return ovals;
+}
+Vals RCCore::calc_group(vartype vt, Vals invals) const {
     // Update one set of values from the previous set
-    Vals out {};
     double vtop  = invals.vtop;
     double vbot  = invals.vbot;
     double vmid  = invals.vmid;
     double r1    = invals.r1;
     double r2    = invals.r2;
     double curr  = invals.curr;
+    double const vul = 7;
+    double const vbl = -7;
+    double const rmax = 100;
+    double const currmax = 4.3;
     /*      INPUTS
             vtop vbot vmid r1  r2 curr  comment
     0x0f      0    0    1   1   1   1	
@@ -55,31 +70,128 @@ Vals RCCore::calc_group(Vals invals) const {
     0x3a      1    1    1   0   1   0	
     0x3c      1    1    1   1   0   0	*/
 
-    out = invals;
+    Vals out = invals;
     switch(invals.incode()) {
-        case 0x0f: 
-            out.vtop = vmid + curr * r1; 
-            out.vbot = vmid - curr * r2; 
+        case 0x0f: {
+            // Vtop, Vbot = f(vmid, r1, r2, curr)
             out.vtopd = Vals::OUTPUT;
             out.vbotd = Vals::OUTPUT;
+            auto compute = [&out]() {
+                out.vtop = out.vmid + out.curr * out.r1;
+                out.vbot = out.vmid - out.curr * out.r2; 
+            };
+            out.vmid = std::max(std::min(out.vmid, vul), vbl);
+            out.r1   = std::min(out.r1, rmax);
+            out.r2   = std::min(out.r2, rmax);
+            out.curr = std::min(out.curr, currmax);
+            int ctr = 0;
+            while (ctr < 10) {
+                ctr ++;
+                compute();
+                if (out.vtop > vul && vt == RCCore::CURR) 
+                    out.curr = (vul - vmid) / r1;
+                else if (out.vtop < vbl && vt == RCCore::CURR) 
+                    out.curr = 0.0;
+                else if (out.vbot > vul && vt == RCCore::CURR) 
+                    out.curr = 0.0;
+                else if (out.vbot < vbl && vt == RCCore::CURR) 
+                    out.curr = (out.vmid - vbl) / r2;
+                else if (out.vtop > vul && vt == RCCore::VMID) 
+                    out.vmid = vul - (out.curr * r1);
+                else if (out.vtop < vbl && vt == RCCore::VMID) 
+                    out.vmid = 0.0;
+                else if (out.vbot > vul && vt == RCCore::VMID) 
+                    out.vmid = 0.0;
+                else if (out.vbot < vbl && vt == RCCore::VMID) 
+                    out.vmid = vbl + (out.curr * r2);
+                else if (out.vtop > vul && vt == RCCore::R1) 
+                    out.r1 = (vul - out.vmid) / out.curr;
+                else if (out.vtop < vbl && vt == RCCore::R1)  // won't happen
+                    out.r1 = (vbl - out.vmid) / out.curr;
+                else if (out.vbot > vul && vt == RCCore::R2)  // won't happen
+                    out.r2 = -(vul - out.vmid) / out.curr;
+                else if (out.vbot < vbl && vt == RCCore::R2) 
+                    out.r2 = -(vbl - out.vmid) / out.curr;
+                else
+                    break;
+            }
             break;
-        case 0x17:
-            out.vtop = vbot + curr + (r1 + r2);
-            out.vmid = vbot + curr * r2;
+        }
+        case 0x17: {
+            // Vtop, vmid = f(vbot, r1, r2, curr)
             out.vtopd = Vals::OUTPUT;
             out.vmidd = Vals::OUTPUT;
+            auto compute = [&out]() {
+                out.vtop = out.vbot + out.curr * (out.r1 + out.r2);
+                out.vmid = out.vbot + out.curr * out.r2; 
+            };
+            out.vbot = std::max(out.vbot, vbl);
+            out.r1   = std::min(out.r1, rmax);
+            out.r2   = std::min(out.r2, rmax);
+            out.curr = std::min(out.curr, currmax);
+            int ctr = 0;
+            while (ctr < 10) {
+                ctr ++;
+                compute();
+                if (out.vtop > vul && vt == RCCore::VBOT)
+                    out.vbot = vul - (out.curr * (out.r1 + out.r2));
+                else if (out.vtop < vbl && vt == RCCore::VBOT)
+                    out.vbot = vbl - (out.curr * (out.r1 + out.r2));
+                else if (out.vmid > vul && vt == RCCore::VBOT)
+                    out.vbot = vul - (out.curr * out.r2);
+                else if (out.vmid < vbl && vt == RCCore::VBOT)
+                    out.vbot = vbl - (out.curr * out.r2);
+                else if (out.vtop > vul && vt == RCCore::R1)
+                    out.r1 = ((vul - out.vbot) / out.curr) - out.r2;
+                else if (out.vtop < vbl && vt == RCCore::R1)
+                    out.r1 = (vbl - out.vbot) / out.curr - out.r2;
+                else if (out.vmid > vul && vt == RCCore::R1); // won't happen
+                else if (out.vmid < vbl && vt == RCCore::R1); // won't happen
+                else if (out.vtop > vul && vt == RCCore::R2)
+                    out.r2 = (vul - out.vbot) / out.curr - out.r1;
+                else if (out.vtop < vbl && vt == RCCore::R2)
+                    out.r2 = (vbl - out.vbot) / out.curr - out.r1;
+                else if (out.vmid > vul && vt == RCCore::R2)
+                    out.r2 = (vul - out.vbot) / out.curr;
+                else if (out.vmid < vbl && vt == RCCore::R2)
+                    out.r2 = (vbl - out.vbot) / out.curr;
+                else if (out.vtop > vul && vt == RCCore::CURR)
+                    out.curr = (vul - out.vbot) / (out.r1 + out.r2);
+                else if (out.vtop < vbl && vt == RCCore::CURR)
+                    out.curr = (vbl - out.vbot) / (out.r1 + out.r2);
+                else if (out.vmid > vul && vt == RCCore::CURR)
+                    out.curr = (vul - out.vbot) / out.r2;
+                else if (out.vmid < vbl && vt == RCCore::CURR)
+                    out.curr = (vbl - out.vbot) / out.r2;
+                else
+                    break;
+            }
             break;
+        }
         case 0x1b:
             throw std::invalid_argument( "Error in logic" );
         case 0x1d:
-            out.vtop = vmid + curr + r1;
-            out.r2   = (vmid - vbot) / curr;
+            // vtop, r2 = f(vbot, vmid, r1, curr)
+            // bound vbot, vmid, constraint curr
             out.vtopd = Vals::OUTPUT;
-            out.vbotd = Vals::OUTPUT;
+            out.r2d   = Vals::OUTPUT;
+            out.vbot = std::max(vbot, vbl);
+            out.vmid = std::min(out.vmid, vul);
+            out.vmid = std::max(out.vmid, out.vbot);
+            out.vtop = out.vmid + curr * r1;
+            out.r2   = (out.vmid - vbot) / curr;
+            if(out.vtop > vul) {
+                out.curr = (vul - out.vmid) / r1;
+                out.vtop = out.vmid + out.curr * r1;
+                out.r2 = (out.vmid - out.vbot) / out.curr;
+                //out.vbot = std::min(out.vbot, out.vtop);
+                //out.vmid = std::min(out.vmid, out.vbot);
+            }
             break;
         case 0x1e:
-            out.curr = (vmid-vbot)/r2;
-            out.vtop = vmid + out.curr * r1;
+            //out.vmid = std::max(vmid, vbot);
+            out.curr = (out.vmid-vbot)/r2;
+            out.vtop = out.vmid + out.curr * r1;
             out.currd = Vals::OUTPUT;
             out.vtopd = Vals::OUTPUT;
             break;
@@ -90,16 +202,18 @@ Vals RCCore::calc_group(Vals invals) const {
             out.vbotd = Vals::OUTPUT;
             break;
         case 0x2b:
-            out.vbot  = vmid - curr * r2;
-            out.r1    = (vtop - vmid) / curr;
+            //out.vmid = std::min(vmid, vtop);
+            out.vbot  = out.vmid - curr * r2;
+            out.r1    = (vtop - out.vmid) / curr;
             out.vbotd = Vals::OUTPUT;
             out.r1d   = Vals::OUTPUT;
             break;
         case 0x2d:
             throw std::invalid_argument( "Error in logic" );
         case 0x2e:
-            out.curr = (vtop - vmid) / r1;
-            out.vbot = vmid - out.curr * r2;
+            //out.vmid = std::min(vmid, vtop);
+            out.curr = (vtop - out.vmid) / r1;
+            out.vbot = out.vmid - out.curr * r2;
             out.currd = Vals::OUTPUT;
             out.vbotd = Vals::OUTPUT;
             break;
@@ -122,20 +236,26 @@ Vals RCCore::calc_group(Vals invals) const {
             out.vmidd = Vals::OUTPUT;
             break;
         case 0x39:
-            out.r1 = (vtop - vmid) / curr;
-            out.r2 = (vmid - vbot) / curr;
+            //out.vmid = std::min(vmid, vtop);
+            //out.vmid = std::max(out.vmid, vbot);
+            out.r1 = (vtop - out.vmid) / curr;
+            out.r2 = (out.vmid - vbot) / curr;
             out.r1d = Vals::OUTPUT;
             out.r2d = Vals::OUTPUT;
             break;
         case 0x3a:
-            out.curr = (vmid - vbot) / r2;
-            out.r1   = (vtop - vmid) / out.curr;
+            //out.vmid = std::min(vmid, vtop);
+            //out.vmid = std::max(out.vmid, vbot);
+            out.curr = (out.vmid - vbot) / r2;
+            out.r1   = (vtop - out.vmid) / out.curr;
             out.currd = Vals::OUTPUT;
             out.r1d   = Vals::OUTPUT;
             break;
         case 0x3c:
-            out.curr = (vtop - vmid) / r1;
-            out.r2   = (vmid - vbot) / out.curr;
+            //out.vmid = std::min(vmid, vtop);
+            //out.vmid = std::max(out.vmid, vbot);
+            out.curr = (vtop - out.vmid) / r1;
+            out.r2   = (out.vmid - vbot) / out.curr;
             out.currd = Vals::OUTPUT;
             out.r2d   = Vals::OUTPUT;
             break;
@@ -145,20 +265,56 @@ Vals RCCore::calc_group(Vals invals) const {
     }
     out.ratio = out.r1 / out.r2;
     out.ratiod = Vals::OUTPUT;
-    calc_constraint(out);
     return out;
 }
-
-void RCCore::calc_constraint(Vals & vals) const {
-    if (vals.numInputs() > 4)
-        vals.constraint = Vals::OVER;
-    else if (vals.numInputs() < 4)
-        vals.constraint = Vals::UNDER;
+Vals::constype RCCore::constraint(Vals vals) const {
+    // Checks whether we have exactly 4 inputs, and of the right combination
+    if (vals.numInputs() > 4) {
+        std::cout << "precheck over" << std::endl;
+        return Vals::OVER;
+    }
+    else if (vals.numInputs() < 4) {
+        std::cout << "precheck under" << std::endl;
+        return Vals::UNDER;
+    }
     else // These two cases represent one loop overdefined and the other underdefined
-        if (vals.incode() == 0x1b || vals.incode() == 0x2d)
-            vals.constraint = Vals::MIXED;
-        else
-            vals.constraint = Vals::PROPER;
+        if (vals.incode() == 0x1b || vals.incode() == 0x2d) {
+            std::cout << "precheck mixed" << std::endl;
+            return Vals::MIXED;
+        }
+        else {
+            return Vals::PROPER;
+        }
+}
+
+bool RCCore::_update(vartype vt) {
+    // Calculate a what-if.
+    // If the what-if violates anything, don't update the output
+    if (constraint(inVals) == Vals::PROPER) {
+        outVals = calc_group(vt, inVals);
+        if (ibridge) ibridge->setState(outVals, constraint(outVals));
+        return true;
+    } else {
+        std::cout << "Improper input constraint -- won't calculate" << std::endl;
+        outVals = inVals;
+        if (ibridge) ibridge->setState(outVals, constraint(outVals));
+        return false;
+    }
+}
+
+
+
+std::string cstr(RCCore::vartype vt) {
+    assert (vt >= RCCore::VTOP && vt <= RCCore::CURR);
+    switch (vt) {
+        case RCCore::VTOP: return "VTOP";
+        case RCCore::VBOT: return "VBOT";
+        case RCCore::VMID: return "VMID";
+        case RCCore::R1:   return "R1";
+        case RCCore::R2:   return "R2";
+        case RCCore::CURR: return "CURR";
+        default: return "logic error";
+    }
 }
 
 // Public
@@ -167,118 +323,128 @@ RCCore::RCCore() :
     outVals (Vals())
     {}
 
-bool RCCore::setVTop(double in) {
-    inVals.vtop = in;
-    inVals.vtopd = Vals::INPUT;
-    pushToList(VTOP);
-    return update();
-}
-bool RCCore::setVBot(double in) {
-    inVals.vbot = in;
-    inVals.vbotd = Vals::INPUT;
-    pushToList(VBOT);
-    return update();
-}
-bool RCCore::setVMid(double in) {
-    inVals.vmid = in;
-    inVals.vmidd = Vals::INPUT;
-    pushToList(VMID);
-    return update();
-}
-bool RCCore::setR1(double in) {
-    inVals.r1 = in;
-    inVals.r1d = Vals::INPUT;
-    pushToList(R1);
-    return update();
-}
-bool RCCore::setR2(double in) {
-    inVals.r2 = in;
-    inVals.r2d = Vals::INPUT;
-    pushToList(R2);
-    return update();
-}
-bool RCCore::setCurr(double in) {
-    inVals.curr = in;
-    inVals.currd = Vals::INPUT;
-    pushToList(CURR);
-    return update();
-}
+// bool RCCore::setVTop(double in) {
+//         /*      INPUTS
+//             vtop vbot vmid r1  r2 curr  comment
+//     0x0f      0    0    1   1   1   1	
+//     0x17      0    1    0   1   1   1	
+//     0x1b      0    1    1   0   1   1	under
+//     0x1d      0    1    1   1   0   1	check r2
+//     0x1e      0    1    1   1   1   0	
+//     0x27      1    0    0   1   1   1	
+//     0x2b      1    0    1   0   1   1	check r1
+//     0x2d      1    0    1   1   0   1	under
+//     0x2e      1    0    1   1   1   0  
+//     0x33      1    1    0   0   1   1	check r1
+//     0x35      1    1    0   1   0   1	check r2
+//     0x36      1    1    0   1   1   0	
+//     0x39      1    1    1   0   0   1	check r1, r2
+//     0x3a      1    1    1   0   1   0	check r1
+//     0x3c      1    1    1   1   0   0	check r2  */
+//     //if (in < inVals.vbot) std::cout << "vtop reach vbot\n";
+//     //inVals.vtop = std::max(in, inVals.vbot);
+//     inVals.vtop = in;
+//     pushToList(VTOP);
+//     inVals = swapInputs(inVals);
+//     return update();
+// }
+// bool RCCore::setVBot(double in) {
+//     // if (in > inVals.vtop) std::cout << "vbot reached vtop\n";
+//     // inVals.vbot = std::min(in, inVals.vtop);
+//     inVals.vbot = in;
+//     pushToList(VBOT);
+//     inVals = swapInputs(inVals);
+//     return update();
+// }
+// bool RCCore::setVMid(double in) {
+//     // if (in > inVals.vbot) std::cout << "vmid reached vtop\n";
+//     // if (in < inVals.vbot) std::cout << "vmid reached vbot\n";
+//     // inVals.vmid = std::max(std::min(in, inVals.vtop), inVals.vbot);
+//     inVals.vmid = in;
+//     pushToList(VMID);
+//     inVals = swapInputs(inVals);
+//     return update();
+// }
+// bool RCCore::setR1(double in) {
+//     inVals.r1 = in;
+//     pushToList(R1);
+//     inVals = swapInputs(inVals);
+//     return update();
+// }
+// bool RCCore::setR2(double in) {
+//     inVals.r2 = in;
+//     pushToList(R2);
+//     inVals = swapInputs(inVals);
+//     return update();
+// }
+// bool RCCore::setCurr(double in) {
+//     inVals.curr = in;
+//     pushToList(CURR);
+//     inVals = swapInputs(inVals);
+//     return update();
+// }
 bool RCCore::setVTop(Vals::dir dir) {
-    inVals.vtopd = dir;
+    removeFromList(VTOP);
     if (dir == Vals::INPUT) pushToList(VTOP);
-    else removeFromList(VTOP);
+    inVals = swapInputs(inVals);
     return update();
 }
 bool RCCore::setVBot(Vals::dir dir) {
-    inVals.vbotd = dir;
+    removeFromList(VBOT);
     if (dir == Vals::INPUT) pushToList(VBOT);
-    else removeFromList(VBOT);
+    inVals = swapInputs(inVals);
     return update();
 }
 bool RCCore::setVMid(Vals::dir dir) {
-    inVals.vmidd = dir;
+    removeFromList(VMID);
     if (dir == Vals::INPUT) pushToList(VMID);
-    else removeFromList(VMID);
+    inVals = swapInputs(inVals);
     return update();
 }
 bool RCCore::setR1(Vals::dir dir) {
-    inVals.r1d = dir;
+    removeFromList(R1);
     if (dir == Vals::INPUT) pushToList(R1);
-    else removeFromList(R1);
+    inVals = swapInputs(inVals);
     return update();
 }
 bool RCCore::setR2(Vals::dir dir) {
-    inVals.r2d = dir;
+    removeFromList(R2);
     if (dir == Vals::INPUT) pushToList(R2);
-    else removeFromList(R2);
+    inVals = swapInputs(inVals);
     return update();
 }
 bool RCCore::setCurr(Vals::dir dir) {
-    inVals.currd = dir;
+    removeFromList(CURR);
     if (dir == Vals::INPUT) pushToList(CURR);
-    else removeFromList(CURR);
+    inVals = swapInputs(inVals);
     return update();
 }
 
-bool RCCore::update() {
-    // Go through all three calculations
-    // keep intermediate results
-
-    // Set everything to output, then set to input if in list
-    inVals.vtopd = inVals.vbotd = inVals.vmidd = 
-    inVals.r1d = inVals.r2d = inVals.currd = inVals.ratiod = Vals::OUTPUT;
-    for (auto i = latest4.begin(); i != latest4.end(); i++) {
-        switch(*i) {
-            case VTOP: inVals.vtopd = Vals::INPUT; break;
-            case VBOT: inVals.vbotd = Vals::INPUT; break;
-            case VMID: inVals.vmidd = Vals::INPUT; break;
-            case R1:   inVals.r1d   = Vals::INPUT; break;
-            case R2:   inVals.r2d   = Vals::INPUT; break;
-            case CURR: inVals.currd = Vals::INPUT; break;
-        }
+bool RCCore::update(vartype vt, double in) {
+    switch(vt) {
+        case VTOP: inVals.vtop = in; break;
+        case VBOT: inVals.vbot = in; break;
+        case VMID: inVals.vmid = in; break;
+        case R1:   inVals.r1 = in;   break;
+        case R2:   inVals.r2 = in;   break;
+        case CURR: inVals.curr = in; break;
+        default: throw std::invalid_argument("whoops!");
     }
+    pushToList(vt);
+    inVals = swapInputs(inVals);
+    return _update(vt);
 
-
-    calc_constraint(inVals);
-
-   if (inVals.constrainedType() != Vals::PROPER) {
-       std::cout << "Improper input constraint -- won't calculate" << std::endl;
-       outVals = inVals;
-       if (ibridge) ibridge->setState(inVals);
-       return false;
-   } else {
-        outVals = calc_group(inVals);
-        if (ibridge) ibridge->setState(outVals);
-        return true;
-   }
+}
+bool RCCore::update() {
+    return _update(NONE);
 }
 
-bool RCCore::update(Vals in) {
-    // Go through all three calculations
-    // keep intermediate results
-    inVals = in;
-    return update();
-}
+// bool RCCore::update(Vals newInput, Vals newOutput) {
+//     inVals = newInput;
+//     outVals = newOutput;
+//     if (ibridge) ibridge->setState(outVals, constraint(outVals));
+//     return constraint(outVals) == Vals::PROPER;
+// }
 void RCCore::setInput(Vals vals) {
     inVals = vals;
 }

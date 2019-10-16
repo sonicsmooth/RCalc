@@ -26,7 +26,7 @@ void UIBridge::setWindow(MainWindow * mw) {
     w = mw;
 }
 
-void UIBridge::setState(Vals vals) {
+void UIBridge::setState(Vals vals, Vals::constype ct) {
     forceSlider(w->VTopSlider(),  vals.vtop * 100.0);
     forceSlider(w->VBotSlider(),  vals.vbot * 100.0);
     forceSlider(w->VMidSlider(),  vals.vmid * 100.0);
@@ -50,8 +50,9 @@ void UIBridge::setState(Vals vals) {
     w->RatioValLabel()->setText(QString::asprintf("%6.4f", vals.ratio));
     w->CurrValLabel()->setText(QString::asprintf("%6.4f", vals.curr));
 
+    // Sets text color
     QPalette palette;
-    palette.setColor(QPalette::WindowText, QColor(vals.constrainedType()==Vals::PROPER ? Qt::black : Qt::red));
+    palette.setColor(QPalette::WindowText, QColor(ct==Vals::PROPER ? Qt::black : Qt::red));
     w->VTopValLabel()->setPalette(palette);
     w->VBotValLabel()->setPalette(palette);
     w->VMidValLabel()->setPalette(palette);

@@ -20,7 +20,7 @@ private:
 public:
     UIBridge();
     void setWindow(MainWindow *w);
-    void setState(Vals);
+    void setState(Vals, Vals::constype);
 };
 
 

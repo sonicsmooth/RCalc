@@ -74,6 +74,9 @@
        </item>
        <item>
         <widget class="QPushButton" name="VTopButton">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="text">
           <string>PushButton</string>
          </property>
@@ -125,6 +128,9 @@
        </item>
        <item>
         <widget class="QPushButton" name="VBotButton">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="text">
           <string>PushButton</string>
          </property>
@@ -170,6 +176,9 @@
        </item>
        <item>
         <widget class="QPushButton" name="VMidButton">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="text">
           <string>PushButton</string>
          </property>
@@ -215,6 +224,9 @@
        </item>
        <item>
         <widget class="QPushButton" name="R1Button">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="text">
           <string>PushButton</string>
          </property>
@@ -260,6 +272,9 @@
        </item>
        <item>
         <widget class="QPushButton" name="R2Button">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="text">
           <string>PushButton</string>
          </property>
@@ -277,10 +292,13 @@
          <item>
           <widget class="QSlider" name="CurrSlider">
            <property name="minimum">
-            <number>-1000</number>
+            <number>0</number>
            </property>
            <property name="maximum">
-            <number>1000</number>
+            <number>100</number>
+           </property>
+           <property name="pageStep">
+            <number>5</number>
            </property>
            <property name="orientation">
             <enum>Qt::Vertical</enum>
@@ -305,6 +323,9 @@
        </item>
        <item>
         <widget class="QPushButton" name="CurrButton">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="text">
           <string>PushButton</string>
          </property>

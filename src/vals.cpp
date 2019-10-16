@@ -7,7 +7,7 @@
 Vals::Vals() : vtop(0.0), vbot(0.0), vmid(0.0), r1(0.0), r2(0.0), curr(0.0), ratio(0.0),
                vtopd(UNDEFINED), vbotd(UNDEFINED), vmidd(UNDEFINED), 
                r1d(UNDEFINED), r2d(UNDEFINED), currd(UNDEFINED), 
-               ratiod(UNDEFINED), constraint(UNDER) {}
+               ratiod(UNDEFINED)/*, _constraint(UNDER)*/ {}
 
 int Vals::numInputs() const {
     return isin(vtopd) + isin(vbotd) + isin(vmidd) +
@@ -17,9 +17,9 @@ bool Vals::isDefined() const {
     return isdef(vtopd) && isdef(vbotd) && isdef(vmidd) &&
            isdef(r1d)   && isdef(r2d)   && isdef(currd) && isdef(ratiod);
 }
-Vals::constype Vals::constrainedType() const {
-    return constraint;
-}
+// Vals::constype Vals::constraint() const {
+//     return _constraint;
+// }
 std::string Vals::str() const {
     int nw = 10;
     int kw = 10;
@@ -54,7 +54,7 @@ std::string Vals::str() const {
     sstr.width(nw); sstr << std::left << "Ratio";
     sstr.width(kw); sstr << std::left << vstr(ratiod);
     sstr.width(vw); sstr << std::left << ratio << std::endl;
-    sstr << "Constrained? " << vstr(constrainedType()) << std::endl;
+    //sstr << "Constrained? " << vstr(constraint()) << std::endl;
     sstr << "Code: 0x" <<std::hex << incode() << std::endl;
     return sstr.str();
 }
@@ -77,6 +77,7 @@ std::string vstr(Vals::dir d) {
         case Vals::UNDEFINED: return "undefined";
         case Vals::INPUT: return "input";
         case Vals::OUTPUT: return "output";
+        default: return "logic error";
     }
 }
 std::string vstr(Vals::constype c) {
@@ -86,5 +87,6 @@ std::string vstr(Vals::constype c) {
         case Vals::PROPER: return "properly constrained";
         case Vals::OVER: return "over constrained";
         case Vals::MIXED: return "mixed constrained";
+        default: return "logic error";
     }
 }

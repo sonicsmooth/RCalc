@@ -10,9 +10,10 @@
 
 class RCCore
 {
+public:
+    typedef enum {NONE, VTOP, VBOT, VMID, R1, R2, CURR} vartype;
 
 private:
-    typedef enum {VTOP, VBOT, VMID, R1, R2, CURR} vartype;
     Vals inVals; // input from UI
     Vals outVals; // second set of calculations;
     std::shared_ptr<UIBridgeInterface> ibridge;
@@ -20,25 +21,28 @@ private:
 
     void pushToList(vartype);
     void removeFromList(vartype);
-    Vals calc_group(Vals) const;
-    void calc_constraint(Vals &) const;
+    Vals swapInputs(Vals) const;
+    Vals calc_group(vartype, Vals) const;
+    Vals::constype constraint(Vals) const;
+    bool _update(vartype);
 
 public:
     RCCore();
-    bool setVTop(double);
-    bool setVBot(double);
-    bool setVMid(double);
-    bool setR1(double);
-    bool setR2(double);
-    bool setCurr(double);
+    // bool setVTop(double);
+    // bool setVBot(double);
+    // bool setVMid(double);
+    // bool setR1(double);
+    // bool setR2(double);
+    // bool setCurr(double);
     bool setVTop(Vals::dir);
     bool setVBot(Vals::dir);
     bool setVMid(Vals::dir);
     bool setR1(Vals::dir);
     bool setR2(Vals::dir);
     bool setCurr(Vals::dir);
-    bool update();     // Given inst.vals0, sets and computes vals3; returns success t/f
-    bool update(Vals); // Given Vals, sets and computes everything; returns success t/f
+    bool update(vartype, double);
+    bool update();     
+    //bool update(Vals, Vals); 
     void setInput(Vals);
     Vals getInput() const;
     Vals getOutput() const;
@@ -47,5 +51,7 @@ public:
 
     void setBridge(std::shared_ptr<UIBridgeInterface> const &);
 };
+
+std::string cstr(RCCore::vartype);
 
 #endif // RCCORE_H

@@ -9,14 +9,12 @@ class Vals {
         typedef enum {UNDER, OVER, PROPER, MIXED} constype;
         double vtop, vbot, vmid, r1, r2, curr, ratio;
         dir vtopd, vbotd, vmidd, r1d, r2d, currd, ratiod;
-        constype constraint;
+        //constype _constraint;
         
         Vals();
-        // Vals(double, double, double, double, double, double, double,
-        //      dir,    dir,    dir,    dir,    dir,    dir,    dir, constype);
         int numInputs() const;
         bool isDefined() const;
-        constype constrainedType() const;
+        //constype constraint() const;
         std::string str() const;
         int incode() const;
 };
