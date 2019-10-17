@@ -23,9 +23,9 @@ void RCCore::pushToList(vartype v) {
     latest4.push_back(v);
     while (latest4.size() > 4)
         latest4.pop_front();
-    for (auto &&i : latest4)
-        std::cout << cstr(i) << " ";    
-    std::cout << std::endl;
+    //for (auto &&i : latest4)
+    //    std::cout << cstr(i) << " ";
+    //std::cout << std::endl;
 }
 void RCCore::removeFromList(vartype v) {
     latest4.remove(v);
@@ -56,6 +56,18 @@ Vals RCCore::clip(Vals ivals, int icode) const {
     if (icode & 0x20) ovals.vtop = std::min(ovals.vtop, vul);
     return ovals;
 }
+
+bool gtb(double a, double b) {
+    // return true if a > b by a certain amount
+    const double eps = 1e-12;
+    return ((a - b) >= eps);
+}
+bool ltb(double a, double b) {
+    // return true if a < b by a certain amount
+    const double eps = 1e-12;
+    return ((b - a) >= eps);
+}
+
 Vals RCCore::calc_group(vartype vt, Vals invals) const {
     // Update one set of values from the previous set
     // double vtop  = invals.vtop;
@@ -85,7 +97,11 @@ Vals RCCore::calc_group(vartype vt, Vals invals) const {
     int icode = invals.incode();
     Vals out = clip(invals, icode);
     auto check_ctr = [](int ctr) {
-        if (ctr >= 10) throw std::exception("Too many counts");};
+        if (ctr >= 10) {
+            std::cout << "too many counts\n";
+            throw std::exception("Too many counts");
+        }
+    };
 
     switch(icode) {
         case 0x0f: {
@@ -99,29 +115,29 @@ Vals RCCore::calc_group(vartype vt, Vals invals) const {
             int ctr;
             for (ctr = 0; ctr < 10; ctr++) {
                 compute();
-                if      (out.vtop > vul && vt == RCCore::CURR) 
+                if      (gtb(out.vtop, vul) && vt == RCCore::CURR) 
                     out.curr = (vul - out.vmid) / out.r1;
-                else if (out.vtop < vbl && vt == RCCore::CURR) 
+                else if (ltb(out.vtop, vbl) && vt == RCCore::CURR) 
                     out.curr = 0.0;
-                else if (out.vbot > vul && vt == RCCore::CURR) 
+                else if (gtb(out.vbot, vul) && vt == RCCore::CURR) 
                     out.curr = 0.0;
-                else if (out.vbot < vbl && vt == RCCore::CURR) 
+                else if (ltb(out.vbot, vbl) && vt == RCCore::CURR) 
                     out.curr = (out.vmid - vbl) / out.r2;
-                else if (out.vtop > vul && vt == RCCore::VMID) 
+                else if (gtb(out.vtop, vul) && vt == RCCore::VMID) 
                     out.vmid = vul - (out.curr * out.r1);
-                else if (out.vtop < vbl && vt == RCCore::VMID) 
+                else if (ltb(out.vtop, vbl) && vt == RCCore::VMID) 
                     out.vmid = 0.0;
-                else if (out.vbot > vul && vt == RCCore::VMID) 
+                else if (gtb(out.vbot, vul) && vt == RCCore::VMID) 
                     out.vmid = 0.0;
-                else if (out.vbot < vbl && vt == RCCore::VMID) 
+                else if (ltb(out.vbot, vbl) && vt == RCCore::VMID) 
                     out.vmid = vbl + (out.curr * out.r2);
-                else if (out.vtop > vul && vt == RCCore::R1) 
+                else if (gtb(out.vtop, vul) && vt == RCCore::R1) 
                     out.r1 = (vul - out.vmid) / out.curr;
-                else if (out.vtop < vbl && vt == RCCore::R1)  // won't happen
+                else if (ltb(out.vtop, vbl) && vt == RCCore::R1)  // won't happen
                     out.r1 = (vbl - out.vmid) / out.curr;
-                else if (out.vbot > vul && vt == RCCore::R2)  // won't happen
+                else if (gtb(out.vbot, vul) && vt == RCCore::R2)  // won't happen
                     out.r2 = -(vul - out.vmid) / out.curr;
-                else if (out.vbot < vbl && vt == RCCore::R2) 
+                else if (ltb(out.vbot, vbl) && vt == RCCore::R2) 
                     out.r2 = -(vbl - out.vmid) / out.curr;
                 else break;
             }
@@ -138,35 +154,35 @@ Vals RCCore::calc_group(vartype vt, Vals invals) const {
             int ctr;
             for (ctr = 0; ctr < 10; ctr++) {
                 compute();
-                if      (out.vtop > vul && vt == RCCore::VBOT)
+                if      (gtb(out.vtop, vul) && vt == RCCore::VBOT)
                     out.vbot = vul - (out.curr * (out.r1 + out.r2));
-                else if (out.vtop < vbl && vt == RCCore::VBOT)
+                else if (ltb(out.vtop, vbl) && vt == RCCore::VBOT)
                     out.vbot = vbl - (out.curr * (out.r1 + out.r2));
-                else if (out.vmid > vul && vt == RCCore::VBOT)
+                else if (gtb(out.vmid, vul) && vt == RCCore::VBOT)
                     out.vbot = vul - (out.curr * out.r2);
-                else if (out.vmid < vbl && vt == RCCore::VBOT)
+                else if (ltb(out.vmid, vbl) && vt == RCCore::VBOT)
                     out.vbot = vbl - (out.curr * out.r2);
-                else if (out.vtop > vul && vt == RCCore::R1)
+                else if (gtb(out.vtop, vul) && vt == RCCore::R1)
                     out.r1 = ((vul - out.vbot) / out.curr) - out.r2;
-                else if (out.vtop < vbl && vt == RCCore::R1)
+                else if (ltb(out.vtop, vbl) && vt == RCCore::R1)
                     out.r1 = (vbl - out.vbot) / out.curr - out.r2;
-                else if (out.vmid > vul && vt == RCCore::R1); // won't happen
-                else if (out.vmid < vbl && vt == RCCore::R1); // won't happen
-                else if (out.vtop > vul && vt == RCCore::R2)
+                else if (gtb(out.vmid, vul) && vt == RCCore::R1); // won't happen
+                else if (ltb(out.vmid, vbl) && vt == RCCore::R1); // won't happen
+                else if (gtb(out.vtop, vul) && vt == RCCore::R2)
                     out.r2 = (vul - out.vbot) / out.curr - out.r1;
-                else if (out.vtop < vbl && vt == RCCore::R2)
+                else if (ltb(out.vtop, vbl) && vt == RCCore::R2)
                     out.r2 = (vbl - out.vbot) / out.curr - out.r1;
-                else if (out.vmid > vul && vt == RCCore::R2)
+                else if (gtb(out.vmid, vul) && vt == RCCore::R2)
                     out.r2 = (vul - out.vbot) / out.curr;
-                else if (out.vmid < vbl && vt == RCCore::R2)
+                else if (ltb(out.vmid, vbl) && vt == RCCore::R2)
                     out.r2 = (vbl - out.vbot) / out.curr;
-                else if (out.vtop > vul && vt == RCCore::CURR)
+                else if (gtb(out.vtop, vul) && vt == RCCore::CURR)
                     out.curr = (vul - out.vbot) / (out.r1 + out.r2);
-                else if (out.vtop < vbl && vt == RCCore::CURR)
+                else if (ltb(out.vtop, vbl) && vt == RCCore::CURR)
                     out.curr = (vbl - out.vbot) / (out.r1 + out.r2);
-                else if (out.vmid > vul && vt == RCCore::CURR)
+                else if (gtb(out.vmid, vul) && vt == RCCore::CURR)
                     out.curr = (vul - out.vbot) / out.r2;
-                else if (out.vmid < vbl && vt == RCCore::CURR)
+                else if (ltb(out.vmid, vbl) && vt == RCCore::CURR)
                     out.curr = (vbl - out.vbot) / out.r2;
                 else break;
             }
@@ -185,33 +201,33 @@ Vals RCCore::calc_group(vartype vt, Vals invals) const {
             int ctr;
             for (ctr = 0; ctr < 10; ctr++) {
                 compute();
-                if      (out.vtop > vul  && vt == RCCore::VBOT); // won't happen
-                else if (out.vtop < vbl  && vt == RCCore::VBOT); // won't happen
-                else if (out.r2   > rmax && vt == RCCore::VBOT)
+                if      (gtb(out.vtop, vul)  && vt == RCCore::VBOT); // won't happen
+                else if (ltb(out.vtop, vbl)  && vt == RCCore::VBOT); // won't happen
+                else if (gtb(out.r2, rmax)   && vt == RCCore::VBOT)
                     out.vbot = -(rmax * out.curr - out.vmid);
-                else if (out.r2   < 0.0  && vt == RCCore::VBOT)
+                else if (ltb(out.r2, 0.0)    && vt == RCCore::VBOT)
                     out.vbot = out.vmid;
-                else if (out.vtop > vul  && vt == RCCore::VMID)
+                else if (gtb(out.vtop, vul)  && vt == RCCore::VMID)
                     out.vmid = vul - out.curr * out.r1;
-                else if (out.vtop < vbl  && vt == RCCore::VMID)
+                else if (ltb(out.vtop, vbl)  && vt == RCCore::VMID)
                     out.vmid = vbl - out.curr * out.r1;
-                else if (out.r2   > rmax && vt == RCCore::VMID)
+                else if (gtb(out.r2, rmax)   && vt == RCCore::VMID)
                     out.vmid = rmax * out.curr + out.vbot;
-                else if (out.r2   < 0.0  && vt == RCCore::VMID)
+                else if (ltb(out.r2, 0.0)    && vt == RCCore::VMID)
                     out.vmid = out.vbot;
-                else if (out.vtop > vul  && vt == RCCore::R1)
+                else if (gtb(out.vtop, vul)  && vt == RCCore::R1)
                     out.r1 = (vul - out.vmid ) / out.curr;
-                else if (out.vtop < vbl  && vt == RCCore::R1)
+                else if (ltb(out.vtop, vbl)  && vt == RCCore::R1)
                     out.r1 = (vbl - out.vmid ) / out.curr;
-                else if (out.r2   > rmax && vt == RCCore::R1); // won't happen
-                else if (out.r2   < 0.0  && vt == RCCore::R1); // won't happen
-                else if (out.vtop > vul  && vt == RCCore::CURR)
+                else if (gtb(out.r2, rmax)   && vt == RCCore::R1); // won't happen
+                else if (ltb(out.r2, 0.0)    && vt == RCCore::R1); // won't happen
+                else if (gtb(out.vtop, vul)  && vt == RCCore::CURR)
                     out.curr = (vul - out.vmid) / out.r1;
-                else if (out.vtop < vbl  && vt == RCCore::CURR)
+                else if (ltb(out.vtop, vbl)  && vt == RCCore::CURR)
                     out.curr = (vbl - out.vmid) / out.r1;
-                else if (out.r2   > rmax && vt == RCCore::CURR)
+                else if (gtb(out.r2, rmax) && vt == RCCore::CURR)
                     out.curr = (out.vmid - out.vbot) / rmax;
-                else if (out.r2   < 0.0  && vt == RCCore::CURR)
+                else if (ltb(out.r2, 0.0)  && vt == RCCore::CURR)
                     // special case so we don't divide by zero
                     // conditions imply vmid < vbot, so just keep r2
                     out.r2 = out.r2;
@@ -230,36 +246,36 @@ Vals RCCore::calc_group(vartype vt, Vals invals) const {
             int ctr;
             for (ctr = 0; ctr < 10; ctr++) {
                 compute();
-                if      (out.curr > currmax && vt == RCCore::VBOT)
+                if      (gtb(out.curr, currmax) && vt == RCCore::VBOT)
                     out.vbot = -(currmax * out.r2 - out.vmid);
-                else if (out.curr < 0.0     && vt == RCCore::VBOT)
+                else if (ltb(out.curr, 0.0)     && vt == RCCore::VBOT)
                     out.vbot = out.vmid;
-                else if (out.vtop > vul     && vt == RCCore::VBOT)
+                else if (gtb(out.vtop, vul)     && vt == RCCore::VBOT)
                     out.vbot = out.vmid - (vul - out.vmid) *  (out.r2 / out.r1);
-                else if (out.vtop < vbl     && vt == RCCore::VBOT) // shouldn't happen
+                else if (ltb(out.vtop, vbl)     && vt == RCCore::VBOT) // shouldn't happen
                     out.vbot = out.vmid - (vbl - out.vmid) *  (out.r2 / out.r1);
-                else if (out.curr > currmax && vt == RCCore::VMID)
+                else if (gtb(out.curr, currmax) && vt == RCCore::VMID)
                     out.vmid = currmax * out.r2 + out.vbot;
-                else if (out.curr < 0.0     && vt == RCCore::VMID)
+                else if (ltb(out.curr, 0.0)     && vt == RCCore::VMID)
                     out.vmid = out.vbot;
-                else if (out.vtop > vul     && vt == RCCore::VMID)
+                else if (gtb(out.vtop, vul)     && vt == RCCore::VMID)
                     out.vmid = (vul + (out.r1 / out.r2) * out.vbot)/(1.0 + out.r1 / out.r2);
-                else if (out.vtop < vbl     && vt == RCCore::VMID) // shouldn't happen
+                else if (ltb(out.vtop, vbl)     && vt == RCCore::VMID) // shouldn't happen
                     out.vmid = (vbl + (out.r1 / out.r2) * out.vbot)/(1.0 + out.r1 / out.r2);
-                else if (out.curr > currmax && vt == RCCore::R1); // won't happen
-                else if (out.curr < 0.0     && vt == RCCore::R1); // won't happen
-                else if (out.vtop > vul     && vt == RCCore::R1)
+                else if (gtb(out.curr, currmax) && vt == RCCore::R1); // won't happen
+                else if (ltb(out.curr, 0.0)     && vt == RCCore::R1); // won't happen
+                else if (gtb(out.vtop, vul)     && vt == RCCore::R1)
                     out.r1 = out.r2 * (vul - out.vmid) / (out.vmid - out.vbot);
-                else if (out.vtop < vbl     && vt == RCCore::R1) // shouldn't happen
+                else if (ltb(out.vtop, vbl)     && vt == RCCore::R1) // shouldn't happen
                     out.r1 = out.r2 * (vbl - out.vmid) / (out.vmid - out.vbot);
-                else if (out.curr > currmax && vt == RCCore::R2)
+                else if (gtb(out.curr, currmax) && vt == RCCore::R2)
                     out.r2 = (out.vmid - out.vbot) / currmax;
-                else if (out.curr < 0.0     && vt == RCCore::R2)
+                else if (ltb(out.curr, 0.0)     && vt == RCCore::R2)
                     // special case so not to divide by zero
                     out.r2 = out.r2;
-                else if (out.vtop > vul     && vt == RCCore::R2)
+                else if (gtb(out.vtop, vul)     && vt == RCCore::R2)
                     out.r2 = out.r1 * (out.vmid - out.vbot) / (vul - out.vmid);
-                else if (out.vtop < vbl     && vt == RCCore::R2) // shouldn't happen
+                else if (ltb(out.vtop, vbl)     && vt == RCCore::R2) // shouldn't happen
                     out.r2 = out.r1 * (out.vmid - out.vbot) / (vbl - out.vmid);
                 else break;                
             }
@@ -276,35 +292,35 @@ Vals RCCore::calc_group(vartype vt, Vals invals) const {
             int ctr;
             for (ctr = 0; ctr < 10; ctr++) {
                 compute();
-                if      (out.vbot > vul && vt == RCCore::VTOP)
+                if      (gtb(out.vbot, vul) && vt == RCCore::VTOP)
                     out.vtop = vul + out.curr * (out.r1 + out.r2);
-                else if (out.vbot < vbl && vt == RCCore::VTOP)
+                else if (ltb(out.vbot, vbl) && vt == RCCore::VTOP)
                     out.vtop = vbl + out.curr * (out.r1 + out.r2);
-                else if (out.vmid > vul && vt == RCCore::VTOP)
+                else if (gtb(out.vmid, vul) && vt == RCCore::VTOP)
                     out.vtop = vul + out.curr * out.r1;
-                else if (out.vmid < vbl && vt == RCCore::VTOP)
+                else if (ltb(out.vmid, vbl) && vt == RCCore::VTOP)
                     out.vtop = vbl + out.curr * out.r1;
-                else if (out.vbot > vul && vt == RCCore::R1)
+                else if (gtb(out.vbot, vul) && vt == RCCore::R1)
                     out.r1 = -(vul - out.vtop) / out.curr - out.r2;
-                else if (out.vbot < vbl && vt == RCCore::R1)
+                else if (ltb(out.vbot, vbl) && vt == RCCore::R1)
                     out.r1 = -(vbl - out.vtop) / out.curr - out.r2;
-                else if (out.vmid > vul && vt == RCCore::R1)
+                else if (gtb(out.vmid, vul) && vt == RCCore::R1)
                     out.r1 = -(vul - out.vtop) / out.curr;
-                else if (out.vmid < vbl && vt == RCCore::R1)
+                else if (ltb(out.vmid, vbl) && vt == RCCore::R1)
                     out.r1 = -(vbl - out.vtop) / out.curr;
-                else if (out.vbot > vul && vt == RCCore::R2)
+                else if (gtb(out.vbot, vul) && vt == RCCore::R2)
                     out.r2 = -(vul - out.vtop) / out.curr - out.r1;
-                else if (out.vbot < vbl && vt == RCCore::R2)
+                else if (ltb(out.vbot, vbl) && vt == RCCore::R2)
                     out.r2 = -(vbl - out.vtop) / out.curr - out.r1;
-                else if (out.vmid > vul && vt == RCCore::R2); // won't happen
-                else if (out.vmid < vbl && vt == RCCore::R2); // won't happen
-                else if (out.vbot > vul && vt == RCCore::CURR)
+                else if (gtb(out.vmid, vul) && vt == RCCore::R2); // won't happen
+                else if (ltb(out.vmid, vbl) && vt == RCCore::R2); // won't happen
+                else if (gtb(out.vbot, vul) && vt == RCCore::CURR)
                     out.curr = -(vul - out.vtop) / (out.r1 + out.r2);
-                else if (out.vbot < vbl && vt == RCCore::CURR)
+                else if (ltb(out.vbot, vbl) && vt == RCCore::CURR)
                     out.curr = -(vbl - out.vtop) / (out.r1 + out.r2);
-                else if (out.vmid > vul && vt == RCCore::CURR)
+                else if (gtb(out.vmid, vul) && vt == RCCore::CURR)
                     out.curr = -(vul - out.vtop) / out.r1;
-                else if (out.vmid < vbl && vt == RCCore::CURR)
+                else if (ltb(out.vmid, vbl) && vt == RCCore::CURR)
                     out.curr = -(vul - out.vtop) / out.r1;
                 else break;
             }
@@ -321,47 +337,93 @@ Vals RCCore::calc_group(vartype vt, Vals invals) const {
             int ctr;
             for (ctr = 0; ctr < 10; ctr++) {
                 compute();
-                if      (out.vbot > vul  && vt == RCCore::VTOP); // won't happen
-                else if (out.vbot < vbl  && vt == RCCore::VTOP); // won't happen
-                else if (out.r1   > rmax && vt == RCCore::VTOP)
+                if      (gtb(out.vbot, vul)  && vt == RCCore::VTOP); // won't happen
+                else if (ltb(out.vbot, vbl)  && vt == RCCore::VTOP); // won't happen
+                else if (gtb(out.r1, rmax) && vt == RCCore::VTOP)
                     out.vtop = rmax * out.curr + out.vmid;
-                else if (out.r1   < 0.0  && vt == RCCore::VTOP)
+                else if (ltb(out.r1, 0.0)  && vt == RCCore::VTOP)
                     out.vtop = out.vmid;
-                else if (out.vbot > vul  && vt == RCCore::VMID)
+                else if (gtb(out.vbot, vul)  && vt == RCCore::VMID)
                     out.vmid = vul + out.curr * out.r2;
-                else if (out.vbot < vbl  && vt == RCCore::VMID)
+                else if (ltb(out.vbot, vbl)  && vt == RCCore::VMID)
                     out.vmid = vbl + out.curr * out.r2;
-                else if (out.r1   > rmax && vt == RCCore::VMID)
+                else if (gtb(out.r1, rmax) && vt == RCCore::VMID)
                     out.vmid = -(rmax * out.curr - out.vtop);
-                else if (out.r1   < 0.0  && vt == RCCore::VMID)
+                else if (ltb(out.r1, 0.0)  && vt == RCCore::VMID)
                     out.vmid = out.vtop;
-                else if (out.vbot > vul  && vt == RCCore::R2)
+                else if (gtb(out.vbot, vul)  && vt == RCCore::R2)
                     out.r2 = -(vul - out.vmid) / out.curr;
-                else if (out.vbot < vbl  && vt == RCCore::R2)
+                else if (ltb(out.vbot, vbl)  && vt == RCCore::R2)
                     out.r2 = -(vbl - out.vmid) / out.curr;
-                else if (out.r1   > rmax && vt == RCCore::R2); // won't happen
-                else if (out.r1   < 0.0  && vt == RCCore::R2); // won't happen
-                else if (out.vbot > vul  && vt == RCCore::CURR)
+                else if (gtb(out.r1, rmax) && vt == RCCore::R2); // won't happen
+                else if (ltb(out.r1, 0.0)  && vt == RCCore::R2); // won't happen
+                else if (gtb(out.vbot, vul)  && vt == RCCore::CURR)
                     out.curr = -(vul -out.vmid) / out.r2;
-                else if (out.vbot < vbl  && vt == RCCore::CURR)
+                else if (ltb(out.vbot, vbl)  && vt == RCCore::CURR)
                     out.curr = -(vbl - out.vmid) / out.r2;
-                else if (out.r1   > rmax && vt == RCCore::CURR)
+                else if (gtb(out.r1, rmax) && vt == RCCore::CURR)
                     out.curr = (out.vtop - out.vmid) / rmax;
-                else if (out.r1   < 0.0  && vt == RCCore::CURR)
-                    // special case for divide by zero
-                    out.curr = out.curr;
+                else if (ltb(out.r1, 0.0)  && vt == RCCore::CURR); // won't happen
                 else break;
             }
+            check_ctr(ctr);
             break; }
         case 0x2d:
             throw std::invalid_argument( "Error in logic" );
-        case 0x2e:
-            //out.vmid = std::min(vmid, vtop);
-            out.curr = (out.vtop - out.vmid) / out.r1;
-            out.vbot = out.vmid - out.curr * out.r2;
-            out.currd = Vals::OUTPUT;
+        case 0x2e: {
+            // vbot, curr = f(vtop, vmid, r1, r2)
             out.vbotd = Vals::OUTPUT;
-            break;
+            out.currd = Vals::OUTPUT;
+            auto compute = [&out]() {
+                out.vbot = out.vmid - (out.r2 / out.r1) * (out.vtop - out.vmid);
+                // vtop = (r1/r2) * (vmid - vbot) + vmid
+                // vmid = (vbot + (r2/r1) * vtop) / (1 + r2/r1)
+                // r1/r2 = (vtop - vmid) / (vmid - vbot) -> r1 = r2 * (vtop - vmid) / (vmid - vbot);
+                // r2/r1 = (vmid - vbot) / (vtop - vmid) -> r2 = r1 * (vmid - vbot) / (vtop - vmid)
+                out.curr = (out.vtop - out.vmid) / out.r1;
+                // vtop = (curr * r1) + vmid
+                // vmid = -(curr * r1 - vtop)
+                // r1 = (vtop - vmid) / curr
+            };
+            int ctr;
+            for (ctr = 0; ctr < 10; ctr++) {
+                compute();
+                if      (gtb(out.vbot, vul) && vt == RCCore::VTOP)
+                    out.vtop = (out.r1 / out.r2) * (out.vmid - vul) + out.vmid;
+                else if (ltb(out.vbot, vbl) && vt == RCCore::VTOP)
+                    out.vtop = (out.r1 / out.r2) * (out.vmid - vbl) + out.vmid;
+                else if (gtb(out.vbot, vul) && vt == RCCore::VMID)
+                    out.vmid = (vul + (out.r2 / out.r1) * out.vtop) / (1.0 + out.r2 / out.r1);
+                else if (ltb(out.vbot, vbl) && vt == RCCore::VMID)
+                    out.vmid = (vbl + (out.r2 / out.r1) * out.vtop) / (1.0 + out.r2 / out.r1);
+                else if (gtb(out.vbot, vul) && vt == RCCore::R1)
+                    out.r1 = out.r2 * (out.vtop - out.vmid) / (out.vmid - vul);
+                else if (ltb(out.vbot, vbl) && vt == RCCore::R1)
+                    out.r1 = out.r2 * (out.vtop - out.vmid) / (out.vmid - vbl);
+                else if (gtb(out.vbot, vul) && vt == RCCore::R2)
+                    out.r2 = out.r1 * (out.vmid - vul) / (out.vtop - out.vmid);
+                else if (ltb(out.vbot, vbl) && vt == RCCore::R2)
+                    out.r2 = out.r1 * (out.vmid - vbl) / (out.vtop - out.vmid);
+
+                else if (gtb(out.curr, currmax) && vt == RCCore::VTOP)
+                    out.vtop = (currmax * out.r1) + out.vmid;
+                else if (ltb(out.curr, 0.0)     && vt == RCCore::VTOP)
+                    out.vtop = out.vmid;
+                else if (gtb(out.curr, currmax) && vt == RCCore::VMID)
+                    out.vmid = -(currmax * out.r1 - out.vtop);
+                else if (ltb(out.curr, 0.0)     && vt == RCCore::VMID)
+                    out.vmid =  out.vtop;
+                else if (gtb(out.curr, currmax)  && vt == RCCore::R1)
+                    out.r1 = (out.vtop - out.vmid) / currmax;
+                else if (ltb(out.curr, 0.0)     && vt == RCCore::R1); // won't happen
+                    // special case divide by zero
+                else if (gtb(out.curr, currmax) && vt == RCCore::R2); // won't happen                    
+                else if (ltb(out.curr, 0.0)     && vt == RCCore::R2); // won't happen
+                else break;
+            }
+            std::cout << ctr << " " << invals.vmid << std::endl;
+            //check_ctr(ctr);
+            break;}
         case 0x33:
             out.vmid = out.vbot + out.curr * out.r2;
             out.r1   = (out.vtop - out.vmid) / out.curr;

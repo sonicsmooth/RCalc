@@ -62,7 +62,7 @@ void UIBridge::setState(Vals vals, Vals::constype ct) {
     w->CurrValLabel()->setPalette(palette);
 
     std::string sstr(vals.str());
-    std::cout << sstr;
+    //std::cout << sstr;
     w->TextEdit()->appendPlainText(QString::fromStdString(sstr));
 
 }
