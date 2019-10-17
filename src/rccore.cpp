@@ -58,12 +58,12 @@ Vals RCCore::clip(Vals ivals, int icode) const {
 }
 Vals RCCore::calc_group(vartype vt, Vals invals) const {
     // Update one set of values from the previous set
-    double vtop  = invals.vtop;
-    double vbot  = invals.vbot;
-    double vmid  = invals.vmid;
-    double r1    = invals.r1;
-    double r2    = invals.r2;
-    double curr  = invals.curr;
+    // double vtop  = invals.vtop;
+    // double vbot  = invals.vbot;
+    // double vmid  = invals.vmid;
+    // double r1    = invals.r1;
+    // double r2    = invals.r2;
+    // double curr  = invals.curr;
     /*      INPUTS
             vtop vbot vmid r1  r2 curr  comment
     0x0f      0    0    1   1   1   1	
@@ -100,21 +100,21 @@ Vals RCCore::calc_group(vartype vt, Vals invals) const {
             for (ctr = 0; ctr < 10; ctr++) {
                 compute();
                 if      (out.vtop > vul && vt == RCCore::CURR) 
-                    out.curr = (vul - vmid) / r1;
+                    out.curr = (vul - out.vmid) / out.r1;
                 else if (out.vtop < vbl && vt == RCCore::CURR) 
                     out.curr = 0.0;
                 else if (out.vbot > vul && vt == RCCore::CURR) 
                     out.curr = 0.0;
                 else if (out.vbot < vbl && vt == RCCore::CURR) 
-                    out.curr = (out.vmid - vbl) / r2;
+                    out.curr = (out.vmid - vbl) / out.r2;
                 else if (out.vtop > vul && vt == RCCore::VMID) 
-                    out.vmid = vul - (out.curr * r1);
+                    out.vmid = vul - (out.curr * out.r1);
                 else if (out.vtop < vbl && vt == RCCore::VMID) 
                     out.vmid = 0.0;
                 else if (out.vbot > vul && vt == RCCore::VMID) 
                     out.vmid = 0.0;
                 else if (out.vbot < vbl && vt == RCCore::VMID) 
-                    out.vmid = vbl + (out.curr * r2);
+                    out.vmid = vbl + (out.curr * out.r2);
                 else if (out.vtop > vul && vt == RCCore::R1) 
                     out.r1 = (vul - out.vmid) / out.curr;
                 else if (out.vtop < vbl && vt == RCCore::R1)  // won't happen
@@ -126,8 +126,7 @@ Vals RCCore::calc_group(vartype vt, Vals invals) const {
                 else break;
             }
             check_ctr(ctr);
-            break;
-        }
+            break;}
         case 0x17: {
             // Vtop, vmid = f(vbot, r1, r2, curr)
             out.vtopd = Vals::OUTPUT;
@@ -172,8 +171,7 @@ Vals RCCore::calc_group(vartype vt, Vals invals) const {
                 else break;
             }
             check_ctr(ctr);
-            break;
-        }
+            break;}
         case 0x1b:
             throw std::invalid_argument( "Error in logic" );
         case 0x1d: {
@@ -220,8 +218,7 @@ Vals RCCore::calc_group(vartype vt, Vals invals) const {
                 else break;
             }
             check_ctr(ctr);
-            break;
-        }
+            break;}
         case 0x1e: {
             // vtop, curr = f(vbot, vmid, r1, r2)
             out.vtopd = Vals::OUTPUT;
@@ -267,8 +264,7 @@ Vals RCCore::calc_group(vartype vt, Vals invals) const {
                 else break;                
             }
             check_ctr(ctr);
-            break;
-        }
+            break;}
         case 0x27: {
             // vbot, vmid = f(vtop, r1, r2 curr)
             out.vbotd = Vals::OUTPUT;
@@ -313,57 +309,92 @@ Vals RCCore::calc_group(vartype vt, Vals invals) const {
                 else break;
             }
             check_ctr(ctr);
-            break;
-        }
-        case 0x2b:
-            //out.vmid = std::min(vmid, vtop);
-            out.vbot  = out.vmid - curr * r2;
-            out.r1    = (vtop - out.vmid) / curr;
+            break;}
+        case 0x2b: {
+            // vbot, r1 = f(vtop, vmid, r2, curr)
             out.vbotd = Vals::OUTPUT;
             out.r1d   = Vals::OUTPUT;
-            break;
+            auto compute = [&out]() {
+                out.vbot  = out.vmid - out.curr * out.r2;
+                out.r1    = (out.vtop - out.vmid) / out.curr;
+            };
+            int ctr;
+            for (ctr = 0; ctr < 10; ctr++) {
+                compute();
+                if      (out.vbot > vul  && vt == RCCore::VTOP); // won't happen
+                else if (out.vbot < vbl  && vt == RCCore::VTOP); // won't happen
+                else if (out.r1   > rmax && vt == RCCore::VTOP)
+                    out.vtop = rmax * out.curr + out.vmid;
+                else if (out.r1   < 0.0  && vt == RCCore::VTOP)
+                    out.vtop = out.vmid;
+                else if (out.vbot > vul  && vt == RCCore::VMID)
+                    out.vmid = vul + out.curr * out.r2;
+                else if (out.vbot < vbl  && vt == RCCore::VMID)
+                    out.vmid = vbl + out.curr * out.r2;
+                else if (out.r1   > rmax && vt == RCCore::VMID)
+                    out.vmid = -(rmax * out.curr - out.vtop);
+                else if (out.r1   < 0.0  && vt == RCCore::VMID)
+                    out.vmid = out.vtop;
+                else if (out.vbot > vul  && vt == RCCore::R2)
+                    out.r2 = -(vul - out.vmid) / out.curr;
+                else if (out.vbot < vbl  && vt == RCCore::R2)
+                    out.r2 = -(vbl - out.vmid) / out.curr;
+                else if (out.r1   > rmax && vt == RCCore::R2); // won't happen
+                else if (out.r1   < 0.0  && vt == RCCore::R2); // won't happen
+                else if (out.vbot > vul  && vt == RCCore::CURR)
+                    out.curr = -(vul -out.vmid) / out.r2;
+                else if (out.vbot < vbl  && vt == RCCore::CURR)
+                    out.curr = -(vbl - out.vmid) / out.r2;
+                else if (out.r1   > rmax && vt == RCCore::CURR)
+                    out.curr = (out.vtop - out.vmid) / rmax;
+                else if (out.r1   < 0.0  && vt == RCCore::CURR)
+                    // special case for divide by zero
+                    out.curr = out.curr;
+                else break;
+            }
+            break; }
         case 0x2d:
             throw std::invalid_argument( "Error in logic" );
         case 0x2e:
             //out.vmid = std::min(vmid, vtop);
-            out.curr = (vtop - out.vmid) / r1;
-            out.vbot = out.vmid - out.curr * r2;
+            out.curr = (out.vtop - out.vmid) / out.r1;
+            out.vbot = out.vmid - out.curr * out.r2;
             out.currd = Vals::OUTPUT;
             out.vbotd = Vals::OUTPUT;
             break;
         case 0x33:
-            out.vmid = vbot + curr * r2;
-            out.r1   = (vtop - out.vmid) / curr;
+            out.vmid = out.vbot + out.curr * out.r2;
+            out.r1   = (out.vtop - out.vmid) / out.curr;
             out.vmidd = Vals::OUTPUT;
             out.r1d   = Vals::OUTPUT;
             break;
         case 0x35:
-            out.vmid = vtop - curr * r1;
-            out.r2   = (out.vmid - vbot) / curr;
+            out.vmid = out.vtop - out.curr * out.r1;
+            out.r2   = (out.vmid - out.vbot) / out.curr;
             out.vmidd = Vals::OUTPUT;
             out.r2d   = Vals::OUTPUT;
             break;
         case 0x36:
-            out.curr = (vtop - vbot) / (r1 + r2);
-            out.vmid = vbot + out.curr * r2;
+            out.curr = (out.vtop - out.vbot) / (out.r1 + out.r2);
+            out.vmid = out.vbot + out.curr * out.r2;
             out.currd = Vals::OUTPUT;
             out.vmidd = Vals::OUTPUT;
             break;
         case 0x39:
-            out.r1 = (vtop - out.vmid) / curr;
-            out.r2 = (out.vmid - vbot) / curr;
+            out.r1 = (out.vtop - out.vmid) / out.curr;
+            out.r2 = (out.vmid - out.vbot) / out.curr;
             out.r1d = Vals::OUTPUT;
             out.r2d = Vals::OUTPUT;
             break;
         case 0x3a:
-            out.curr = (out.vmid - vbot) / r2;
-            out.r1   = (vtop - out.vmid) / out.curr;
+            out.curr = (out.vmid - out.vbot) / out.r2;
+            out.r1   = (out.vtop - out.vmid) / out.curr;
             out.currd = Vals::OUTPUT;
             out.r1d   = Vals::OUTPUT;
             break;
         case 0x3c:
-            out.curr = (vtop - out.vmid) / r1;
-            out.r2   = (out.vmid - vbot) / out.curr;
+            out.curr = (out.vtop - out.vmid) / out.r1;
+            out.r2   = (out.vmid - out.vbot) / out.curr;
             out.currd = Vals::OUTPUT;
             out.r2d   = Vals::OUTPUT;
             break;

@@ -54,10 +54,10 @@ int main(int argc, char *argv[])
 
     pcore->update(RCCore::VTOP, 3.3);
     //pcore->update(RCCore::VBOT, 0.5);//setVBot(0.5);
-    //pcore->update(RCCore::VMID, 3.75);//setVMid(1.5);
-    pcore->update(RCCore::R1, 20.0);//setR1(20);
+    pcore->update(RCCore::VMID, 1.0);//setVMid(1.5);
+    //pcore->update(RCCore::R1, 20.0);//setR1(20);
     pcore->update(RCCore::R2, 20.0);//setR1(20);
-    pcore->update(RCCore::CURR, 0.1);//setCurr(0.1);
+    pcore->update(RCCore::CURR, 0.4);//setCurr(0.1);
 
     pbridge->setWindow(&w);
     pcore->setBridge(pbridge);
