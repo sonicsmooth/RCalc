@@ -50,7 +50,7 @@ Vals RCCore::calc_group(vartype vt, Vals invals) const {
     double curr  = invals.curr;
     double const vul = 7;
     double const vbl = -7;
-    double const rmax = 100;
+    double const rmax = 99.31415;
     double const currmax = 4.3;
     /*      INPUTS
             vtop vbot vmid r1  r2 curr  comment
@@ -71,6 +71,9 @@ Vals RCCore::calc_group(vartype vt, Vals invals) const {
     0x3c      1    1    1   1   0   0	*/
 
     Vals out = invals;
+    // std::cout << "---IN----\n";
+    // std::cout << invals.str() << std::endl;
+    // std::cout << "---------\n";
     switch(invals.incode()) {
         case 0x0f: {
             // Vtop, Vbot = f(vmid, r1, r2, curr)
@@ -84,11 +87,10 @@ Vals RCCore::calc_group(vartype vt, Vals invals) const {
             out.r1   = std::min(out.r1, rmax);
             out.r2   = std::min(out.r2, rmax);
             out.curr = std::min(out.curr, currmax);
-            int ctr = 0;
-            while (ctr < 10) {
-                ctr ++;
+            unsigned int ctr = 0;
+            while (ctr++ < 10) {
                 compute();
-                if (out.vtop > vul && vt == RCCore::CURR) 
+                if      (out.vtop > vul && vt == RCCore::CURR) 
                     out.curr = (vul - vmid) / r1;
                 else if (out.vtop < vbl && vt == RCCore::CURR) 
                     out.curr = 0.0;
@@ -112,8 +114,7 @@ Vals RCCore::calc_group(vartype vt, Vals invals) const {
                     out.r2 = -(vul - out.vmid) / out.curr;
                 else if (out.vbot < vbl && vt == RCCore::R2) 
                     out.r2 = -(vbl - out.vmid) / out.curr;
-                else
-                    break;
+                else break;
             }
             break;
         }
@@ -129,11 +130,10 @@ Vals RCCore::calc_group(vartype vt, Vals invals) const {
             out.r1   = std::min(out.r1, rmax);
             out.r2   = std::min(out.r2, rmax);
             out.curr = std::min(out.curr, currmax);
-            int ctr = 0;
-            while (ctr < 10) {
-                ctr ++;
+            unsigned int ctr = 0;
+            while (ctr++ < 10) {
                 compute();
-                if (out.vtop > vul && vt == RCCore::VBOT)
+                if      (out.vtop > vul && vt == RCCore::VBOT)
                     out.vbot = vul - (out.curr * (out.r1 + out.r2));
                 else if (out.vtop < vbl && vt == RCCore::VBOT)
                     out.vbot = vbl - (out.curr * (out.r1 + out.r2));
@@ -163,38 +163,111 @@ Vals RCCore::calc_group(vartype vt, Vals invals) const {
                     out.curr = (vul - out.vbot) / out.r2;
                 else if (out.vmid < vbl && vt == RCCore::CURR)
                     out.curr = (vbl - out.vbot) / out.r2;
-                else
-                    break;
+                else break;
             }
             break;
         }
         case 0x1b:
             throw std::invalid_argument( "Error in logic" );
-        case 0x1d:
+        case 0x1d: {
             // vtop, r2 = f(vbot, vmid, r1, curr)
-            // bound vbot, vmid, constraint curr
             out.vtopd = Vals::OUTPUT;
             out.r2d   = Vals::OUTPUT;
-            out.vbot = std::max(vbot, vbl);
-            out.vmid = std::min(out.vmid, vul);
-            out.vmid = std::max(out.vmid, out.vbot);
-            out.vtop = out.vmid + curr * r1;
-            out.r2   = (out.vmid - vbot) / curr;
-            if(out.vtop > vul) {
-                out.curr = (vul - out.vmid) / r1;
-                out.vtop = out.vmid + out.curr * r1;
-                out.r2 = (out.vmid - out.vbot) / out.curr;
-                //out.vbot = std::min(out.vbot, out.vtop);
-                //out.vmid = std::min(out.vmid, out.vbot);
+            auto compute = [&out]() {
+                out.vtop = out.vmid + out.curr * out.r1;
+                out.r2   = (out.vmid - out.vbot) / out.curr;
+            };
+            out.vbot = std::max(out.vbot, vbl);
+            out.vmid = std::max(std::min(out.vmid, vul), vbl);
+            out.r1   = std::min(out.r1, rmax);
+            out.curr = std::min(out.curr, currmax);
+            unsigned int ctr = 0;
+            while (ctr++ < 10) {
+                compute();
+                if      (out.vtop > vul  && vt == RCCore::VBOT); // won't happen
+                else if (out.vtop < vbl  && vt == RCCore::VBOT); // won't happen
+                else if (out.r2   > rmax && vt == RCCore::VBOT)
+                    out.vbot = -(rmax * out.curr - out.vmid);
+                else if (out.r2   < 0.0  && vt == RCCore::VBOT)
+                    out.vbot = out.vmid;
+                else if (out.vtop > vul  && vt == RCCore::VMID)
+                    out.vmid = vul - out.curr * out.r1;
+                else if (out.vtop < vbl  && vt == RCCore::VMID)
+                    out.vmid = vbl - out.curr * out.r1;
+                else if (out.r2   > rmax && vt == RCCore::VMID)
+                    out.vmid = rmax * out.curr + out.vbot;
+                else if (out.r2   < 0.0  && vt == RCCore::VMID)
+                    out.vmid = out.vbot;
+                else if (out.vtop > vul  && vt == RCCore::R1)
+                    out.r1 = (vul - out.vmid ) / out.curr;
+                else if (out.vtop < vbl  && vt == RCCore::R1)
+                    out.r1 = (vbl - out.vmid ) / out.curr;
+                else if (out.r2   > rmax && vt == RCCore::R1); // won't happen
+                else if (out.r2   < 0.0  && vt == RCCore::R1); // won't happen
+                else if (out.vtop > vul  && vt == RCCore::CURR)
+                    out.curr = (vul - out.vmid) / out.r1;
+                else if (out.vtop < vbl  && vt == RCCore::CURR)
+                    out.curr = (vbl - out.vmid) / out.r1;
+                else if (out.r2   > rmax && vt == RCCore::CURR)
+                    out.curr = (out.vmid - out.vbot) / rmax;
+                else if (out.r2   < 0.0  && vt == RCCore::CURR)
+                    // special case so we don't divide by zero
+                    // conditions imply vmid < vbot, so just keep r2
+                    out.r2 = out.r2;
+                else break;
             }
             break;
-        case 0x1e:
-            //out.vmid = std::max(vmid, vbot);
-            out.curr = (out.vmid-vbot)/r2;
-            out.vtop = out.vmid + out.curr * r1;
-            out.currd = Vals::OUTPUT;
+        }
+        case 0x1e: {
+            // vtop, curr = f(vbot, vmid, r1, r2)
             out.vtopd = Vals::OUTPUT;
+            out.currd = Vals::OUTPUT;
+            auto compute = [&out]() {
+                out.curr = (out.vmid - out.vbot) / out.r2;
+                out.vtop = out.vmid + (out.r1 / out.r2) * (out.vmid - out.vbot);
+            };
+            out.vbot = std::max(out.vbot, vbl);
+            out.vmid = std::max(std::min(out.vmid, vul), vbl);
+            out.r1   = std::min(out.r1, rmax);
+            out.r2   = std::min(out.r2, rmax);
+            unsigned int ctr = 0;
+            while(ctr++ < 10) {
+                compute();
+                if      (out.curr > currmax && vt == RCCore::VBOT)
+                    out.vbot = -(currmax * out.r2 - out.vmid);
+                else if (out.curr < 0.0     && vt == RCCore::VBOT)
+                    out.vbot = out.vmid;
+                else if (out.vtop > vul     && vt == RCCore::VBOT)
+                    out.vbot = out.vmid - (vul - out.vmid) *  (out.r2 / out.r1);
+                else if (out.vtop < vbl     && vt == RCCore::VBOT) // shouldn't happen
+                    out.vbot = out.vmid - (vbl - out.vmid) *  (out.r2 / out.r1);
+                else if (out.curr > currmax && vt == RCCore::VMID)
+                    out.vmid = currmax * out.r2 + out.vbot;
+                else if (out.curr < 0.0     && vt == RCCore::VMID)
+                    out.vmid = out.vbot;
+                else if (out.vtop > vul     && vt == RCCore::VMID)
+                    out.vmid = (vul + (out.r1 / out.r2) * out.vbot)/(1.0 + out.r1 / out.r2);
+                else if (out.vtop < vbl     && vt == RCCore::VMID) // shouldn't happen
+                    out.vmid = (vbl + (out.r1 / out.r2) * out.vbot)/(1.0 + out.r1 / out.r2);
+                else if (out.curr > currmax && vt == RCCore::R1); // won't happen
+                else if (out.curr < 0.0     && vt == RCCore::R1); // won't happen
+                else if (out.vtop > vul     && vt == RCCore::R1)
+                    out.r1 = out.r2 * (vul - out.vmid) / (out.vmid - out.vbot);
+                else if (out.vtop < vbl     && vt == RCCore::R1) // shouldn't happen
+                    out.r1 = out.r2 * (vbl - out.vmid) / (out.vmid - out.vbot);
+                else if (out.curr > currmax && vt == RCCore::R2)
+                    out.r2 = (out.vmid - out.vbot) / currmax;
+                else if (out.curr < 0.0     && vt == RCCore::R2)
+                    // special case so not to divide by zero
+                    out.r2 = out.r2;
+                else if (out.vtop > vul     && vt == RCCore::R2)
+                    out.r2 = out.r1 * (out.vmid - out.vbot) / (vul - out.vmid);
+                else if (out.vtop < vbl     && vt == RCCore::R2) // shouldn't happen
+                    out.r2 = out.r1 * (out.vmid - out.vbot) / (vbl - out.vmid);
+                else break;                
+            }
             break;
+        }
         case 0x27:
             out.vmid = vtop - curr * r1;
             out.vbot = vmid - curr * r2;
@@ -292,6 +365,8 @@ bool RCCore::_update(vartype vt) {
     // If the what-if violates anything, don't update the output
     if (constraint(inVals) == Vals::PROPER) {
         outVals = calc_group(vt, inVals);
+        // Setting inVals to outVals prevents things from jumping after recovering from a limit
+        inVals = outVals;
         if (ibridge) ibridge->setState(outVals, constraint(outVals));
         return true;
     } else {
@@ -323,66 +398,6 @@ RCCore::RCCore() :
     outVals (Vals())
     {}
 
-// bool RCCore::setVTop(double in) {
-//         /*      INPUTS
-//             vtop vbot vmid r1  r2 curr  comment
-//     0x0f      0    0    1   1   1   1	
-//     0x17      0    1    0   1   1   1	
-//     0x1b      0    1    1   0   1   1	under
-//     0x1d      0    1    1   1   0   1	check r2
-//     0x1e      0    1    1   1   1   0	
-//     0x27      1    0    0   1   1   1	
-//     0x2b      1    0    1   0   1   1	check r1
-//     0x2d      1    0    1   1   0   1	under
-//     0x2e      1    0    1   1   1   0  
-//     0x33      1    1    0   0   1   1	check r1
-//     0x35      1    1    0   1   0   1	check r2
-//     0x36      1    1    0   1   1   0	
-//     0x39      1    1    1   0   0   1	check r1, r2
-//     0x3a      1    1    1   0   1   0	check r1
-//     0x3c      1    1    1   1   0   0	check r2  */
-//     //if (in < inVals.vbot) std::cout << "vtop reach vbot\n";
-//     //inVals.vtop = std::max(in, inVals.vbot);
-//     inVals.vtop = in;
-//     pushToList(VTOP);
-//     inVals = swapInputs(inVals);
-//     return update();
-// }
-// bool RCCore::setVBot(double in) {
-//     // if (in > inVals.vtop) std::cout << "vbot reached vtop\n";
-//     // inVals.vbot = std::min(in, inVals.vtop);
-//     inVals.vbot = in;
-//     pushToList(VBOT);
-//     inVals = swapInputs(inVals);
-//     return update();
-// }
-// bool RCCore::setVMid(double in) {
-//     // if (in > inVals.vbot) std::cout << "vmid reached vtop\n";
-//     // if (in < inVals.vbot) std::cout << "vmid reached vbot\n";
-//     // inVals.vmid = std::max(std::min(in, inVals.vtop), inVals.vbot);
-//     inVals.vmid = in;
-//     pushToList(VMID);
-//     inVals = swapInputs(inVals);
-//     return update();
-// }
-// bool RCCore::setR1(double in) {
-//     inVals.r1 = in;
-//     pushToList(R1);
-//     inVals = swapInputs(inVals);
-//     return update();
-// }
-// bool RCCore::setR2(double in) {
-//     inVals.r2 = in;
-//     pushToList(R2);
-//     inVals = swapInputs(inVals);
-//     return update();
-// }
-// bool RCCore::setCurr(double in) {
-//     inVals.curr = in;
-//     pushToList(CURR);
-//     inVals = swapInputs(inVals);
-//     return update();
-// }
 bool RCCore::setVTop(Vals::dir dir) {
     removeFromList(VTOP);
     if (dir == Vals::INPUT) pushToList(VTOP);
@@ -439,12 +454,6 @@ bool RCCore::update() {
     return _update(NONE);
 }
 
-// bool RCCore::update(Vals newInput, Vals newOutput) {
-//     inVals = newInput;
-//     outVals = newOutput;
-//     if (ibridge) ibridge->setState(outVals, constraint(outVals));
-//     return constraint(outVals) == Vals::PROPER;
-// }
 void RCCore::setInput(Vals vals) {
     inVals = vals;
 }

@@ -28,12 +28,6 @@ private:
 
 public:
     RCCore();
-    // bool setVTop(double);
-    // bool setVBot(double);
-    // bool setVMid(double);
-    // bool setR1(double);
-    // bool setR2(double);
-    // bool setCurr(double);
     bool setVTop(Vals::dir);
     bool setVBot(Vals::dir);
     bool setVMid(Vals::dir);
@@ -42,7 +36,6 @@ public:
     bool setCurr(Vals::dir);
     bool update(vartype, double);
     bool update();     
-    //bool update(Vals, Vals); 
     void setInput(Vals);
     Vals getInput() const;
     Vals getOutput() const;
