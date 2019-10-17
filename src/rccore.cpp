@@ -7,8 +7,13 @@
 #include "rccore.h"
 #include "vals.h"
 
+const double vul = 7;
+const double vbl = -7;
+const double rmax = 99.31415;
+const double currmax = 4.3;
+
+
 // PRIVATE
-    
 // For the list, keep at most 4 elements,
 // and enable removing something from the middle
 // No need for pop, as we'll access the list entirely
@@ -40,6 +45,17 @@ Vals RCCore::swapInputs(Vals vals) const {
     ovals.currd = find(CURR) ? Vals::INPUT : Vals::OUTPUT;
     return ovals;
 }
+Vals RCCore::clip(Vals ivals, int icode) const {
+    // Clips values in vals.
+    Vals ovals = ivals;
+    if (icode & 0x01) ovals.curr = std::min(ovals.curr, currmax);
+    if (icode & 0x02) ovals.r2   = std::min(ovals.r2, rmax);
+    if (icode & 0x04) ovals.r1   = std::min(ovals.r1, rmax);
+    if (icode & 0x08) ovals.vmid = std::max(std::min(ovals.vmid, vul), vbl);
+    if (icode & 0x10) ovals.vbot = std::max(ovals.vbot, vbl);
+    if (icode & 0x20) ovals.vtop = std::min(ovals.vtop, vul);
+    return ovals;
+}
 Vals RCCore::calc_group(vartype vt, Vals invals) const {
     // Update one set of values from the previous set
     double vtop  = invals.vtop;
@@ -48,10 +64,6 @@ Vals RCCore::calc_group(vartype vt, Vals invals) const {
     double r1    = invals.r1;
     double r2    = invals.r2;
     double curr  = invals.curr;
-    double const vul = 7;
-    double const vbl = -7;
-    double const rmax = 99.31415;
-    double const currmax = 4.3;
     /*      INPUTS
             vtop vbot vmid r1  r2 curr  comment
     0x0f      0    0    1   1   1   1	
@@ -70,11 +82,12 @@ Vals RCCore::calc_group(vartype vt, Vals invals) const {
     0x3a      1    1    1   0   1   0	
     0x3c      1    1    1   1   0   0	*/
 
-    Vals out = invals;
-    // std::cout << "---IN----\n";
-    // std::cout << invals.str() << std::endl;
-    // std::cout << "---------\n";
-    switch(invals.incode()) {
+    int icode = invals.incode();
+    Vals out = clip(invals, icode);
+    auto check_ctr = [](int ctr) {
+        if (ctr >= 10) throw std::exception("Too many counts");};
+
+    switch(icode) {
         case 0x0f: {
             // Vtop, Vbot = f(vmid, r1, r2, curr)
             out.vtopd = Vals::OUTPUT;
@@ -83,12 +96,8 @@ Vals RCCore::calc_group(vartype vt, Vals invals) const {
                 out.vtop = out.vmid + out.curr * out.r1;
                 out.vbot = out.vmid - out.curr * out.r2; 
             };
-            out.vmid = std::max(std::min(out.vmid, vul), vbl);
-            out.r1   = std::min(out.r1, rmax);
-            out.r2   = std::min(out.r2, rmax);
-            out.curr = std::min(out.curr, currmax);
-            unsigned int ctr = 0;
-            while (ctr++ < 10) {
+            int ctr;
+            for (ctr = 0; ctr < 10; ctr++) {
                 compute();
                 if      (out.vtop > vul && vt == RCCore::CURR) 
                     out.curr = (vul - vmid) / r1;
@@ -116,6 +125,7 @@ Vals RCCore::calc_group(vartype vt, Vals invals) const {
                     out.r2 = -(vbl - out.vmid) / out.curr;
                 else break;
             }
+            check_ctr(ctr);
             break;
         }
         case 0x17: {
@@ -126,12 +136,8 @@ Vals RCCore::calc_group(vartype vt, Vals invals) const {
                 out.vtop = out.vbot + out.curr * (out.r1 + out.r2);
                 out.vmid = out.vbot + out.curr * out.r2; 
             };
-            out.vbot = std::max(out.vbot, vbl);
-            out.r1   = std::min(out.r1, rmax);
-            out.r2   = std::min(out.r2, rmax);
-            out.curr = std::min(out.curr, currmax);
-            unsigned int ctr = 0;
-            while (ctr++ < 10) {
+            int ctr;
+            for (ctr = 0; ctr < 10; ctr++) {
                 compute();
                 if      (out.vtop > vul && vt == RCCore::VBOT)
                     out.vbot = vul - (out.curr * (out.r1 + out.r2));
@@ -165,6 +171,7 @@ Vals RCCore::calc_group(vartype vt, Vals invals) const {
                     out.curr = (vbl - out.vbot) / out.r2;
                 else break;
             }
+            check_ctr(ctr);
             break;
         }
         case 0x1b:
@@ -177,12 +184,8 @@ Vals RCCore::calc_group(vartype vt, Vals invals) const {
                 out.vtop = out.vmid + out.curr * out.r1;
                 out.r2   = (out.vmid - out.vbot) / out.curr;
             };
-            out.vbot = std::max(out.vbot, vbl);
-            out.vmid = std::max(std::min(out.vmid, vul), vbl);
-            out.r1   = std::min(out.r1, rmax);
-            out.curr = std::min(out.curr, currmax);
-            unsigned int ctr = 0;
-            while (ctr++ < 10) {
+            int ctr;
+            for (ctr = 0; ctr < 10; ctr++) {
                 compute();
                 if      (out.vtop > vul  && vt == RCCore::VBOT); // won't happen
                 else if (out.vtop < vbl  && vt == RCCore::VBOT); // won't happen
@@ -216,6 +219,7 @@ Vals RCCore::calc_group(vartype vt, Vals invals) const {
                     out.r2 = out.r2;
                 else break;
             }
+            check_ctr(ctr);
             break;
         }
         case 0x1e: {
@@ -223,15 +227,11 @@ Vals RCCore::calc_group(vartype vt, Vals invals) const {
             out.vtopd = Vals::OUTPUT;
             out.currd = Vals::OUTPUT;
             auto compute = [&out]() {
-                out.curr = (out.vmid - out.vbot) / out.r2;
                 out.vtop = out.vmid + (out.r1 / out.r2) * (out.vmid - out.vbot);
+                out.curr = (out.vmid - out.vbot) / out.r2;
             };
-            out.vbot = std::max(out.vbot, vbl);
-            out.vmid = std::max(std::min(out.vmid, vul), vbl);
-            out.r1   = std::min(out.r1, rmax);
-            out.r2   = std::min(out.r2, rmax);
-            unsigned int ctr = 0;
-            while(ctr++ < 10) {
+            int ctr;
+            for (ctr = 0; ctr < 10; ctr++) {
                 compute();
                 if      (out.curr > currmax && vt == RCCore::VBOT)
                     out.vbot = -(currmax * out.r2 - out.vmid);
@@ -266,14 +266,55 @@ Vals RCCore::calc_group(vartype vt, Vals invals) const {
                     out.r2 = out.r1 * (out.vmid - out.vbot) / (vbl - out.vmid);
                 else break;                
             }
+            check_ctr(ctr);
             break;
         }
-        case 0x27:
-            out.vmid = vtop - curr * r1;
-            out.vbot = vmid - curr * r2;
-            out.vmidd = Vals::OUTPUT;
+        case 0x27: {
+            // vbot, vmid = f(vtop, r1, r2 curr)
             out.vbotd = Vals::OUTPUT;
+            out.vmidd = Vals::OUTPUT;
+            auto compute = [&out]() {
+                out.vbot = out.vtop - out.curr * (out.r1 + out.r2);
+                out.vmid = out.vtop - out.curr * out.r1;
+            };
+            int ctr;
+            for (ctr = 0; ctr < 10; ctr++) {
+                compute();
+                if      (out.vbot > vul && vt == RCCore::VTOP)
+                    out.vtop = vul + out.curr * (out.r1 + out.r2);
+                else if (out.vbot < vbl && vt == RCCore::VTOP)
+                    out.vtop = vbl + out.curr * (out.r1 + out.r2);
+                else if (out.vmid > vul && vt == RCCore::VTOP)
+                    out.vtop = vul + out.curr * out.r1;
+                else if (out.vmid < vbl && vt == RCCore::VTOP)
+                    out.vtop = vbl + out.curr * out.r1;
+                else if (out.vbot > vul && vt == RCCore::R1)
+                    out.r1 = -(vul - out.vtop) / out.curr - out.r2;
+                else if (out.vbot < vbl && vt == RCCore::R1)
+                    out.r1 = -(vbl - out.vtop) / out.curr - out.r2;
+                else if (out.vmid > vul && vt == RCCore::R1)
+                    out.r1 = -(vul - out.vtop) / out.curr;
+                else if (out.vmid < vbl && vt == RCCore::R1)
+                    out.r1 = -(vbl - out.vtop) / out.curr;
+                else if (out.vbot > vul && vt == RCCore::R2)
+                    out.r2 = -(vul - out.vtop) / out.curr - out.r1;
+                else if (out.vbot < vbl && vt == RCCore::R2)
+                    out.r2 = -(vbl - out.vtop) / out.curr - out.r1;
+                else if (out.vmid > vul && vt == RCCore::R2); // won't happen
+                else if (out.vmid < vbl && vt == RCCore::R2); // won't happen
+                else if (out.vbot > vul && vt == RCCore::CURR)
+                    out.curr = -(vul - out.vtop) / (out.r1 + out.r2);
+                else if (out.vbot < vbl && vt == RCCore::CURR)
+                    out.curr = -(vbl - out.vtop) / (out.r1 + out.r2);
+                else if (out.vmid > vul && vt == RCCore::CURR)
+                    out.curr = -(vul - out.vtop) / out.r1;
+                else if (out.vmid < vbl && vt == RCCore::CURR)
+                    out.curr = -(vul - out.vtop) / out.r1;
+                else break;
+            }
+            check_ctr(ctr);
             break;
+        }
         case 0x2b:
             //out.vmid = std::min(vmid, vtop);
             out.vbot  = out.vmid - curr * r2;
@@ -309,24 +350,18 @@ Vals RCCore::calc_group(vartype vt, Vals invals) const {
             out.vmidd = Vals::OUTPUT;
             break;
         case 0x39:
-            //out.vmid = std::min(vmid, vtop);
-            //out.vmid = std::max(out.vmid, vbot);
             out.r1 = (vtop - out.vmid) / curr;
             out.r2 = (out.vmid - vbot) / curr;
             out.r1d = Vals::OUTPUT;
             out.r2d = Vals::OUTPUT;
             break;
         case 0x3a:
-            //out.vmid = std::min(vmid, vtop);
-            //out.vmid = std::max(out.vmid, vbot);
             out.curr = (out.vmid - vbot) / r2;
             out.r1   = (vtop - out.vmid) / out.curr;
             out.currd = Vals::OUTPUT;
             out.r1d   = Vals::OUTPUT;
             break;
         case 0x3c:
-            //out.vmid = std::min(vmid, vtop);
-            //out.vmid = std::max(out.vmid, vbot);
             out.curr = (vtop - out.vmid) / r1;
             out.r2   = (out.vmid - vbot) / out.curr;
             out.currd = Vals::OUTPUT;

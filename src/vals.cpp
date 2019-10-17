@@ -17,9 +17,7 @@ bool Vals::isDefined() const {
     return isdef(vtopd) && isdef(vbotd) && isdef(vmidd) &&
            isdef(r1d)   && isdef(r2d)   && isdef(currd) && isdef(ratiod);
 }
-// Vals::constype Vals::constraint() const {
-//     return _constraint;
-// }
+
 std::string Vals::str() const {
     int nw = 10;
     int kw = 10;
@@ -54,7 +52,6 @@ std::string Vals::str() const {
     sstr.width(nw); sstr << std::left << "Ratio";
     sstr.width(kw); sstr << std::left << vstr(ratiod);
     sstr.width(vw); sstr << std::left << ratio << std::endl;
-    //sstr << "Constrained? " << vstr(constraint()) << std::endl;
     sstr << "Code: 0x" <<std::hex << incode() << std::endl;
     return sstr.str();
 }

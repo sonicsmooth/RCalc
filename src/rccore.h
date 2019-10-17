@@ -22,6 +22,7 @@ private:
     void pushToList(vartype);
     void removeFromList(vartype);
     Vals swapInputs(Vals) const;
+    Vals clip(Vals, int) const;
     Vals calc_group(vartype, Vals) const;
     Vals::constype constraint(Vals) const;
     bool _update(vartype);
