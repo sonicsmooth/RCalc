@@ -9,8 +9,8 @@
 
 const double vul = 7;
 const double vbl = -7;
-const double rmax = 99.31415;
-const double currmax = 4.3;
+const double rmax = 85.5;
+const double currmax = 2.5;
 
 
 // PRIVATE
@@ -83,11 +83,11 @@ Vals RCCore::calc_group(vartype vt, Vals invals) const {
     0x1b      0    1    1   0   1   1	under
     0x1d      0    1    1   1   0   1	
     0x1e      0    1    1   1   1   0	
-    0x27      1    0    0   1   1   1	
+    0x27      1    0    0   1   1   1
     0x2b      1    0    1   0   1   1	
     0x2d      1    0    1   1   0   1	under
     0x2e      1    0    1   1   1   0  
-    0x33      1    1    0   0   1   1	
+    0x33      1    1    0   0   1   1
     0x35      1    1    0   1   0   1	
     0x36      1    1    0   1   1   0	
     0x39      1    1    1   0   0   1	
@@ -665,54 +665,63 @@ Vals RCCore::calc_group(vartype vt, Vals invals) const {
             check_ctr(ctr);
             break;}
         case 0x3a:{
+            std::cout << invals.vmid << std::endl;
             // r1, curr = f(vtop, vbot, vmid, r2)
             out.r1d   = Vals::OUTPUT;
             out.currd = Vals::OUTPUT;
             auto compute = [&out]() {
+                out.r1   = out.r2 * (out.vtop - out.vmid) / (out.vmid - out.vbot);
+                // out.vtop = (out.r1 / out.r2) * (out.vmid - out.vbot) + out.vmid;
+                // out.vbot = out.vmid - (out.vtop - out.vmid) * (out.r2 / out.r1);
+                // out.vmid = (out.vtop * out.r2 + out.vbot * out.r1) / (out.r1 + out.r2);
+                // out.r2 = out.r1 * (out.vmid - out.vbot) / (out.vtop - out.vmid);
                 out.curr = (out.vmid - out.vbot) / out.r2;
                 // out.vbot = out.vmid - out.curr * out.r2
                 // out.vmid = out.curr * out.r2 + out.vbot
                 // out.r2 = (out.vmid - out.vbot) / out.curr
-                out.r1   = (out.vtop - out.vmid) / out.curr;
-                // out.vtop = out.r1 * out.curr + out.vmid
-                // out.vmid = out.vtop - out.r1 * out.curr
-                // out.curr = (out.vtop - out.vmid) / out.r1
                 };
             int ctr;
             for (ctr = 0; ctr < 10; ctr++) {
                 compute();
+                // comparisons to curr and r1 are swapped, otherwise when vmid < vbot, 
+                // vmid goes to vtop and r1 goes to zero
                 if (gtb(out.curr, currmax)) {
                     if      (vt == RCCore::VBOT)
                 		out.vbot = out.vmid - currmax * out.r2;
                     else if (vt == RCCore::VMID)
                 		out.vmid = currmax * out.r2 + out.vbot;
                     else if (vt == RCCore::R2)
-                		out.r2 = (out.vmid - out.vbot) / out.curr;
+                        out.r2 = (out.vmid - out.vbot) / currmax;
                     else break;}
                 else if (ltb(out.curr, 0.0))     {
                     if      (vt == RCCore::VBOT)
-                		out.r2 = (out.vmid - out.vbot) / 0.0;
+                        out.vbot = out.vmid - out.curr * 0.0;
                     else if (vt == RCCore::VMID)
                 		out.vmid = 0.0 * out.r2 + out.vbot;
                     else if (vt == RCCore::R2)
-                		out.r2 = (out.vmid - out.vbot) / 0.0;
+                        out.r2 = (out.vmid - out.vbot) / 0.0;
                     else break;}
                 else if (gtb(out.r1, rmax))      {
                     if      (vt == RCCore::VTOP)
-                		out.vtop = rmax * out.curr + out.vmid;
+                        out.vtop = (rmax / out.r2) * (out.vmid - out.vbot) + out.vmid;
+                    else if (vt == RCCore::VBOT)
+                        out.vbot = out.vmid - (out.vtop - out.vmid) * (out.r2 / rmax);
                     else if (vt == RCCore::VMID)
-                		out.vmid = out.vtop - rmax * out.curr;
-                    else if (vt == RCCore::CURR)
-                		out.curr = (out.vtop - out.vmid) / rmax;
+                        out.vmid = (out.vtop * out.r2 + out.vbot * rmax) / (rmax + out.r2);
+                    else if (vt == RCCore::R2)
+                        out.r2 = rmax * (out.vmid - out.vbot) / (out.vtop - out.vmid);
                     else break;}
                 else if (ltb(out.r1, 0.0))       {
                     if      (vt == RCCore::VTOP)
-                		out.vtop = 0.0 * out.curr + out.vmid;
+                        out.vtop = (0.0 / out.r2) * (out.vmid - out.vbot) + out.vmid;
+                    else if (vt == RCCore::VBOT)
+                        out.vbot = out.vmid;// - (out.vtop - out.vmid) * (out.r2 / 0.0); // special, causes r1->inf, which causes vbot->vmid
                     else if (vt == RCCore::VMID)
-                		out.vmid = out.vtop - 0.0 * out.curr;
-                    else if (vt == RCCore::CURR)
-                		out.curr = (out.vtop - out.vmid) / 0.0;
+                        out.vmid = (out.vtop * out.r2 + out.vbot * 0.0) / (0.0 + out.r2);
+                    else if (vt == RCCore::R2)
+                        out.r2 = 0.0 * (out.vmid - out.vbot) / (out.vtop - out.vmid);
                     else break;}
+
                 else break;
             }
             check_ctr(ctr);
@@ -722,50 +731,56 @@ Vals RCCore::calc_group(vartype vt, Vals invals) const {
             out.r2d   = Vals::OUTPUT;
             out.currd = Vals::OUTPUT;
             auto compute = [&out]() {
+                out.r2   = out.r1 * (out.vmid - out.vbot) / (out.vtop - out.vmid);
+                // out.vtop = (out.r1 / out.r2) * (out.vmid - out.vbot) + out.vmid;
+                // out.vbot = out.vmid - (out.vtop - out.vmid) * (out.r2 / out.r1);
+                // out.vmid = (out.vtop * out.r2 + out.vbot * out.r1) / (out.r1 + out.r2);
+                // out.r1   = out.r2 * (out.vtop - out.vmid) / (out.vmid - out.vbot);
                 out.curr = (out.vtop - out.vmid) / out.r1;
-                // out.vtop = out.curr * out.r1 + out.vmid
-                // out.vmid = out.vtop - out.curr * out.r1
-                // out.r1 = (out.vtop - out.vmid) / out.curr
-                out.r2   = (out.vmid - out.vbot) / out.curr;
-                // out.vbot = out.vmid - out.r2 * out.curr
-                // out.vmid = out.r2 * out.curr + out.vbot
-                // out.curr = (out.vmid - out.vbot) / out.r2
+                // out.vtop = out.vmid + out.curr * out.r1;
+                // out.vmid = out.vtop - out.curr * out.r1;
+                // out.r1 = (out.vtop - out.vmid) / out.curr;
                 };
             int ctr;
             for (ctr = 0; ctr < 10; ctr++) {
                 compute();
-                if (gtb(out.curr, currmax)) {
+                if (gtb(out.r2, rmax))      {
                     if      (vt == RCCore::VTOP)
-                		out.vtop = currmax * out.r1 + out.vmid;
+                        out.vtop = (out.r1 / rmax) * (out.vmid - out.vbot) + out.vmid;
+                    else if (vt == RCCore::VBOT)
+                        out.vbot = out.vmid - (out.vtop - out.vmid) * (rmax / out.r1);
                     else if (vt == RCCore::VMID)
-                		out.vmid = out.vtop - currmax * out.r1;
+                        out.vmid = (out.vtop * rmax + out.vbot * out.r1) / (out.r1 + rmax);
                     else if (vt == RCCore::R1)
-                		out.r1 = (out.vtop - out.vmid) / currmax;
+                        out.r1   = rmax * (out.vtop - out.vmid) / (out.vmid - out.vbot);
+                    else break;}
+                else if (ltb(out.r2, 0.0))       {
+                    if      (vt == RCCore::VTOP)
+                        out.vtop = (out.r1 / 0.0) * (out.vmid - out.vbot) + out.vmid;
+                    else if (vt == RCCore::VBOT)
+                        out.vbot = out.vmid - (out.vtop - out.vmid) * (0.0 / out.r1);
+                    else if (vt == RCCore::VMID)
+                        out.vmid = (out.vtop * 0.0 + out.vbot * out.r1) / (out.r1 + 0.0);
+                    else if (vt == RCCore::R1)
+                        out.r1   = 0.0 * (out.vtop - out.vmid) / (out.vmid - out.vbot);
+                    else break;}
+                else if (gtb(out.curr, currmax)) {
+                    if      (vt == RCCore::VTOP)
+                        out.vtop = out.vmid + currmax * out.r1;
+                    else if (vt == RCCore::VMID)
+                        out.vmid = out.vtop - currmax * out.r1;
+                    else if (vt == RCCore::R1)
+                        out.r1 = (out.vtop - out.vmid) / currmax;
                     else break;}
                 else if (ltb(out.curr, 0.0))     {
                     if      (vt == RCCore::VTOP)
-                		out.vtop = 0.0 * out.r1 + out.vmid;
+                        out.vtop = out.vmid + 0.0 * out.r1;
                     else if (vt == RCCore::VMID)
-                		out.vmid = out.vtop - 0.0 * out.r1;
+                        out.vmid = out.vtop - 0.0 * out.r1;
                     else if (vt == RCCore::R1)
-                		out.r1 = (out.vtop - out.vmid) / 0.0;
+                        out.r1 = (out.vtop - out.vmid) / 0.0;
                     else break;}
-                else if (gtb(out.r2, rmax))      {
-                    if      (vt == RCCore::VBOT)
-                		out.vbot = out.vmid - rmax * out.curr;
-                    else if (vt == RCCore::VMID)
-                		out.vmid = rmax * out.curr + out.vbot;
-                    else if (vt == RCCore::CURR)
-                		out.curr = (out.vmid - out.vbot) / rmax;
-                    else break;}
-                else if (ltb(out.r2, 0.0))       {
-                    if      (vt == RCCore::VBOT)
-                		out.vbot = out.vmid - 0.0 * out.curr;
-                    else if (vt == RCCore::VMID)
-                		out.vmid = 0.0 * out.curr + out.vbot;
-                    else if (vt == RCCore::CURR)
-                		out.curr = (out.vmid - out.vbot) / 0.0;
-                    else break;}
+                    
                 else break;
             }
             check_ctr(ctr);
