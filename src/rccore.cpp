@@ -23,13 +23,6 @@ const double currmax = 2.5;
         throw std::logic_error(s.str()); \
     } while (0)
  
-void junk(std::string msg) {
-    std::ostringstream s;
-    s << msg << " " << __FILE__ << ":" << __LINE__;
-    std::cout << s.str();
-    throw std::logic_error(s.str());
- }
-
 // PRIVATE
 // For the list, keep at most 4 elements,
 // and enable removing something from the middle
@@ -40,9 +33,6 @@ void RCCore::pushToList(vartype v) {
     latest4.push_back(v);
     while (latest4.size() > 4)
         latest4.pop_front();
-    //for (auto &&i : latest4)
-    //    std::cout << cstr(i) << " ";
-    //std::cout << std::endl;
 }
 void RCCore::removeFromList(vartype v) {
     latest4.remove(v);
@@ -108,11 +98,8 @@ Vals RCCore::calc_group(vartype vt, Vals invals) const {
     int icode = invals.incode();
     Vals out = clip(invals, icode);
     auto check_ctr = [](int ctr) {
-        if (ctr >= 10) {
+        if (ctr >= 10)
             throw_line("Too many counts");
-        //    std::cout << "too many counts\n";
-        //    throw std::logic_error("Too many counts");
-        }
     };
 
     switch(icode) {
@@ -702,17 +689,14 @@ Vals RCCore::calc_group(vartype vt, Vals invals) const {
                     else if (vt == RCCore::VMID)
                         out.vmid = (out.vtop * out.r2 + out.vbot * rmax) / (rmax + out.r2);
                     else
-                        throw_line("Shouldn't get here");
-                }
+                        throw_line("Shouldn't get here");}
                 else if (out.vtop < out.vmid) {
                     if (vt == RCCore::VTOP)
                         out.vtop = out.vtop = (0.0 / out.r2) * (out.vmid - out.vbot) + out.vmid;
                     else if (vt == RCCore::VMID)
-                        out.vmid = out.vmid = (out.vtop * out.r2 + out.vbot * 0.0) / (0.0 + out.r2);
+                        out.vmid = (out.vtop * out.r2 + out.vbot * 0.0) / (0.0 + out.r2);
                     else 
-                        throw_line("Shouldn't get here");
-                }
-                
+                        throw_line("Shouldn't get here");}
                 else if (gtb(out.r1, rmax))      {
                     if      (vt == RCCore::VTOP)
                         {std::cout << "here r1 > max!, VTOP" << std::endl;
@@ -727,28 +711,6 @@ Vals RCCore::calc_group(vartype vt, Vals invals) const {
                         out.r2 = rmax * (out.vmid - out.vbot) / (out.vtop - out.vmid);
                     else 
                         throw_line("Shouldn't get here");}
-//                else if (ltb(out.r1, 0.0))       {
-//                    if      (vt == RCCore::VTOP) {
-//                        std::cout << "here r1 < 0!, VTOP" << std::endl;
-//                        out.vtop = (0.0 / out.r2) * (out.vmid - out.vbot) + out.vmid;
-//                    }
-//                    else if (vt == RCCore::VBOT) {
-//                        std::cout << "here r1 < 0!, VBOT" << std::endl;
-//                        out.vbot = out.vmid - (out.vtop - out.vmid) * (out.r2 / 0.0);
-//                        //// special, keep to the left of asymptote using rmax instead of 0.0.
-//                        //// We could also just assign out.vbot = out.vmid, but then the if-elses
-//                        //// between r1 and curr would need to be swapped.  This hack works.
-//                        //out.vbot = out.vmid - (out.vtop - out.vmid) * (out.r2 / rmax); // special, keep to the left of asymptote using rmax instead of 0x0.
-//                    }
-//                    else if (vt == RCCore::VMID) {
-//                        std::cout << "here r1 < 0!, VMID" << std::endl;
-//                        out.vmid = (out.vtop * out.r2 + out.vbot * 0.0) / (0.0 + out.r2);
-//                        //// Same thing -- keep things to the left of asymptote.  This hack partially works
-//                        //out.vmid = (out.vtop * out.r2 + out.vbot * rmax) / (rmax + out.r2); // keep to left of asymptote
-//                    }
-//                    else if (vt == RCCore::R2)
-//                        out.r2 = 0.0 * (out.vmid - out.vbot) / (out.vtop - out.vmid);
-//                    else break;}
                 else if (gtb(out.curr, currmax)) {
                     if      (vt == RCCore::VBOT)
                 		out.vbot = out.vmid - currmax * out.r2;
@@ -759,15 +721,6 @@ Vals RCCore::calc_group(vartype vt, Vals invals) const {
                     else
                         throw_line("Shouldn't get here");
                     }
-//                else if (ltb(out.curr, 0.0))     {
-//                    if      (vt == RCCore::VBOT)
-//                        out.vbot = out.vmid - out.curr * 0.0;
-//                    else if (vt == RCCore::VMID)
-//                		out.vmid = 0.0 * out.r2 + out.vbot;
-//                    else if (vt == RCCore::R2)
-//                        out.r2 = (out.vmid - out.vbot) / 0.0;
-//                    else break;}
-
                 else break;
             }
             check_ctr(ctr);
@@ -790,7 +743,23 @@ Vals RCCore::calc_group(vartype vt, Vals invals) const {
             int ctr;
             for (ctr = 0; ctr < 10; ctr++) {
                 compute();
-                if (gtb(out.r2, rmax))      {
+                // Special case at the root of r1<0, r2<0, or curr<0 problems
+                if (out.vbot > out.vmid) {
+                    if (vt == RCCore::VBOT)
+                        out.vbot = out.vmid - (out.vtop - out.vmid) * (0.0 / out.r1);
+                    else if (vt == RCCore::VMID)
+                        out.vmid = (out.vtop * 0.0 + out.vbot * out.r1) / (out.r1 + 0.0);
+                    else
+                        throw_line("Shouldn't get here");}
+                else if (out.vtop < out.vmid) {
+                    if (vt == RCCore::VTOP)
+                        out.vtop = out.vtop = (out.r1 / rmax) * (out.vmid - out.vbot) + out.vmid;
+                    else if (vt == RCCore::VMID)
+                        out.vmid = (out.vtop * rmax + out.vbot * out.r1) / (out.r1 + rmax);
+                    else
+                        throw_line("Shouldn't get here");}
+
+                else if (gtb(out.r2, rmax))      {
                     if      (vt == RCCore::VTOP)
                         out.vtop = (out.r1 / rmax) * (out.vmid - out.vbot) + out.vmid;
                     else if (vt == RCCore::VBOT)
@@ -799,17 +768,8 @@ Vals RCCore::calc_group(vartype vt, Vals invals) const {
                         out.vmid = (out.vtop * rmax + out.vbot * out.r1) / (out.r1 + rmax);
                     else if (vt == RCCore::R1)
                         out.r1   = rmax * (out.vtop - out.vmid) / (out.vmid - out.vbot);
-                    else break;}
-                else if (ltb(out.r2, 0.0))       {
-                    if      (vt == RCCore::VTOP)
-                        out.vtop = (out.r1 / 0.0) * (out.vmid - out.vbot) + out.vmid;
-                    else if (vt == RCCore::VBOT)
-                        out.vbot = out.vmid - (out.vtop - out.vmid) * (0.0 / out.r1);
-                    else if (vt == RCCore::VMID)
-                        out.vmid = (out.vtop * 0.0 + out.vbot * out.r1) / (out.r1 + 0.0);
-                    else if (vt == RCCore::R1)
-                        out.r1   = 0.0 * (out.vtop - out.vmid) / (out.vmid - out.vbot);
-                    else break;}
+                    else
+                        throw_line("Shouldn't get here");}
                 else if (gtb(out.curr, currmax)) {
                     if      (vt == RCCore::VTOP)
                         out.vtop = out.vmid + currmax * out.r1;
@@ -817,16 +777,8 @@ Vals RCCore::calc_group(vartype vt, Vals invals) const {
                         out.vmid = out.vtop - currmax * out.r1;
                     else if (vt == RCCore::R1)
                         out.r1 = (out.vtop - out.vmid) / currmax;
-                    else break;}
-                else if (ltb(out.curr, 0.0))     {
-                    if      (vt == RCCore::VTOP)
-                        out.vtop = out.vmid + 0.0 * out.r1;
-                    else if (vt == RCCore::VMID)
-                        out.vmid = out.vtop - 0.0 * out.r1;
-                    else if (vt == RCCore::R1)
-                        out.r1 = (out.vtop - out.vmid) / 0.0;
-                    else break;}
-                    
+                    else
+                        throw_line("Shouldn't get here");}
                 else break;
             }
             check_ctr(ctr);
