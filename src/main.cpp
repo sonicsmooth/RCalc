@@ -151,7 +151,7 @@ int main(int argc, char *argv[])
     {//        vtop vbot vmid  r1  r2 curr 
     // 0x3a      1    1    1   0   1   0	
     pcore->update(RCCore::VTOP, 5.0);
-    pcore->update(RCCore::VBOT, 0.0);
+    pcore->update(RCCore::VBOT, 0.75);
     pcore->update(RCCore::VMID, 2.0);
     //pcore->update(RCCore::R1, 20.0);
     pcore->update(RCCore::R2,   20);
@@ -162,7 +162,7 @@ int main(int argc, char *argv[])
     // 0x3c      1    1    1   1   0   0
     pcore->update(RCCore::VTOP, 5);
     pcore->update(RCCore::VBOT, 0.0);
-    pcore->update(RCCore::VMID, 1.5);
+    pcore->update(RCCore::VMID, 2.0);
     pcore->update(RCCore::R1,   20.0);
     //pcore->update(RCCore::R2,   20.0);
     //pcore->update(RCCore::CURR, 0.1);

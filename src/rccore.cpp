@@ -1,9 +1,11 @@
 #include <iostream>
+#include <sstream>
 #include <iomanip>
 #include <cmath>
 #include <list>
 #include <algorithm>
 #include <cassert>
+#include <stdexcept>
 #include "rccore.h"
 #include "vals.h"
 
@@ -12,6 +14,21 @@ const double vbl = -7;
 const double rmax = 85.5;
 const double currmax = 2.5;
 
+
+#define throw_line(msg) \
+    do { \
+        std::ostringstream s; \
+        s << msg << " " << __FILE__ << ":" << __LINE__; \
+        std::cout << s.str(); \
+        throw std::logic_error(s.str()); \
+    } while (0)
+ 
+void junk(std::string msg) {
+    std::ostringstream s;
+    s << msg << " " << __FILE__ << ":" << __LINE__;
+    std::cout << s.str();
+    throw std::logic_error(s.str());
+ }
 
 // PRIVATE
 // For the list, keep at most 4 elements,
@@ -70,12 +87,6 @@ bool ltb(double a, double b) {
 
 Vals RCCore::calc_group(vartype vt, Vals invals) const {
     // Update one set of values from the previous set
-    // double vtop  = invals.vtop;
-    // double vbot  = invals.vbot;
-    // double vmid  = invals.vmid;
-    // double r1    = invals.r1;
-    // double r2    = invals.r2;
-    // double curr  = invals.curr;
     /*      INPUTS
             vtop vbot vmid r1  r2 curr  comment
     0x0f      0    0    1   1   1   1	
@@ -98,8 +109,9 @@ Vals RCCore::calc_group(vartype vt, Vals invals) const {
     Vals out = clip(invals, icode);
     auto check_ctr = [](int ctr) {
         if (ctr >= 10) {
-            std::cout << "too many counts\n";
-            throw std::exception("Too many counts");
+            throw_line("Too many counts");
+        //    std::cout << "too many counts\n";
+        //    throw std::logic_error("Too many counts");
         }
     };
 
@@ -195,7 +207,7 @@ Vals RCCore::calc_group(vartype vt, Vals invals) const {
             check_ctr(ctr);
             break;}
         case 0x1b:
-            throw std::invalid_argument( "Error in logic" );
+            throw_line( "Error in logic" );
         case 0x1d: {
             // vtop, r2 = f(vbot, vmid, r1, curr)
             out.vtopd = Vals::OUTPUT;
@@ -375,7 +387,7 @@ Vals RCCore::calc_group(vartype vt, Vals invals) const {
             check_ctr(ctr);
             break; }
         case 0x2d:
-            throw std::invalid_argument( "Error in logic" );
+            throw_line( "Error in logic" );
         case 0x2e: {
             // vbot, curr = f(vtop, vmid, r1, r2)
             out.vbotd = Vals::OUTPUT;
@@ -683,44 +695,78 @@ Vals RCCore::calc_group(vartype vt, Vals invals) const {
             int ctr;
             for (ctr = 0; ctr < 10; ctr++) {
                 compute();
-                // comparisons to curr and r1 are swapped, otherwise when vmid < vbot, 
-                // vmid goes to vtop and r1 goes to zero
-                if (gtb(out.curr, currmax)) {
+                // Special case at the root of r1<0, r2<0, or curr<0 problems
+                if (out.vbot > out.vmid) {
+                    if (vt == RCCore::VBOT)
+                        out.vbot = out.vmid - (out.vtop - out.vmid) * (out.r2 / rmax);
+                    else if (vt == RCCore::VMID)
+                        out.vmid = (out.vtop * out.r2 + out.vbot * rmax) / (rmax + out.r2);
+                    else
+                        throw_line("Shouldn't get here");
+                }
+                else if (out.vtop < out.vmid) {
+                    if (vt == RCCore::VTOP)
+                        out.vtop = out.vtop = (0.0 / out.r2) * (out.vmid - out.vbot) + out.vmid;
+                    else if (vt == RCCore::VMID)
+                        out.vmid = out.vmid = (out.vtop * out.r2 + out.vbot * 0.0) / (0.0 + out.r2);
+                    else 
+                        throw_line("Shouldn't get here");
+                }
+                
+                else if (gtb(out.r1, rmax))      {
+                    if      (vt == RCCore::VTOP)
+                        {std::cout << "here r1 > max!, VTOP" << std::endl;
+                        out.vtop = (rmax / out.r2) * (out.vmid - out.vbot) + out.vmid;}
+                    else if (vt == RCCore::VBOT)
+                        {std::cout << "here r1 > max!, VBOT" << std::endl;
+                        out.vbot = out.vmid - (out.vtop - out.vmid) * (out.r2 / rmax);}
+                    else if (vt == RCCore::VMID)
+                        {std::cout << "here r1 > max!, VMID" << std::endl;
+                        out.vmid = (out.vtop * out.r2 + out.vbot * rmax) / (rmax + out.r2);}
+                    else if (vt == RCCore::R2)
+                        out.r2 = rmax * (out.vmid - out.vbot) / (out.vtop - out.vmid);
+                    else 
+                        throw_line("Shouldn't get here");}
+//                else if (ltb(out.r1, 0.0))       {
+//                    if      (vt == RCCore::VTOP) {
+//                        std::cout << "here r1 < 0!, VTOP" << std::endl;
+//                        out.vtop = (0.0 / out.r2) * (out.vmid - out.vbot) + out.vmid;
+//                    }
+//                    else if (vt == RCCore::VBOT) {
+//                        std::cout << "here r1 < 0!, VBOT" << std::endl;
+//                        out.vbot = out.vmid - (out.vtop - out.vmid) * (out.r2 / 0.0);
+//                        //// special, keep to the left of asymptote using rmax instead of 0.0.
+//                        //// We could also just assign out.vbot = out.vmid, but then the if-elses
+//                        //// between r1 and curr would need to be swapped.  This hack works.
+//                        //out.vbot = out.vmid - (out.vtop - out.vmid) * (out.r2 / rmax); // special, keep to the left of asymptote using rmax instead of 0x0.
+//                    }
+//                    else if (vt == RCCore::VMID) {
+//                        std::cout << "here r1 < 0!, VMID" << std::endl;
+//                        out.vmid = (out.vtop * out.r2 + out.vbot * 0.0) / (0.0 + out.r2);
+//                        //// Same thing -- keep things to the left of asymptote.  This hack partially works
+//                        //out.vmid = (out.vtop * out.r2 + out.vbot * rmax) / (rmax + out.r2); // keep to left of asymptote
+//                    }
+//                    else if (vt == RCCore::R2)
+//                        out.r2 = 0.0 * (out.vmid - out.vbot) / (out.vtop - out.vmid);
+//                    else break;}
+                else if (gtb(out.curr, currmax)) {
                     if      (vt == RCCore::VBOT)
                 		out.vbot = out.vmid - currmax * out.r2;
                     else if (vt == RCCore::VMID)
                 		out.vmid = currmax * out.r2 + out.vbot;
                     else if (vt == RCCore::R2)
                         out.r2 = (out.vmid - out.vbot) / currmax;
-                    else break;}
-                else if (ltb(out.curr, 0.0))     {
-                    if      (vt == RCCore::VBOT)
-                        out.vbot = out.vmid - out.curr * 0.0;
-                    else if (vt == RCCore::VMID)
-                		out.vmid = 0.0 * out.r2 + out.vbot;
-                    else if (vt == RCCore::R2)
-                        out.r2 = (out.vmid - out.vbot) / 0.0;
-                    else break;}
-                else if (gtb(out.r1, rmax))      {
-                    if      (vt == RCCore::VTOP)
-                        out.vtop = (rmax / out.r2) * (out.vmid - out.vbot) + out.vmid;
-                    else if (vt == RCCore::VBOT)
-                        out.vbot = out.vmid - (out.vtop - out.vmid) * (out.r2 / rmax);
-                    else if (vt == RCCore::VMID)
-                        out.vmid = (out.vtop * out.r2 + out.vbot * rmax) / (rmax + out.r2);
-                    else if (vt == RCCore::R2)
-                        out.r2 = rmax * (out.vmid - out.vbot) / (out.vtop - out.vmid);
-                    else break;}
-                else if (ltb(out.r1, 0.0))       {
-                    if      (vt == RCCore::VTOP)
-                        out.vtop = (0.0 / out.r2) * (out.vmid - out.vbot) + out.vmid;
-                    else if (vt == RCCore::VBOT)
-                        out.vbot = out.vmid;// - (out.vtop - out.vmid) * (out.r2 / 0.0); // special, causes r1->inf, which causes vbot->vmid
-                    else if (vt == RCCore::VMID)
-                        out.vmid = (out.vtop * out.r2 + out.vbot * 0.0) / (0.0 + out.r2);
-                    else if (vt == RCCore::R2)
-                        out.r2 = 0.0 * (out.vmid - out.vbot) / (out.vtop - out.vmid);
-                    else break;}
+                    else
+                        throw_line("Shouldn't get here");
+                    }
+//                else if (ltb(out.curr, 0.0))     {
+//                    if      (vt == RCCore::VBOT)
+//                        out.vbot = out.vmid - out.curr * 0.0;
+//                    else if (vt == RCCore::VMID)
+//                		out.vmid = 0.0 * out.r2 + out.vbot;
+//                    else if (vt == RCCore::R2)
+//                        out.r2 = (out.vmid - out.vbot) / 0.0;
+//                    else break;}
 
                 else break;
             }
@@ -786,7 +832,7 @@ Vals RCCore::calc_group(vartype vt, Vals invals) const {
             check_ctr(ctr);
             break;}
         default:
-            throw std::invalid_argument( "Error in logic" );
+            throw_line( "Error in logic" );
 
     }
     out.ratio = out.r1 / out.r2;
@@ -896,7 +942,7 @@ bool RCCore::update(vartype vt, double in) {
         case R1:   inVals.r1 = in;   break;
         case R2:   inVals.r2 = in;   break;
         case CURR: inVals.curr = in; break;
-        default: throw std::invalid_argument("whoops!");
+        default: throw_line("whoops!");
     }
     pushToList(vt);
     inVals = swapInputs(inVals);
