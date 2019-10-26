@@ -90,7 +90,7 @@ int main(int argc, char *argv[])
     pcore->update(RCCore::R1,   20.0);
     pcore->update(RCCore::R2,   20.0);
     pcore->update(RCCore::CURR, 0.1);}
-    if (1) // 0x2b //ok
+    if (0) // 0x2b //ok
     {//        vtop vbot vmid  r1  r2 curr 
     // 0x2b      1    0    1   0   1   1	
     pcore->update(RCCore::VTOP, 3.3);
@@ -99,7 +99,7 @@ int main(int argc, char *argv[])
     //pcore->update(RCCore::R1,   20.0);
     pcore->update(RCCore::R2,   20.0);
     pcore->update(RCCore::CURR, 0.1);}
-    if (0) // 0x2e //ok
+    if (1) // 0x2e //ok
     {//        vtop vbot vmid  r1  r2 curr 
     // 0x2e      1    0    1   1   1   0  
     pcore->update(RCCore::VTOP, 3.3);
