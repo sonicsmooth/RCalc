@@ -441,34 +441,6 @@ Vals RCCore::calc_group(vartype vt, Vals invals) const {
                         out.curr = (out.vtop - out.vmid) / 0.0;
                 }
                 else break;
-                // if      (gtb(out.vbot, vul)  && vt == RCCore::VTOP); // won't happen
-                // else if (ltb(out.vbot, vbl)  && vt == RCCore::VTOP); // won't happen
-                // else if (gtb(out.r1, rmax)   && vt == RCCore::VTOP)
-                //     out.vtop = rmax * out.curr + out.vmid;
-                // else if (ltb(out.r1, 0.0)    && vt == RCCore::VTOP)
-                //     out.vtop = out.vmid;
-                // else if (gtb(out.vbot, vul)  && vt == RCCore::VMID)
-                //     out.vmid = vul + out.curr * out.r2;
-                // else if (ltb(out.vbot, vbl)  && vt == RCCore::VMID)
-                //     out.vmid = vbl + out.curr * out.r2;
-                // else if (gtb(out.r1, rmax)   && vt == RCCore::VMID)
-                //     out.vmid = -(rmax * out.curr - out.vtop);
-                // else if (ltb(out.r1, 0.0)    && vt == RCCore::VMID)
-                //     out.vmid = out.vtop;
-                // else if (gtb(out.vbot, vul)  && vt == RCCore::R2)
-                //     out.r2 = -(vul - out.vmid) / out.curr;
-                // else if (ltb(out.vbot, vbl)  && vt == RCCore::R2)
-                //     out.r2 = -(vbl - out.vmid) / out.curr;
-                // else if (gtb(out.r1, rmax)   && vt == RCCore::R2); // won't happen
-                // else if (ltb(out.r1, 0.0)    && vt == RCCore::R2); // won't happen
-                // else if (gtb(out.vbot, vul)  && vt == RCCore::CURR)
-                //     out.curr = -(vul -out.vmid) / out.r2;
-                // else if (ltb(out.vbot, vbl)  && vt == RCCore::CURR)
-                //     out.curr = -(vbl - out.vmid) / out.r2;
-                // else if (gtb(out.r1, rmax)   && vt == RCCore::CURR)
-                //     out.curr = (out.vtop - out.vmid) / rmax;
-                // else if (ltb(out.r1, 0.0)    && vt == RCCore::CURR); // won't happen
-                // else break;
             }
             check_ctr(ctr);
             break; }
