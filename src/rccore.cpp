@@ -9,9 +9,9 @@
 #include "rccore.h"
 #include "vals.h"
 
-const double vul = 7;
-const double vbl = -7;
-const double rmax = 85.5;
+const double vul = 20;
+const double vbl = -5;
+const double rmax = 500000;
 const double currmax = 2.5;
 
 
@@ -638,10 +638,8 @@ Vals RCCore::calc_group(vartype vt, Vals invals) const {
                 // out.r2 = (out.vtop - out.vbot) / out.curr - out.r1
                 };
             int ctr;
-            std::cout << invals.vbot << " ";
             for (ctr = 0; ctr < 10; ctr++) {
                 compute();
-                std::cout << ctr << " ";
                 if (gtb(out.vmid, vul))     {
                     if      (vt == RCCore::VTOP)
                         out.vtop = (vul * ( out.r1 + out.r2) - out.vbot / out.r2) + out.vbot;
@@ -684,7 +682,6 @@ Vals RCCore::calc_group(vartype vt, Vals invals) const {
                     else break;}
                 else break;
             }
-            std::cout << std::endl;
             check_ctr(ctr);
             break;}
         case 0x39:{
@@ -741,7 +738,6 @@ Vals RCCore::calc_group(vartype vt, Vals invals) const {
             check_ctr(ctr);
             break;}
         case 0x3a:{
-            std::cout << invals.vmid << std::endl;
             // r1, curr = f(vtop, vbot, vmid, r2)
             out.r1d   = Vals::OUTPUT;
             out.currd = Vals::OUTPUT;
@@ -776,14 +772,11 @@ Vals RCCore::calc_group(vartype vt, Vals invals) const {
                         throw_line("Shouldn't get here");}
                 else if (gtb(out.r1, rmax))      {
                     if      (vt == RCCore::VTOP)
-                        {std::cout << "here r1 > max!, VTOP" << std::endl;
-                        out.vtop = (rmax / out.r2) * (out.vmid - out.vbot) + out.vmid;}
+                        out.vtop = (rmax / out.r2) * (out.vmid - out.vbot) + out.vmid;
                     else if (vt == RCCore::VBOT)
-                        {std::cout << "here r1 > max!, VBOT" << std::endl;
-                        out.vbot = out.vmid - (out.vtop - out.vmid) * (out.r2 / rmax);}
+                        out.vbot = out.vmid - (out.vtop - out.vmid) * (out.r2 / rmax);
                     else if (vt == RCCore::VMID)
-                        {std::cout << "here r1 > max!, VMID" << std::endl;
-                        out.vmid = (out.vtop * out.r2 + out.vbot * rmax) / (rmax + out.r2);}
+                        out.vmid = (out.vtop * out.r2 + out.vbot * rmax) / (rmax + out.r2);
                     else if (vt == RCCore::R2)
                         out.r2 = rmax * (out.vmid - out.vbot) / (out.vtop - out.vmid);
                     else 

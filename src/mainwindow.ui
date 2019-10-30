@@ -46,10 +46,10 @@
          <item>
           <widget class="QSlider" name="VTopSlider">
            <property name="minimum">
-            <number>-1000</number>
+            <number>-2000</number>
            </property>
            <property name="maximum">
-            <number>1000</number>
+            <number>2000</number>
            </property>
            <property name="orientation">
             <enum>Qt::Vertical</enum>
@@ -100,10 +100,10 @@
          <item>
           <widget class="QSlider" name="VBotSlider">
            <property name="minimum">
-            <number>-1000</number>
+            <number>-2000</number>
            </property>
            <property name="maximum">
-            <number>1000</number>
+            <number>2000</number>
            </property>
            <property name="orientation">
             <enum>Qt::Vertical</enum>
@@ -148,10 +148,10 @@
          <item>
           <widget class="QSlider" name="VMidSlider">
            <property name="minimum">
-            <number>-1000</number>
+            <number>-2000</number>
            </property>
            <property name="maximum">
-            <number>1000</number>
+            <number>2000</number>
            </property>
            <property name="orientation">
             <enum>Qt::Vertical</enum>
@@ -396,7 +396,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>21</height>
+     <height>20</height>
     </rect>
    </property>
   </widget>
