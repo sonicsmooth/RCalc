@@ -8,35 +8,35 @@
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
-    , ui(new Ui::MainWindow)
+    , m_ui(new Ui::MainWindow)
 {
-    ui->setupUi(this);
+    m_ui->setupUi(this);
 }
 
 MainWindow::~MainWindow()
 {
-    delete ui;
+    delete m_ui;
 }
-
-QSlider * MainWindow::VTopSlider() {return ui->VTopSlider;}
-QSlider * MainWindow::VBotSlider() {return ui->VBotSlider;}
-QSlider * MainWindow::VMidSlider() {return ui->VMidSlider;}
-QSlider * MainWindow::R1Slider() {return ui->R1Slider;}
-QSlider * MainWindow::R2Slider() {return ui->R2Slider;}
-QSlider * MainWindow::RatioSlider() {return ui->RatioSlider;}
-QSlider * MainWindow::CurrSlider() {return ui->CurrSlider;}
-QLabel * MainWindow::VTopValLabel() {return ui->VTopValLabel;}
-QLabel * MainWindow::VBotValLabel() {return ui->VBotValLabel;}
-QLabel * MainWindow::VMidValLabel() {return ui->VMidValLabel;}
-QLabel * MainWindow::R1ValLabel() {return ui->R1ValLabel;}
-QLabel * MainWindow::R2ValLabel() {return ui->R2ValLabel;}
-QLabel * MainWindow::RatioValLabel() {return ui->RatioValLabel;}
-QLabel * MainWindow::CurrValLabel() {return ui->CurrValLabel;}
-QPushButton * MainWindow::VTopButton() {return ui->VTopButton;}
-QPushButton * MainWindow::VBotButton() {return ui->VBotButton;}
-QPushButton * MainWindow::VMidButton() {return ui->VMidButton;}
-QPushButton * MainWindow::R1Button() {return ui->R1Button;}
-QPushButton * MainWindow::R2Button() {return ui->R2Button;}
-QPushButton * MainWindow::CurrButton() {return ui->CurrButton;}
-QPlainTextEdit * MainWindow::TextEdit() {return ui->plainTextEdit;}
+//Ui::MainWindow * MainWindow::ui() {return m_ui;}
+QSlider * MainWindow::VTopSlider() {return m_ui->VTopSlider;}
+QSlider * MainWindow::VBotSlider() {return m_ui->VBotSlider;}
+QSlider * MainWindow::VMidSlider() {return m_ui->VMidSlider;}
+QSlider * MainWindow::R1Slider() {return m_ui->R1Slider;}
+QSlider * MainWindow::R2Slider() {return m_ui->R2Slider;}
+QSlider * MainWindow::RatioSlider() {return m_ui->RatioSlider;}
+QSlider * MainWindow::CurrSlider() {return m_ui->CurrSlider;}
+QLabel * MainWindow::VTopValLabel() {return m_ui->VTopValLabel;}
+QLabel * MainWindow::VBotValLabel() {return m_ui->VBotValLabel;}
+QLabel * MainWindow::VMidValLabel() {return m_ui->VMidValLabel;}
+QLabel * MainWindow::R1ValLabel() {return m_ui->R1ValLabel;}
+QLabel * MainWindow::R2ValLabel() {return m_ui->R2ValLabel;}
+QLabel * MainWindow::RatioValLabel() {return m_ui->RatioValLabel;}
+QLabel * MainWindow::CurrValLabel() {return m_ui->CurrValLabel;}
+QPushButton * MainWindow::VTopButton() {return m_ui->VTopButton;}
+QPushButton * MainWindow::VBotButton() {return m_ui->VBotButton;}
+QPushButton * MainWindow::VMidButton() {return m_ui->VMidButton;}
+QPushButton * MainWindow::R1Button() {return m_ui->R1Button;}
+QPushButton * MainWindow::R2Button() {return m_ui->R2Button;}
+QPushButton * MainWindow::CurrButton() {return m_ui->CurrButton;}
+QPlainTextEdit * MainWindow::TextEdit() {return m_ui->plainTextEdit;}
 

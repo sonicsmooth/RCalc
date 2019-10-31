@@ -9,10 +9,10 @@
 #include "rccore.h"
 #include "vals.h"
 
-const double vul = 20;
-const double vbl = -5;
-const double rmax = 500000;
-const double currmax = 2.5;
+// const double vul = 20;
+// const double vbl = -5;
+// const double rmax = 500000;
+// const double currmax = 2.5;
 
 
 #define throw_line(msg) \
@@ -913,10 +913,10 @@ std::string cstr(RCCore::vartype vt) {
 }
 
 // Public
-RCCore::RCCore() :
-    inVals (Vals()),
-    outVals (Vals())
-    {}
+// RCCore::RCCore() :
+//     inVals (Vals()),
+//     outVals (Vals())
+//     {}
 
 bool RCCore::setVTop(Vals::dir dir) {
     removeFromList(VTOP);
@@ -984,6 +984,14 @@ Vals RCCore::getOutput() const {
     return outVals;
 }
 
+double RCCore::getVul() const {return vul;}
+double RCCore::getVbl() const {return vbl;}
+double RCCore::getRmax() const {return rmax;}
+double RCCore::getCurrmax() const {return currmax;}
+void   RCCore::setVul(double x) {vul = x;};
+void   RCCore::setVbl(double x) {vbl = x; };
+void   RCCore::setRmax(double x) {rmax = x;};
+void   RCCore::setCurrmax(double x) {currmax = x; };
 
 
 

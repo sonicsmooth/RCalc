@@ -18,6 +18,7 @@ private:
     Vals outVals; // second set of calculations;
     std::shared_ptr<UIBridgeInterface> ibridge;
     std::list<vartype> latest4; // list of 4 inputs
+    double vul,vbl,rmax,currmax;
 
     void pushToList(vartype);
     void removeFromList(vartype);
@@ -28,7 +29,7 @@ private:
     bool _update(vartype);
 
 public:
-    RCCore();
+    //RCCore() = default;
     bool setVTop(Vals::dir);
     bool setVBot(Vals::dir);
     bool setVMid(Vals::dir);
@@ -40,7 +41,16 @@ public:
     void setInput(Vals);
     Vals getInput() const;
     Vals getOutput() const;
-    bool inputConstrainedType() const;
+    double getVul() const;
+    double getVbl() const;
+    double getRmax() const;
+    double getCurrmax() const;
+    void   setVul(double);
+    void   setVbl(double);
+    void   setRmax(double);
+    void   setCurrmax(double);
+    
+
     
 
     void setBridge(std::shared_ptr<UIBridgeInterface> const &);

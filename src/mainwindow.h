@@ -18,6 +18,7 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+    Ui::MainWindow *ui();
     QSlider * VTopSlider();
     QSlider * VBotSlider();
     QSlider * VMidSlider();
@@ -43,6 +44,6 @@ public:
 
 
 private:
-    Ui::MainWindow *ui;
+    Ui::MainWindow *m_ui;
 };
 #endif // MAINWINDOW_H

@@ -25,15 +25,17 @@ void UIBridge::forceButton(QPushButton *button, bool val) const {
 void UIBridge::setWindow(MainWindow * mw) {
     w = mw;
 }
+double UIBridge::getScale() const {return scale;}
+void UIBridge::setScale(double x) {scale = x;}
 
 void UIBridge::setState(Vals vals, Vals::constype ct) {
-    forceSlider(w->VTopSlider(),  vals.vtop * 100.0);
-    forceSlider(w->VBotSlider(),  vals.vbot * 100.0);
-    forceSlider(w->VMidSlider(),  vals.vmid * 100.0);
-    forceSlider(w->R1Slider(),    vals.r1 * 100.0);
-    forceSlider(w->R2Slider(),    vals.r2 * 100.0);
-    forceSlider(w->CurrSlider(),  vals.curr * 100.0);
-    forceSlider(w->RatioSlider(), vals.ratio * 100.0);
+    forceSlider(w->VTopSlider(),  vals.vtop * scale);
+    forceSlider(w->VBotSlider(),  vals.vbot * scale);
+    forceSlider(w->VMidSlider(),  vals.vmid * scale);
+    forceSlider(w->R1Slider(),    vals.r1 * scale);
+    forceSlider(w->R2Slider(),    vals.r2 * scale);
+    forceSlider(w->CurrSlider(),  vals.curr * scale);
+    forceSlider(w->RatioSlider(), vals.ratio * scale);
 
     forceButton(w->VTopButton(), isin(vals.vtopd));
     forceButton(w->VBotButton(), isin(vals.vbotd));

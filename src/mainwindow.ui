@@ -46,10 +46,10 @@
          <item>
           <widget class="QSlider" name="VTopSlider">
            <property name="minimum">
-            <number>-2000</number>
+            <number>0</number>
            </property>
            <property name="maximum">
-            <number>2000</number>
+            <number>10</number>
            </property>
            <property name="orientation">
             <enum>Qt::Vertical</enum>
@@ -100,10 +100,10 @@
          <item>
           <widget class="QSlider" name="VBotSlider">
            <property name="minimum">
-            <number>-2000</number>
+            <number>0</number>
            </property>
            <property name="maximum">
-            <number>2000</number>
+            <number>10</number>
            </property>
            <property name="orientation">
             <enum>Qt::Vertical</enum>
@@ -148,10 +148,10 @@
          <item>
           <widget class="QSlider" name="VMidSlider">
            <property name="minimum">
-            <number>-2000</number>
+            <number>0</number>
            </property>
            <property name="maximum">
-            <number>2000</number>
+            <number>10</number>
            </property>
            <property name="orientation">
             <enum>Qt::Vertical</enum>
@@ -196,10 +196,10 @@
          <item>
           <widget class="QSlider" name="R1Slider">
            <property name="minimum">
-            <number>0</number>
+            <number>1</number>
            </property>
            <property name="maximum">
-            <number>10000</number>
+            <number>10</number>
            </property>
            <property name="orientation">
             <enum>Qt::Vertical</enum>
@@ -244,10 +244,10 @@
          <item>
           <widget class="QSlider" name="R2Slider">
            <property name="minimum">
-            <number>0</number>
+            <number>1</number>
            </property>
            <property name="maximum">
-            <number>10000</number>
+            <number>10</number>
            </property>
            <property name="orientation">
             <enum>Qt::Vertical</enum>
@@ -290,12 +290,12 @@
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout">
          <item>
-          <widget class="QSlider" name="CurrSlider">
+          <widget class="LogSlider" name="CurrSlider">
            <property name="minimum">
-            <number>0</number>
+            <number>1</number>
            </property>
            <property name="maximum">
-            <number>100</number>
+            <number>10</number>
            </property>
            <property name="pageStep">
             <number>5</number>
@@ -396,12 +396,19 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>20</height>
+     <height>21</height>
     </rect>
    </property>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>LogSlider</class>
+   <extends>QSlider</extends>
+   <header>src/logslider.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>
