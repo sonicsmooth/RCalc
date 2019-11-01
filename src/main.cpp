@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
     pcore->setVul(20);
     pcore->setVbl(0);
     pcore->setRmax(10000);
-    pcore->setCurrmax(3);
+    pcore->setCurrmax(10);
 
     // Update sliders based on core's limits
     w.VTopSlider()->setMaximum(int(scale * pcore->getVul()));

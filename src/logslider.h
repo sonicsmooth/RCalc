@@ -6,15 +6,18 @@
 class LogSlider : public QSlider
 {
     Q_OBJECT
-    Q_PROPERTY(double extValue READ getExtValue WRITE setExtValue NOTIFY extValueChanged)
+private:
+    double m_extValue;
+    Q_PROPERTY(double extValue  MEMBER m_extValue  READ getExtValue  WRITE setExtValue  NOTIFY extValueChanged)
+
 public:
     explicit LogSlider(QWidget *parent = nullptr);
     void sliderChange(QAbstractSlider::SliderChange);
     double getExtValue() const;
-    void setExtValue(double);
+    void setExtValue(double); // called from outside
 
 signals:
-    void extValueChanged();
+    void extValueChanged(double);
 public slots:
 };
 

@@ -290,7 +290,7 @@
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout">
          <item>
-          <widget class="LogSlider" name="CurrSlider">
+          <widget class="QSlider" name="CurrSlider">
            <property name="minimum">
             <number>1</number>
            </property>
@@ -402,13 +402,6 @@
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>LogSlider</class>
-   <extends>QSlider</extends>
-   <header>src/logslider.h</header>
-  </customwidget>
- </customwidgets>
  <resources/>
  <connections/>
 </ui>
