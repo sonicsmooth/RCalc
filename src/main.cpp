@@ -24,12 +24,12 @@ int main(int argc, char *argv[])
     MainWindow w;
 
     // Slider int is divided by scale to get double
-    double scale = 10.0;
+    double scale = 100.0;
 
     // Set core limits
     pcore->setVul(20);
     pcore->setVbl(0);
-    pcore->setRmax(1000000);
+    pcore->setRmax(10000);
     pcore->setCurrmax(3);
 
     // Update sliders based on core's limits
