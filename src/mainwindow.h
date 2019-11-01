@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QSlider>
 #include <QLabel>
+#include <QLineEdit>
 #include <QPlainTextEdit>
 #include <QPushButton>
 
@@ -33,6 +34,13 @@ public:
     QLabel * R2ValLabel();
     QLabel * RatioValLabel();
     QLabel * CurrValLabel();
+    QLineEdit * VTopValEdit();
+    QLineEdit * VBotValEdit();
+    QLineEdit * VMidValEdit();
+    QLineEdit * R1ValEdit();
+    QLineEdit * R2ValEdit();
+    QLineEdit * RatioValEdit();
+    QLineEdit * CurrValEdit();
     QPushButton * VTopButton();
     QPushButton * VBotButton();
     QPushButton * VMidButton();

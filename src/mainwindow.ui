@@ -73,6 +73,9 @@
         </widget>
        </item>
        <item>
+        <widget class="QLineEdit" name="VTopValEdit"/>
+       </item>
+       <item>
         <widget class="QPushButton" name="VTopButton">
          <property name="enabled">
           <bool>false</bool>
@@ -127,6 +130,9 @@
         </widget>
        </item>
        <item>
+        <widget class="QLineEdit" name="VBotValEdit"/>
+       </item>
+       <item>
         <widget class="QPushButton" name="VBotButton">
          <property name="enabled">
           <bool>false</bool>
@@ -173,6 +179,9 @@
           <string>TextLabel</string>
          </property>
         </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="VMidValEdit"/>
        </item>
        <item>
         <widget class="QPushButton" name="VMidButton">
@@ -223,6 +232,9 @@
         </widget>
        </item>
        <item>
+        <widget class="QLineEdit" name="R1ValEdit"/>
+       </item>
+       <item>
         <widget class="QPushButton" name="R1Button">
          <property name="enabled">
           <bool>false</bool>
@@ -269,6 +281,9 @@
           <string>TextLabel</string>
          </property>
         </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="R2ValEdit"/>
        </item>
        <item>
         <widget class="QPushButton" name="R2Button">
@@ -322,6 +337,9 @@
         </widget>
        </item>
        <item>
+        <widget class="QLineEdit" name="CurrValEdit"/>
+       </item>
+       <item>
         <widget class="QPushButton" name="CurrButton">
          <property name="enabled">
           <bool>false</bool>
@@ -369,6 +387,13 @@
         <widget class="QLabel" name="RatioValLabel">
          <property name="text">
           <string>TextLabel</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="RatioValEdit">
+         <property name="enabled">
+          <bool>false</bool>
          </property>
         </widget>
        </item>

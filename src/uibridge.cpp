@@ -52,6 +52,16 @@ void UIBridge::setState(Vals vals, Vals::constype ct) {
     w->RatioValLabel()->setText(QString::asprintf("%6.4f", vals.ratio));
     w->CurrValLabel()->setText(QString::asprintf("%6.4f", vals.curr));
 
+    w->VTopValEdit()->setText(QString::asprintf("%6.4f", vals.vtop));
+    w->VBotValEdit()->setText(QString::asprintf("%6.4f", vals.vbot));
+    w->VMidValEdit()->setText(QString::asprintf("%6.4f", vals.vmid));
+    w->R1ValEdit()->setText(QString::asprintf("%6.4f", vals.r1));
+    w->R2ValEdit()->setText(QString::asprintf("%6.4f", vals.r2));
+    w->RatioValEdit()->setText(QString::asprintf("%6.4f", vals.ratio));
+    w->CurrValEdit()->setText(QString::asprintf("%6.4f", vals.curr));
+
+
+
     // Sets text color
     QPalette palette;
     palette.setColor(QPalette::WindowText, QColor(ct==Vals::PROPER ? Qt::black : Qt::red));
@@ -63,8 +73,35 @@ void UIBridge::setState(Vals vals, Vals::constype ct) {
     w->RatioValLabel()->setPalette(palette);
     w->CurrValLabel()->setPalette(palette);
 
+    palette.setColor(QPalette::Base, QColor(vals.vtopd ? Qt::black : Qt::blue));
+    std::string inputstyle = "background:#f00;";
+    std::string outputstyle = "background:#00f;";
+    //w->VTopValEdit()->setPalette(palette);
+    w->VTopValEdit()->setStyleSheet(vals.vtopd ? inputstyle.c_str() : outputstyle.c_str());
+
+    palette.setColor(QPalette::Base, QColor(vals.vbotd ? Qt::black : Qt::blue));
+    palette.setColor(QPalette::Text, QColor(vals.vbotd ? Qt::yellow : Qt::red));
+    w->VBotValEdit()->setPalette(palette);
+
+    palette.setColor(QPalette::Base, QColor(vals.vmidd ? Qt::black : Qt::blue));
+    palette.setColor(QPalette::Text, QColor(vals.vbotd ? Qt::yellow : Qt::red));
+    w->VMidValEdit()->setPalette(palette);
+
+    palette.setColor(QPalette::Base, QColor(vals.r1d ? Qt::black : Qt::blue));
+    palette.setColor(QPalette::Text, QColor(vals.vbotd ? Qt::yellow : Qt::red));
+    w->R1ValEdit()->setPalette(palette);
+
+    palette.setColor(QPalette::Base, QColor(vals.r2d ? Qt::black : Qt::blue));
+    palette.setColor(QPalette::Text, QColor(vals.vbotd ? Qt::yellow : Qt::red));
+    w->R2ValEdit()->setPalette(palette);
+
+    palette.setColor(QPalette::Base, QColor(vals.currd ? Qt::black : Qt::blue));
+    palette.setColor(QPalette::Text, QColor(vals.vbotd ? Qt::yellow : Qt::red));
+    w->CurrValEdit()->setPalette(palette);
+
+
+
     std::string sstr(vals.str());
-    //std::cout << sstr;
     w->TextEdit()->appendPlainText(QString::fromStdString(sstr));
 
 }
