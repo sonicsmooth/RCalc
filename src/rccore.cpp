@@ -887,12 +887,12 @@ bool RCCore::_update(vartype vt) {
         outVals = calc_group(vt, inVals);
         // Setting inVals to outVals prevents things from jumping after recovering from a limit
         inVals = outVals;
-        if (ibridge) ibridge->setState(outVals, constraint(outVals));
+        if (ibridge) ibridge->setOutputStates(outVals, constraint(outVals));
         return true;
     } else {
         std::cout << "Improper input constraint -- won't calculate" << std::endl;
         outVals = inVals;
-        if (ibridge) ibridge->setState(outVals, constraint(outVals));
+        if (ibridge) ibridge->setOutputStates(outVals, constraint(outVals));
         return false;
     }
 }
@@ -912,50 +912,45 @@ std::string cstr(RCCore::vartype vt) {
     }
 }
 
-// Public
-// RCCore::RCCore() :
-//     inVals (Vals()),
-//     outVals (Vals())
-//     {}
 
-bool RCCore::setVTop(Vals::dir dir) {
-    removeFromList(VTOP);
-    if (dir == Vals::INPUT) pushToList(VTOP);
-    inVals = swapInputs(inVals);
-    return update();
-}
-bool RCCore::setVBot(Vals::dir dir) {
-    removeFromList(VBOT);
-    if (dir == Vals::INPUT) pushToList(VBOT);
-    inVals = swapInputs(inVals);
-    return update();
-}
-bool RCCore::setVMid(Vals::dir dir) {
-    removeFromList(VMID);
-    if (dir == Vals::INPUT) pushToList(VMID);
-    inVals = swapInputs(inVals);
-    return update();
-}
-bool RCCore::setR1(Vals::dir dir) {
-    removeFromList(R1);
-    if (dir == Vals::INPUT) pushToList(R1);
-    inVals = swapInputs(inVals);
-    return update();
-}
-bool RCCore::setR2(Vals::dir dir) {
-    removeFromList(R2);
-    if (dir == Vals::INPUT) pushToList(R2);
-    inVals = swapInputs(inVals);
-    return update();
-}
-bool RCCore::setCurr(Vals::dir dir) {
-    removeFromList(CURR);
-    if (dir == Vals::INPUT) pushToList(CURR);
-    inVals = swapInputs(inVals);
-    return update();
-}
+// bool RCCore::setVTop(Vals::dir dir) {
+//     removeFromList(VTOP);
+//     if (dir == Vals::INPUT) pushToList(VTOP);
+//     inVals = swapInputs(inVals);
+//     return update();
+// }
+// bool RCCore::setVBot(Vals::dir dir) {
+//     removeFromList(VBOT);
+//     if (dir == Vals::INPUT) pushToList(VBOT);
+//     inVals = swapInputs(inVals);
+//     return update();
+// }
+// bool RCCore::setVMid(Vals::dir dir) {
+//     removeFromList(VMID);
+//     if (dir == Vals::INPUT) pushToList(VMID);
+//     inVals = swapInputs(inVals);
+//     return update();
+// }
+// bool RCCore::setR1(Vals::dir dir) {
+//     removeFromList(R1);
+//     if (dir == Vals::INPUT) pushToList(R1);
+//     inVals = swapInputs(inVals);
+//     return update();
+// }
+// bool RCCore::setR2(Vals::dir dir) {
+//     removeFromList(R2);
+//     if (dir == Vals::INPUT) pushToList(R2);
+//     inVals = swapInputs(inVals);
+//     return update();
+// }
+// bool RCCore::setCurr(Vals::dir dir) {
+//     removeFromList(CURR);
+//     if (dir == Vals::INPUT) pushToList(CURR);
+//     inVals = swapInputs(inVals);
+//     return update();
+// }
 
-bool RCCore::update(vartype vt, double in) {
+bool RCCore::setInput(vartype vt, double in) {
     switch(vt) {
         case VTOP: inVals.vtop = in; break;
         case VBOT: inVals.vbot = in; break;
@@ -974,7 +969,7 @@ bool RCCore::update() {
     return _update(NONE);
 }
 
-void RCCore::setInput(Vals vals) {
+void RCCore::setInputs(Vals vals) {
     inVals = vals;
 }
 Vals RCCore::getInput() const {

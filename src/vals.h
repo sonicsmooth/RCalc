@@ -6,7 +6,7 @@
 class Vals {
     public:
         typedef enum {UNDEFINED, INPUT, OUTPUT} dir;
-        typedef enum {UNDER, OVER, PROPER, MIXED} constype;
+        typedef enum {UNDER, OVER, PROPER, MIXED} constype; // move to core
         double vtop, vbot, vmid, r1, r2, curr, ratio;
         dir vtopd, vbotd, vmidd, r1d, r2d, currd, ratiod;
         //constype _constraint;

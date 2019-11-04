@@ -29,16 +29,15 @@ private:
     bool _update(vartype);
 
 public:
-    //RCCore() = default;
-    bool setVTop(Vals::dir);
-    bool setVBot(Vals::dir);
-    bool setVMid(Vals::dir);
-    bool setR1(Vals::dir);
-    bool setR2(Vals::dir);
-    bool setCurr(Vals::dir);
-    bool update(vartype, double);
+    // bool setVTop(Vals::dir);
+    // bool setVBot(Vals::dir);
+    // bool setVMid(Vals::dir);
+    // bool setR1(Vals::dir);
+    // bool setR2(Vals::dir);
+    // bool setCurr(Vals::dir);
+    bool setInput(vartype, double);
     bool update();     
-    void setInput(Vals);
+    void setInputs(Vals);
     Vals getInput() const;
     Vals getOutput() const;
     double getVul() const;

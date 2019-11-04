@@ -43,30 +43,29 @@ int main(int argc, char *argv[])
     w.R2Slider()->setMaximum(int(scale * pcore->getRmax()));
     w.CurrSlider()->setMaximum(int(scale * pcore->getCurrmax()));
 
-    //w.CurrSlider()->setValue(2);
-    //w.VTopSlider()->setValue(2);
 
     // signals affect core directly using lambda; slid values become inputs, which goes to update, which sets the buttons
-    QObject::connect(w.VTopSlider(), &QSlider::valueChanged, [=](int x) {pcore->update(RCCore::VTOP, double(x)/scale);});
-    QObject::connect(w.VBotSlider(), &QSlider::valueChanged, [=](int x) {pcore->update(RCCore::VBOT, double(x)/scale);});
-    QObject::connect(w.VMidSlider(), &QSlider::valueChanged, [=](int x) {pcore->update(RCCore::VMID, double(x)/scale);});
-    QObject::connect(w.R1Slider(),   &QSlider::valueChanged, [=](int x) {pcore->update(RCCore::R1,   double(x)/scale);});
-    QObject::connect(w.R2Slider(),   &QSlider::valueChanged, [=](int x) {pcore->update(RCCore::R2,   double(x)/scale);});
-    QObject::connect(w.CurrSlider(), &QSlider::valueChanged, [=](int x) {pcore->update(RCCore::CURR, double(x)/scale);});
+    QObject::connect(w.VTopSlider(), &QSlider::valueChanged, [=](int x) {pbridge->setCoreValue(RCCore::VTOP, x);});
+    QObject::connect(w.VBotSlider(), &QSlider::valueChanged, [=](int x) {pbridge->setCoreValue(RCCore::VBOT, x);});
+    QObject::connect(w.VMidSlider(), &QSlider::valueChanged, [=](int x) {pbridge->setCoreValue(RCCore::VMID, x);});
+    QObject::connect(w.R1Slider(),   &QSlider::valueChanged, [=](int x) {pbridge->setCoreValue(RCCore::R1,   x);});
+    QObject::connect(w.R2Slider(),   &QSlider::valueChanged, [=](int x) {pbridge->setCoreValue(RCCore::R2,   x);});
+    QObject::connect(w.CurrSlider(), &QSlider::valueChanged, [=](int x) {pbridge->setCoreValue(RCCore::CURR, x);});
 
-    QObject::connect(w.VTopSlider(), &QSlider::sliderPressed, [=, &w]() {pcore->update(RCCore::VTOP, w.VTopSlider()->value()/scale);});
-    QObject::connect(w.VBotSlider(), &QSlider::sliderPressed, [=, &w]() {pcore->update(RCCore::VBOT, w.VBotSlider()->value()/scale);});
-    QObject::connect(w.VMidSlider(), &QSlider::sliderPressed, [=, &w]() {pcore->update(RCCore::VMID, w.VMidSlider()->value()/scale);});
-    QObject::connect(w.R1Slider(),   &QSlider::sliderPressed, [=, &w]() {pcore->update(RCCore::R1,   w.R1Slider()->value()/scale);});
-    QObject::connect(w.R2Slider(),   &QSlider::sliderPressed, [=, &w]() {pcore->update(RCCore::R2,   w.R2Slider()->value()/scale);});
-    QObject::connect(w.CurrSlider(), &QSlider::sliderPressed, [=, &w]() {pcore->update(RCCore::CURR, w.CurrSlider()->value()/scale);});
+    QObject::connect(w.VTopSlider(), &QSlider::sliderPressed, [=, &w]() {pbridge->setCoreValue(RCCore::VTOP, w.VTopSlider()->value());});
+    QObject::connect(w.VBotSlider(), &QSlider::sliderPressed, [=, &w]() {pbridge->setCoreValue(RCCore::VBOT, w.VBotSlider()->value());});
+    QObject::connect(w.VMidSlider(), &QSlider::sliderPressed, [=, &w]() {pbridge->setCoreValue(RCCore::VMID, w.VMidSlider()->value());});
+    QObject::connect(w.R1Slider(),   &QSlider::sliderPressed, [=, &w]() {pbridge->setCoreValue(RCCore::R1,   w.R1Slider()->value());});
+    QObject::connect(w.R2Slider(),   &QSlider::sliderPressed, [=, &w]() {pbridge->setCoreValue(RCCore::R2,   w.R2Slider()->value());});
+    QObject::connect(w.CurrSlider(), &QSlider::sliderPressed, [=, &w]() {pbridge->setCoreValue(RCCore::CURR, w.CurrSlider()->value());});
 
-    pcore->update(RCCore::VMID, 1.2);
-    pcore->update(RCCore::R1,   20.0);
-    pcore->update(RCCore::R2,   20.0);
-    pcore->update(RCCore::CURR, 0.1);
+    pbridge->setCoreValue(RCCore::VMID, 1.2);
+    pbridge->setCoreValue(RCCore::R1,   20.0);
+    pbridge->setCoreValue(RCCore::R2,   20.0);
+    pbridge->setCoreValue(RCCore::CURR, 0.1);
 
-    pbridge->setWindow(&w);
+    pbridge->setCore(pcore);
+    pbridge->setWindow(&w); // change to shared ptr
     pbridge->setScale(scale);
     pcore->setBridge(pbridge);
     pcore->update();
