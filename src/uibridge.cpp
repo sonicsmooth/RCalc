@@ -109,8 +109,13 @@ void UIBridge::setWindow(MainWindow * mw) {
 // void UIBridge::setScale(double x) {scale = x;}
 
 void UIBridge::setRange(RCCore::vartype vt, int x1, int x2, double y1, double y2) {
-    // slider must be set to range (x1, x2)
-    // this fn maps (x1,x2) to (y1,y2)
+    // Tells the bridge the expected range of the slider, and the desired output
+    // values; the mapping coefficients are calculated and stored in this function.
+    // Whether the mapping from input to output is linear or log is based
+    // on vt.  If voltage, then mapping is linear.  If current or resistance, then
+    // mapping is log.  Slider should also be set to range (x1, x2), or the output
+    // won't match.
+    
     // linearly if vt=voltage, log if resistor or current
     // for linear: m = (y2 - y1) / (x2 - x1)
     //             b = y1 - m * x1
@@ -119,9 +124,9 @@ void UIBridge::setRange(RCCore::vartype vt, int x1, int x2, double y1, double y2
     // for log: a = y1
     //          x0 = x1
     //          r = log10(y2/y1) / (x2 - x1)
-    //          then y = a*10^((x-x0)*r) when x <= 0, else 0
+    //          then y = a*10^((x-x0)*r) when x < x0, else 0
     //               x = log10(y/a)/r + x0
-    // just calculate all 4, then apply as needed
+    // just calculate all 5, then apply as needed
     double m = (y2 - y1) / (x2 - x1);
     double b = y1 - m * x1;
     double a = y1;
@@ -155,28 +160,17 @@ void UIBridge::setRange(RCCore::vartype vt, int x1, int x2, double y1, double y2
             currexp.x0 = x0;
             currexp.r = r;
             break;
+        default:
+            throw std::logic_error("bad switch in UIBridge::setRange");
+            
     }
 }
-double UIBridge::sliderToLinval(RCCore::vartype vt, int x) {
+double UIBridge::sliderToDouble(RCCore::vartype vt, int x) {
     // Return linear values mapped values for voltages
     switch (vt) {
         case RCCore::VTOP: return vtopmxb.m * x + vtopmxb.b;
         case RCCore::VBOT: return vbotmxb.m * x + vbotmxb.b;
         case RCCore::VMID: return vmidmxb.m * x + vmidmxb.b;
-    }
-}
-int UIBridge::linvalToSlider(RCCore::vartype vt, double y) {
-    // Return linear value back to slider.
-    // TODO: ensure stuff gets calculated again with new integer
-    switch (vt) {
-        case RCCore::VTOP: return int(round((y - vtopmxb.b) / vtopmxb.m));
-        case RCCore::VBOT: return int(round((y - vbotmxb.b) / vbotmxb.m));
-        case RCCore::VMID: return int(round((y - vmidmxb.b) / vmidmxb.m));
-    }
-}
-double UIBridge::sliderToLogval(RCCore::vartype vt, int x) {
-    // Return exponential value for resistors and current
-    switch (vt) {
         case RCCore::R1: 
             if (x < r1exp.x0) return 0.0;
             return r1exp.a * pow(10.0, (x - r1exp.x0) * r1exp.r);
@@ -186,11 +180,18 @@ double UIBridge::sliderToLogval(RCCore::vartype vt, int x) {
         case RCCore::CURR: 
             if (x < currexp.x0) return 0.0;
             return currexp.a * pow(10.0, (x - currexp.x0) * currexp.r);
+        default:
+            throw std::logic_error("bad switch in UIBridge::sliderToDouble");    default:
+
     }
 }
-int UIBridge::logvalToSlider(RCCore::vartype vt, double y) {
-    // Return best integer value give double (reverse map)
-    switch(vt) {
+int UIBridge::doubleToSlider(RCCore::vartype vt, double y) {
+    // Return linear value back to slider.
+    // TODO: ensure stuff gets calculated again with new integer
+    switch (vt) {
+        case RCCore::VTOP: return int(round((y - vtopmxb.b) / vtopmxb.m));
+        case RCCore::VBOT: return int(round((y - vbotmxb.b) / vbotmxb.m));
+        case RCCore::VMID: return int(round((y - vmidmxb.b) / vmidmxb.m));
         case RCCore::R1: {
             int ret = log10(y / r1exp.a) / r1exp.r + r1exp.x0;
             if (ret < r1exp.x0) return 0;
@@ -205,20 +206,22 @@ int UIBridge::logvalToSlider(RCCore::vartype vt, double y) {
             int ret = log10(y / currexp.a) / currexp.r + currexp.x0;
             if (ret < currexp.x0) return 0;
             return ret;
-        }
+        default:
+            throw std::logic_error("bad switch in UIBridge::linvalToSlider");
     }
 }
 
 void UIBridge::setCoreValue(RCCore::vartype vt, int sliderVal) {
     // log expands based on parameters, then sets core value
+    pcore->setInput(vt, )
 }
 
-void UIBridge::setCoreValue(RCCore::vartype vt, double sliderVal) {
+void UIBridge::setCoreValue(RCCore::vartype vt, double directVal) {
     // sets core value directly
-    //pcore->
+    pcore->setInput(vt, directVal);
 }
 
-void UIBridge::setCoreValue(RCCore::vartype vt, std::string sliderVal) {
+void UIBridge::setCoreValue(RCCore::vartype vt, std::string stringVal) {
     // Converts from string to double, then sets core value
 }
 

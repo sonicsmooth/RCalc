@@ -25,11 +25,8 @@ private:
     //double scale;
     void forceSlider(QSlider *, int) const;
     void forceButton(QPushButton *, bool) const;
-    double sliderToLinval(RCCore::vartype, int);
-    int linvalToSlider(RCCore::vartype, double);
-    double sliderToLogval(RCCore::vartype, int);
-    int logvalToSlider(RCCore::vartype, double);
-
+    double sliderToDouble(RCCore::vartype, int);
+    int doubleToSlider(RCCore::vartype, double);
 
 public:
     UIBridge();
