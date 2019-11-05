@@ -38,10 +38,10 @@ public:
     double getVbl() const;
     double getRmax() const;
     double getCurrmax() const;
-    void   setVul(double);
-    void   setVbl(double);
-    void   setRmax(double);
-    void   setCurrmax(double);
+    void setVul(double);
+    void setVbl(double);
+    void setRmax(double);
+    void setCurrmax(double);
     void setBridge(std::shared_ptr<UIBridgeInterface> const &);
 };
 

@@ -18,13 +18,13 @@
 int main(int argc, char *argv[])
 {
     QApplication::setStyle("Fusion"); // Windows, windowsvista
-    QApplication a(argc, argv);
+    QApplication app(argc, argv);
     std::shared_ptr<RCCore> pcore = std::make_shared<RCCore>();
     std::shared_ptr<UIBridge> pbridge = std::make_shared<UIBridge>();
     MainWindow w;
 
     // Each slider has this many steps
-    int steps = 100;
+    int steps = 1000;
     w.VTopSlider()->setMinimum(0);
     w.VBotSlider()->setMinimum(0);
     w.VMidSlider()->setMinimum(0);
@@ -41,8 +41,8 @@ int main(int argc, char *argv[])
     // Set core limits
     pcore->setVul(20.0);
     pcore->setVbl(-5.0);
-    pcore->setRmax(10000.0);
-    pcore->setCurrmax(10.0);
+    pcore->setRmax(1e6);
+    pcore->setCurrmax(3.0);
 
     // Update bridge ranges
     pbridge->setRange(RCCore::VTOP, 0, steps, pcore->getVbl(), pcore->getVul());
@@ -68,17 +68,66 @@ int main(int argc, char *argv[])
     QObject::connect(w.CurrSlider(), &QSlider::sliderPressed, [=, &w]() {pbridge->setCoreValue(RCCore::CURR, w.CurrSlider()->value());});
 \
     pbridge->setCore(pcore);
-    pbridge->setCoreValue(RCCore::VMID, 1.2);
-    pbridge->setCoreValue(RCCore::R1,   20.0);
-    pbridge->setCoreValue(RCCore::R2,   20.0);
+    pbridge->setCoreValue(RCCore::VTOP, 20.0);
+    pbridge->setCoreValue(RCCore::VBOT, -5.0);
+    pbridge->setCoreValue(RCCore::R1,   230.0);
     pbridge->setCoreValue(RCCore::CURR, 0.1);
 
     pbridge->setWindow(&w); // change to shared ptr
     pcore->setBridge(pbridge);
     pcore->update();
 
+    int a,c;
+    double b;
+    
+    a = 0;
+    b = pbridge->sliderToDouble(RCCore::VTOP, a);
+    c = pbridge->doubleToSlider(RCCore::VTOP, b);
+    std::cout << a << " -> " << b << " -> " << c << std::endl;
+
+    a = 50;
+    b = pbridge->sliderToDouble(RCCore::VTOP, a);
+    c = pbridge->doubleToSlider(RCCore::VTOP, b);
+    std::cout << a << " -> " << b << " -> " << c << std::endl;
+\
+    a = 100;
+    b = pbridge->sliderToDouble(RCCore::VTOP, a);
+    c = pbridge->doubleToSlider(RCCore::VTOP, b);
+    std::cout << a << " -> " << b << " -> " << c << std::endl;
+
+//////
+
+    a = 0;
+    b = pbridge->sliderToDouble(RCCore::R1, a);
+    c = pbridge->doubleToSlider(RCCore::R1, b);
+    std::cout << a << " -> " << b << " -> " << c << std::endl;
+
+    a = 4;
+    b = pbridge->sliderToDouble(RCCore::R1, a);
+    c = pbridge->doubleToSlider(RCCore::R1, b);
+    std::cout << a << " -> " << b << " -> " << c << std::endl;
+\
+    a = 5;
+    b = pbridge->sliderToDouble(RCCore::R1, a);
+    c = pbridge->doubleToSlider(RCCore::R1, b);
+    std::cout << a << " -> " << b << " -> " << c << std::endl;
+\
+    a = 50;
+    b = pbridge->sliderToDouble(RCCore::R1, a);
+    c = pbridge->doubleToSlider(RCCore::R1, b);
+    std::cout << a << " -> " << b << " -> " << c << std::endl;
+\
+    a = 100;
+    b = pbridge->sliderToDouble(RCCore::R1, a);
+    c = pbridge->doubleToSlider(RCCore::R1, b);
+    std::cout << a << " -> " << b << " -> " << c << std::endl;
+
+
+
+
+
     w.show();
-    return a.exec();
+    return app.exec();
 }
 
 

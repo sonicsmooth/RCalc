@@ -131,7 +131,7 @@ void UIBridge::setRange(RCCore::vartype vt, int x1, int x2, double y1, double y2
     double b = y1 - m * x1;
     double a = y1;
     double x0 = x1;
-    double r = log10(y2 / y1) / (x1 - x2 -1);
+    double r = log10(y2 / y1) / (x2 - x1);
     switch(vt) {
         case RCCore::VTOP:
             vtopmxb.m = m;

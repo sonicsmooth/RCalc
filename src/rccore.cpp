@@ -949,13 +949,3 @@ void   RCCore::setVul(double x) {vul = x;};
 void   RCCore::setVbl(double x) {vbl = x; };
 void   RCCore::setRmax(double x) {rmax = x;};
 void   RCCore::setCurrmax(double x) {currmax = x; };
-
-
-
-
-
-
-
-
-
-

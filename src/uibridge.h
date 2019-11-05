@@ -19,16 +19,15 @@ private:
     struct {double m, b;} vtopmxb, vbotmxb, vmidmxb;
     // y = a * 10^((x-x0)*r) where x is slider, y is output
     struct {double a, x0, r;} r1exp, r2exp, currexp;
-
     MainWindow *w;
     std::shared_ptr<RCCore> pcore;
-    //double scale;
+
     void forceSlider(QSlider *, int) const;
     void forceButton(QPushButton *, bool) const;
-    double sliderToDouble(RCCore::vartype, int);
-    int doubleToSlider(RCCore::vartype, double);
 
 public:
+    double sliderToDouble(RCCore::vartype, int);
+    int doubleToSlider(RCCore::vartype, double);
     //UIBridge();
     void setCore(std::shared_ptr<RCCore>) override;
     void setOutputStates(Vals, Vals::constype) override;
@@ -39,7 +38,6 @@ public:
     void setCoreValue(RCCore::vartype, int);
     void setCoreValue(RCCore::vartype, double);
     void setCoreValue(RCCore::vartype, std::string);
-    void setCoreRange(RCCore::vartype, double, double);
     void setCoreDir(RCCore::vartype, Vals::dir);
 
 
