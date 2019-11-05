@@ -29,7 +29,7 @@ private:
     int doubleToSlider(RCCore::vartype, double);
 
 public:
-    UIBridge();
+    //UIBridge();
     void setCore(std::shared_ptr<RCCore>) override;
     void setOutputStates(Vals, Vals::constype) override;
     void setWindow(MainWindow *w);

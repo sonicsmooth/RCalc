@@ -15,13 +15,13 @@ void UIBridge::setCore(std::shared_ptr<RCCore> pc) {
 }
 
 void UIBridge::setOutputStates(Vals vals, Vals::constype ct) {
-    forceSlider(w->VTopSlider(),  int(vals.vtop * scale));
-    forceSlider(w->VBotSlider(),  int(vals.vbot * scale));
-    forceSlider(w->VMidSlider(),  int(vals.vmid * scale));
-    forceSlider(w->R1Slider(),    int(vals.r1 * scale));
-    forceSlider(w->R2Slider(),    int(vals.r2 * scale));
-    forceSlider(w->CurrSlider(),  int(vals.curr * scale));
-    forceSlider(w->RatioSlider(), int(vals.ratio * scale));
+    forceSlider(w->VTopSlider(),  doubleToSlider(RCCore::VTOP, vals.vtop));
+    forceSlider(w->VBotSlider(),  doubleToSlider(RCCore::VBOT, vals.vbot));
+    forceSlider(w->VMidSlider(),  doubleToSlider(RCCore::VMID, vals.vmid));
+    forceSlider(w->R1Slider(),    doubleToSlider(RCCore::R1,   vals.r1));
+    forceSlider(w->R2Slider(),    doubleToSlider(RCCore::R2,   vals.r2));
+    forceSlider(w->CurrSlider(),  doubleToSlider(RCCore::CURR, vals.curr));
+    //forceSlider(w->RatioSlider(), doubleToSlider(RCCore::, vals.vtop));
 
     forceButton(w->VTopButton(), isin(vals.vtopd));
     forceButton(w->VBotButton(), isin(vals.vbotd));
@@ -117,7 +117,7 @@ void UIBridge::setRange(RCCore::vartype vt, int x1, int x2, double y1, double y2
     // won't match.
     
     // linearly if vt=voltage, log if resistor or current
-    // for linear: m = (y2 - y1) / (x2 - x1)
+    // for linear: m = (y2 - y1) / (x2 - x1)5
     //             b = y1 - m * x1
     //             then y = mx+b
     //                  x = (y - b) / m
@@ -172,17 +172,13 @@ double UIBridge::sliderToDouble(RCCore::vartype vt, int x) {
         case RCCore::VBOT: return vbotmxb.m * x + vbotmxb.b;
         case RCCore::VMID: return vmidmxb.m * x + vmidmxb.b;
         case RCCore::R1: 
-            if (x < r1exp.x0) return 0.0;
-            return r1exp.a * pow(10.0, (x - r1exp.x0) * r1exp.r);
+            return (x < r1exp.x0) ? 0.0 : r1exp.a * pow(10.0, (x - r1exp.x0) * r1exp.r); 
         case RCCore::R2: 
-            if (x < r2exp.x0) return 0.0;
-            return r2exp.a * pow(10.0, (x - r2exp.x0) * r2exp.r);
+            return (x < r2exp.x0) ? 0.0 : r2exp.a * pow(10.0, (x - r2exp.x0) * r2exp.r);
         case RCCore::CURR: 
-            if (x < currexp.x0) return 0.0;
-            return currexp.a * pow(10.0, (x - currexp.x0) * currexp.r);
+            return (x < currexp.x0) ? 0.0 : currexp.a * pow(10.0, (x - currexp.x0) * currexp.r);
         default:
-            throw std::logic_error("bad switch in UIBridge::sliderToDouble");    default:
-
+            throw std::logic_error("bad switch in UIBridge::sliderToDouble");
     }
 }
 int UIBridge::doubleToSlider(RCCore::vartype vt, double y) {
@@ -193,19 +189,20 @@ int UIBridge::doubleToSlider(RCCore::vartype vt, double y) {
         case RCCore::VBOT: return int(round((y - vbotmxb.b) / vbotmxb.m));
         case RCCore::VMID: return int(round((y - vmidmxb.b) / vmidmxb.m));
         case RCCore::R1: {
-            int ret = log10(y / r1exp.a) / r1exp.r + r1exp.x0;
+            int ret = int(round(log10(y / r1exp.a) / r1exp.r + r1exp.x0));
             if (ret < r1exp.x0) return 0;
             return ret;
         }
         case RCCore::R2: {
-            int ret = log10(y / r2exp.a) / r2exp.r + r2exp.x0;
+            int ret = int(round(log10(y / r2exp.a) / r2exp.r + r2exp.x0));
             if (ret < r2exp.x0) return 0;
             return ret;
         }
         case RCCore::CURR: {
-            int ret = log10(y / currexp.a) / currexp.r + currexp.x0;
+            int ret = int(round(log10(y / currexp.a) / currexp.r + currexp.x0));
             if (ret < currexp.x0) return 0;
             return ret;
+    }
         default:
             throw std::logic_error("bad switch in UIBridge::linvalToSlider");
     }
@@ -213,7 +210,7 @@ int UIBridge::doubleToSlider(RCCore::vartype vt, double y) {
 
 void UIBridge::setCoreValue(RCCore::vartype vt, int sliderVal) {
     // log expands based on parameters, then sets core value
-    pcore->setInput(vt, )
+    pcore->setInput(vt, sliderToDouble(vt, sliderVal));
 }
 
 void UIBridge::setCoreValue(RCCore::vartype vt, double directVal) {

@@ -23,27 +23,35 @@ int main(int argc, char *argv[])
     std::shared_ptr<UIBridge> pbridge = std::make_shared<UIBridge>();
     MainWindow w;
 
-    // Slider int is divided by scale to get double
-    double scale = 100.0;
+    // Each slider has this many steps
+    int steps = 100;
+    w.VTopSlider()->setMinimum(0);
+    w.VBotSlider()->setMinimum(0);
+    w.VMidSlider()->setMinimum(0);
+    w.R1Slider()->setMinimum(0);
+    w.R1Slider()->setMinimum(0);
+    w.CurrSlider()->setMinimum(0);
+    w.VTopSlider()->setMaximum(steps);
+    w.VBotSlider()->setMaximum(steps);
+    w.VMidSlider()->setMaximum(steps);
+    w.R2Slider()->setMaximum(steps);
+    w.R1Slider()->setMaximum(steps);
+    w.CurrSlider()->setMaximum(steps);
 
     // Set core limits
-    pcore->setVul(20);
-    pcore->setVbl(0);
-    pcore->setRmax(10000);
-    pcore->setCurrmax(10);
+    pcore->setVul(20.0);
+    pcore->setVbl(-5.0);
+    pcore->setRmax(10000.0);
+    pcore->setCurrmax(10.0);
 
-    // Update sliders based on core's limits
-    w.VTopSlider()->setMaximum(int(scale * pcore->getVul()));
-    w.VTopSlider()->setMinimum(int(scale * pcore->getVbl()));
-    w.VBotSlider()->setMaximum(int(scale * pcore->getVul()));
-    w.VBotSlider()->setMinimum(int(scale * pcore->getVbl()));
-    w.VMidSlider()->setMaximum(int(scale * pcore->getVul()));
-    w.VMidSlider()->setMinimum(int(scale * pcore->getVbl()));
-    w.R1Slider()->setMaximum(int(scale * pcore->getRmax()));
-    w.R2Slider()->setMaximum(int(scale * pcore->getRmax()));
-    w.CurrSlider()->setMaximum(int(scale * pcore->getCurrmax()));
-
-
+    // Update bridge ranges
+    pbridge->setRange(RCCore::VTOP, 0, steps, pcore->getVbl(), pcore->getVul());
+    pbridge->setRange(RCCore::VBOT, 0, steps, pcore->getVbl(), pcore->getVul());
+    pbridge->setRange(RCCore::VMID, 0, steps, pcore->getVbl(), pcore->getVul());
+    pbridge->setRange(RCCore::R1, 5, steps, 1e-3, pcore->getRmax());
+    pbridge->setRange(RCCore::R2, 5, steps, 1e-3, pcore->getRmax());
+    pbridge->setRange(RCCore::CURR, 5, steps, 1e-6, pcore->getCurrmax());
+ 
     // signals affect core directly using lambda; slid values become inputs, which goes to update, which sets the buttons
     QObject::connect(w.VTopSlider(), &QSlider::valueChanged, [=](int x) {pbridge->setCoreValue(RCCore::VTOP, x);});
     QObject::connect(w.VBotSlider(), &QSlider::valueChanged, [=](int x) {pbridge->setCoreValue(RCCore::VBOT, x);});
@@ -58,15 +66,14 @@ int main(int argc, char *argv[])
     QObject::connect(w.R1Slider(),   &QSlider::sliderPressed, [=, &w]() {pbridge->setCoreValue(RCCore::R1,   w.R1Slider()->value());});
     QObject::connect(w.R2Slider(),   &QSlider::sliderPressed, [=, &w]() {pbridge->setCoreValue(RCCore::R2,   w.R2Slider()->value());});
     QObject::connect(w.CurrSlider(), &QSlider::sliderPressed, [=, &w]() {pbridge->setCoreValue(RCCore::CURR, w.CurrSlider()->value());});
-
+\
+    pbridge->setCore(pcore);
     pbridge->setCoreValue(RCCore::VMID, 1.2);
     pbridge->setCoreValue(RCCore::R1,   20.0);
     pbridge->setCoreValue(RCCore::R2,   20.0);
     pbridge->setCoreValue(RCCore::CURR, 0.1);
 
-    pbridge->setCore(pcore);
     pbridge->setWindow(&w); // change to shared ptr
-    pbridge->setScale(scale);
     pcore->setBridge(pbridge);
     pcore->update();
 
