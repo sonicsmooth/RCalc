@@ -912,44 +912,6 @@ std::string cstr(RCCore::vartype vt) {
     }
 }
 
-
-// bool RCCore::setVTop(Vals::dir dir) {
-//     removeFromList(VTOP);
-//     if (dir == Vals::INPUT) pushToList(VTOP);
-//     inVals = swapInputs(inVals);
-//     return update();
-// }
-// bool RCCore::setVBot(Vals::dir dir) {
-//     removeFromList(VBOT);
-//     if (dir == Vals::INPUT) pushToList(VBOT);
-//     inVals = swapInputs(inVals);
-//     return update();
-// }
-// bool RCCore::setVMid(Vals::dir dir) {
-//     removeFromList(VMID);
-//     if (dir == Vals::INPUT) pushToList(VMID);
-//     inVals = swapInputs(inVals);
-//     return update();
-// }
-// bool RCCore::setR1(Vals::dir dir) {
-//     removeFromList(R1);
-//     if (dir == Vals::INPUT) pushToList(R1);
-//     inVals = swapInputs(inVals);
-//     return update();
-// }
-// bool RCCore::setR2(Vals::dir dir) {
-//     removeFromList(R2);
-//     if (dir == Vals::INPUT) pushToList(R2);
-//     inVals = swapInputs(inVals);
-//     return update();
-// }
-// bool RCCore::setCurr(Vals::dir dir) {
-//     removeFromList(CURR);
-//     if (dir == Vals::INPUT) pushToList(CURR);
-//     inVals = swapInputs(inVals);
-//     return update();
-// }
-
 bool RCCore::setInput(vartype vt, double in) {
     switch(vt) {
         case VTOP: inVals.vtop = in; break;

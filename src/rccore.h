@@ -29,12 +29,6 @@ private:
     bool _update(vartype);
 
 public:
-    // bool setVTop(Vals::dir);
-    // bool setVBot(Vals::dir);
-    // bool setVMid(Vals::dir);
-    // bool setR1(Vals::dir);
-    // bool setR2(Vals::dir);
-    // bool setCurr(Vals::dir);
     bool setInput(vartype, double);
     bool update();     
     void setInputs(Vals);
@@ -48,10 +42,6 @@ public:
     void   setVbl(double);
     void   setRmax(double);
     void   setCurrmax(double);
-    
-
-    
-
     void setBridge(std::shared_ptr<UIBridgeInterface> const &);
 };
 
