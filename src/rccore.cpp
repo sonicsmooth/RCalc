@@ -9,10 +9,6 @@
 #include "rccore.h"
 #include "vals.h"
 
-// const double vul = 20;
-// const double vbl = -5;
-// const double rmax = 500000;
-// const double currmax = 2.5;
 
 
 #define throw_line(msg) \
@@ -570,7 +566,7 @@ Vals RCCore::calc_group(vartype vt, Vals invals) const {
             auto compute = [&out]() {
                 out.vmid = out.vtop - out.curr * out.r1;
                 // out.vtop = out.vmid + out.curr * out.r1
-                // out.r1 = (out.vtop - out.vvmid) / out.curr
+                // out.r1 = (out.vtop - out.vmid) / out.curr
                 // out.curr = (out.vtop - out.vmid) / out.r1
                 out.r2 = (out.vtop - out.vbot) / out.curr - out.r1;
                 // out.vtop = out.curr * (out.r1 + out.r2)  + out.vbot;
@@ -593,7 +589,7 @@ Vals RCCore::calc_group(vartype vt, Vals invals) const {
                     if      (vt == RCCore::VTOP)
                 		out.vtop = vbl + out.curr * out.r1;
                     else if (vt == RCCore::R1)
-                		out.r1 = (out.vtop - out.vmid) / out.curr;
+                        out.r1 = (out.vtop - vbl) / out.curr;
                     else if (vt == RCCore::CURR)
                 		out.curr = (out.vtop - vbl) / out.r1;
                     else break;}

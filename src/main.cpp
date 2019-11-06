@@ -11,7 +11,6 @@
 #include "rccore.h"
 #include "uibridge.h"
 #include "mainwindow.h"
-//#include "ui_mainwindow.h"
 
 
 
@@ -66,7 +65,8 @@ int main(int argc, char *argv[])
     QObject::connect(w.R1Slider(),   &QSlider::sliderPressed, [=, &w]() {pbridge->setCoreValue(RCCore::R1,   w.R1Slider()->value());});
     QObject::connect(w.R2Slider(),   &QSlider::sliderPressed, [=, &w]() {pbridge->setCoreValue(RCCore::R2,   w.R2Slider()->value());});
     QObject::connect(w.CurrSlider(), &QSlider::sliderPressed, [=, &w]() {pbridge->setCoreValue(RCCore::CURR, w.CurrSlider()->value());});
-\
+
+    // crashes when R1 gets to about 250
     pbridge->setCore(pcore);
     pbridge->setCoreValue(RCCore::VTOP, 20.0);
     pbridge->setCoreValue(RCCore::VBOT, -5.0);

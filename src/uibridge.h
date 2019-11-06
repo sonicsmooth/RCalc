@@ -26,14 +26,12 @@ private:
     void forceButton(QPushButton *, bool) const;
 
 public:
+    //UIBridge();
     double sliderToDouble(RCCore::vartype, int);
     int doubleToSlider(RCCore::vartype, double);
-    //UIBridge();
     void setCore(std::shared_ptr<RCCore>) override;
     void setOutputStates(Vals, Vals::constype) override;
     void setWindow(MainWindow *w);
-    //double getScale() const;
-    //void setScale(double);
     void setRange(RCCore::vartype, int, int, double, double);
     void setCoreValue(RCCore::vartype, int);
     void setCoreValue(RCCore::vartype, double);
