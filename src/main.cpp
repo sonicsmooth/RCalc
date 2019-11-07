@@ -9,6 +9,7 @@
 
 #include "vals.h"
 #include "rccore.h"
+#include "engstr.h"
 #include "uibridge.h"
 #include "mainwindow.h"
 
@@ -89,13 +90,13 @@ int main(int argc, char *argv[])
     b = pbridge->sliderToDouble(RCCore::VTOP, a);
     c = pbridge->doubleToSlider(RCCore::VTOP, b);
     std::cout << a << " -> " << b << " -> " << c << std::endl;
-\
+
     a = 100;
     b = pbridge->sliderToDouble(RCCore::VTOP, a);
     c = pbridge->doubleToSlider(RCCore::VTOP, b);
     std::cout << a << " -> " << b << " -> " << c << std::endl;
 
-//////
+////////
 
     a = 0;
     b = pbridge->sliderToDouble(RCCore::R1, a);
@@ -106,23 +107,47 @@ int main(int argc, char *argv[])
     b = pbridge->sliderToDouble(RCCore::R1, a);
     c = pbridge->doubleToSlider(RCCore::R1, b);
     std::cout << a << " -> " << b << " -> " << c << std::endl;
-\
+
     a = 5;
     b = pbridge->sliderToDouble(RCCore::R1, a);
     c = pbridge->doubleToSlider(RCCore::R1, b);
     std::cout << a << " -> " << b << " -> " << c << std::endl;
-\
+
     a = 50;
     b = pbridge->sliderToDouble(RCCore::R1, a);
     c = pbridge->doubleToSlider(RCCore::R1, b);
     std::cout << a << " -> " << b << " -> " << c << std::endl;
-\
+
     a = 100;
     b = pbridge->sliderToDouble(RCCore::R1, a);
     c = pbridge->doubleToSlider(RCCore::R1, b);
     std::cout << a << " -> " << b << " -> " << c << std::endl;
 
-
+    std::cout << EngStr::doubleToStr(1e-12, 4) << std::endl;
+    std::cout << EngStr::doubleToStr(1e-11, 4) << std::endl;
+    std::cout << EngStr::doubleToStr(1e-10, 4) << std::endl;
+    std::cout << EngStr::doubleToStr(1e-9, 4) << std::endl;
+    std::cout << EngStr::doubleToStr(1e-8, 4) << std::endl;
+    std::cout << EngStr::doubleToStr(1e-7, 4) << std::endl;
+    std::cout << EngStr::doubleToStr(1e-6, 4) << std::endl;
+    std::cout << EngStr::doubleToStr(1e-5, 4) << std::endl;
+    std::cout << EngStr::doubleToStr(1e-4, 4) << std::endl;
+    std::cout << EngStr::doubleToStr(1e-3, 4) << std::endl;
+    std::cout << EngStr::doubleToStr(1e-2, 4) << std::endl;
+    std::cout << EngStr::doubleToStr(1e-1, 4) << std::endl;
+    std::cout << EngStr::doubleToStr(1.0, 4) << std::endl;
+    std::cout << EngStr::doubleToStr(1e1, 4) << std::endl;
+    std::cout << EngStr::doubleToStr(1e2, 4) << std::endl;
+    std::cout << EngStr::doubleToStr(1e3, 4) << std::endl;
+    std::cout << EngStr::doubleToStr(1e4, 4) << std::endl;
+    std::cout << EngStr::doubleToStr(1e5, 4) << std::endl;
+    std::cout << EngStr::doubleToStr(1e6, 4) << std::endl;
+    std::cout << EngStr::doubleToStr(1e7, 4) << std::endl;
+    std::cout << EngStr::doubleToStr(1e8, 4) << std::endl;
+    std::cout << EngStr::doubleToStr(1e9, 4) << std::endl;
+    std::cout << EngStr::doubleToStr(1e10, 4) << std::endl;
+    std::cout << EngStr::doubleToStr(1e11, 4) << std::endl;
+    std::cout << EngStr::doubleToStr(1e12, 4) << std::endl;
 
 
 

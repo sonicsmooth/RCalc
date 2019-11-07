@@ -16,6 +16,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    src/engstr.cpp \
     src/main.cpp \
     src/mainwindow.cpp \
     src/rccore.cpp \
@@ -24,10 +25,12 @@ SOURCES += \
     src/vals.cpp
 
 HEADERS += \
+    src/engstr.h \
     src/mainwindow.h \
     src/rccore.h \
     src/uibridge.h \
-    src/uibridgeinterface.h
+    src/uibridgeinterface.h \
+    src/vals.h
 
 FORMS += \
     src/mainwindow.ui

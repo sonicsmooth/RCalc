@@ -47,8 +47,7 @@ void UIBridge::setOutputStates(Vals vals, Vals::constype ct) {
     w->CurrValEdit()->setText(QString::asprintf("%6.4f", vals.curr));
 
 
-
-    // Sets text color
+    // Sets label color red if constraints are in error
     QPalette palette;
     palette.setColor(QPalette::WindowText, QColor(ct==Vals::PROPER ? Qt::black : Qt::red));
     w->VTopValLabel()->setPalette(palette);
@@ -59,31 +58,17 @@ void UIBridge::setOutputStates(Vals vals, Vals::constype ct) {
     w->RatioValLabel()->setPalette(palette);
     w->CurrValLabel()->setPalette(palette);
 
-    palette.setColor(QPalette::Base, QColor(vals.vtopd ? Qt::black : Qt::blue));
-    std::string inputstyle = "background:#f00;";
-    std::string outputstyle = "background:#00f;";
-    //w->VTopValEdit()->setPalette(palette);
-    w->VTopValEdit()->setStyleSheet(vals.vtopd ? inputstyle.c_str() : outputstyle.c_str());
-
-    palette.setColor(QPalette::Base, QColor(vals.vbotd ? Qt::black : Qt::blue));
-    palette.setColor(QPalette::Text, QColor(vals.vbotd ? Qt::yellow : Qt::red));
-    w->VBotValEdit()->setPalette(palette);
-
-    palette.setColor(QPalette::Base, QColor(vals.vmidd ? Qt::black : Qt::blue));
-    palette.setColor(QPalette::Text, QColor(vals.vbotd ? Qt::yellow : Qt::red));
-    w->VMidValEdit()->setPalette(palette);
-
-    palette.setColor(QPalette::Base, QColor(vals.r1d ? Qt::black : Qt::blue));
-    palette.setColor(QPalette::Text, QColor(vals.vbotd ? Qt::yellow : Qt::red));
-    w->R1ValEdit()->setPalette(palette);
-
-    palette.setColor(QPalette::Base, QColor(vals.r2d ? Qt::black : Qt::blue));
-    palette.setColor(QPalette::Text, QColor(vals.vbotd ? Qt::yellow : Qt::red));
-    w->R2ValEdit()->setPalette(palette);
-
-    palette.setColor(QPalette::Base, QColor(vals.currd ? Qt::black : Qt::blue));
-    palette.setColor(QPalette::Text, QColor(vals.vbotd ? Qt::yellow : Qt::red));
-    w->CurrValEdit()->setPalette(palette);
+    auto setDirColors = [=](QLineEdit * le, Vals::dir d) {
+        le->setStyleSheet(isin(d) ? 
+            "color: darkblue; background-color: #bffcc6" :
+            "color: darkblue; background-color: #b28dff" );
+    };
+    setDirColors(w->VTopValEdit(), vals.vtopd);
+    setDirColors(w->VBotValEdit(), vals.vbotd);
+    setDirColors(w->VMidValEdit(), vals.vmidd);
+    setDirColors(w->R1ValEdit(), vals.r1d);
+    setDirColors(w->R2ValEdit(), vals.r2d);
+    setDirColors(w->CurrValEdit(), vals.currd);
 
     std::string sstr(vals.str());
     w->TextEdit()->appendPlainText(QString::fromStdString(sstr));
