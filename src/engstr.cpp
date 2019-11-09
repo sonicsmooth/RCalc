@@ -12,13 +12,17 @@ EngStr::EngStr() {}
 
 std::string EngStr::doubleToStr(double x, int prec) {
     // Convert x to string with prec digits
-    double lx = log10(x);
-    assert(lx >= -12);
-    assert(lx <= 12);
+    if (std::isnan(x))
+        return std::string("nan");
+    bool isNeg = x < 0;
+    double lx = abs(log10(x));
+    //assert(lx >= -12);
+    //assert(lx <= 12);
     int flx = int(floor(lx/3)) + 4;
     std::string suffixes[] = {"pico","nano","micro","milli","","kilo","mega","giga","tera"};
-    std::string suffix = suffixes[flx];
+    std::string suffix = (flx >= -12 && flx <= 12) ? suffixes[flx] : std::string("toomuch");
     double norm = x / (pow(10.0, 3*(flx-4)));
+    if(isNeg) norm *= -1.0;
     std::stringstream ss;
     ss << std::fixed << std::setprecision(prec) << norm << " " << suffix;
     return ss.str();   
@@ -44,7 +48,7 @@ double EngStr::strToDouble(std::string str) {
             }   
         }
         result = base * pow(10.0, exp);
-        std::cout  << result << std::endl;
+        //std::cout  << result << std::endl;
     } 
     return result;
 }

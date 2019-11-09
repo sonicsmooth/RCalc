@@ -123,95 +123,25 @@ int main(int argc, char *argv[])
     c = pbridge->doubleToSlider(RCCore::R1, b);
     std::cout << a << " -> " << b << " -> " << c << std::endl;
 
-    std::cout << EngStr::doubleToStr(1e-12, 4) << std::endl;
-    std::cout << EngStr::doubleToStr(1e-11, 4) << std::endl;
-    std::cout << EngStr::doubleToStr(1e-10, 4) << std::endl;
-    std::cout << EngStr::doubleToStr(1e-9, 4) << std::endl;
-    std::cout << EngStr::doubleToStr(1e-8, 4) << std::endl;
-    std::cout << EngStr::doubleToStr(1e-7, 4) << std::endl;
-    std::cout << EngStr::doubleToStr(1e-6, 4) << std::endl;
-    std::cout << EngStr::doubleToStr(1e-5, 4) << std::endl;
-    std::cout << EngStr::doubleToStr(1e-4, 4) << std::endl;
-    std::cout << EngStr::doubleToStr(1e-3, 4) << std::endl;
-    std::cout << EngStr::doubleToStr(1e-2, 4) << std::endl;
-    std::cout << EngStr::doubleToStr(1e-1, 4) << std::endl;
-    std::cout << EngStr::doubleToStr(1.0, 4) << std::endl;
-    std::cout << EngStr::doubleToStr(1e1, 4) << std::endl;
-    std::cout << EngStr::doubleToStr(1e2, 4) << std::endl;
-    std::cout << EngStr::doubleToStr(1e3, 4) << std::endl;
-    std::cout << EngStr::doubleToStr(1e4, 4) << std::endl;
-    std::cout << EngStr::doubleToStr(1e5, 4) << std::endl;
-    std::cout << EngStr::doubleToStr(1e6, 4) << std::endl;
-    std::cout << EngStr::doubleToStr(1e7, 4) << std::endl;
-    std::cout << EngStr::doubleToStr(1e8, 4) << std::endl;
-    std::cout << EngStr::doubleToStr(1e9, 4) << std::endl;
-    std::cout << EngStr::doubleToStr(1e10, 4) << std::endl;
-    std::cout << EngStr::doubleToStr(1e11, 4) << std::endl;
-    std::cout << EngStr::doubleToStr(1e12, 4) << std::endl;
+    // Legit strings
+    std::string testStrs[] = {
+    //"123", ".5", "1.","1.e10","1.e+10","1.e-10","1.5","1.2345","1.2345e","1.2345e1","1.2345e+1","1.2345e-1",
+    //"1.2345e+100","1.2345e-100","123 p","123    p","123p","123P","123n","123u","123m","123k","123M","123g",
+    //"123t","123z","123Z","123m","123milli","123M","123Meg",".5u","1.u","1.e10u","1.e-10u","1.2345e1u","1.2345e-1u",
+    //"-123 p","-123    p","-123p","-123P","-123n","-123u","-123m","-123k","-123M","-123g","-123t","-123z",
+    //"-123Z",
+    "-123m","-123milli","-123M","-123Meg","-.5u","-1.u","-1.e10u","-1.e-10u","-1.2345e1u","-1.2345e-1u"
+    };
 
-    std::cout << EngStr::strToDouble("123") << std::endl;
-    std::cout << EngStr::strToDouble("123cat") << std::endl;
-    std::cout << EngStr::strToDouble("horse") << std::endl;
-    std::cout << EngStr::strToDouble(".5") << std::endl;
-    std::cout << EngStr::strToDouble("1.") << std::endl;
-    std::cout << EngStr::strToDouble("1.e") << std::endl;
-    std::cout << EngStr::strToDouble("1.e10") << std::endl;
-    std::cout << EngStr::strToDouble("1.e+10") << std::endl;
-    std::cout << EngStr::strToDouble("1.e-10") << std::endl;
-    std::cout << EngStr::strToDouble("1.5") << std::endl;
-    std::cout << EngStr::strToDouble("1.2345") << std::endl;
-    std::cout << EngStr::strToDouble("1.2345e") << std::endl;
-    std::cout << EngStr::strToDouble("1.2345e1") << std::endl;
-    std::cout << EngStr::strToDouble("1.2345e+1") << std::endl;
-    std::cout << EngStr::strToDouble("1.2345e-1") << std::endl;
-    std::cout << EngStr::strToDouble("1.2345e+100") << std::endl;
-    std::cout << EngStr::strToDouble("1.2345e-100") << std::endl;
-    std::cout << EngStr::strToDouble("123 p") << std::endl;
-    std::cout << EngStr::strToDouble("123    p") << std::endl;
-    std::cout << EngStr::strToDouble("123p") << std::endl;
-    std::cout << EngStr::strToDouble("123P") << std::endl;
-    std::cout << EngStr::strToDouble("123n") << std::endl;
-    std::cout << EngStr::strToDouble("123u") << std::endl;
-    std::cout << EngStr::strToDouble("123m") << std::endl;
-    std::cout << EngStr::strToDouble("123k") << std::endl;
-    std::cout << EngStr::strToDouble("123M") << std::endl;
-    std::cout << EngStr::strToDouble("123g") << std::endl;
-    std::cout << EngStr::strToDouble("123t") << std::endl;
-    std::cout << EngStr::strToDouble("123z") << std::endl;
-    std::cout << EngStr::strToDouble("123Z") << std::endl;
-    std::cout << EngStr::strToDouble("123m") << std::endl;
-    std::cout << EngStr::strToDouble("123milli") << std::endl;
-    std::cout << EngStr::strToDouble("123M") << std::endl;
-    std::cout << EngStr::strToDouble("123Meg") << std::endl;
-    std::cout << EngStr::strToDouble(".5u") << std::endl;
-    std::cout << EngStr::strToDouble("1.u") << std::endl;
-    std::cout << EngStr::strToDouble("1.e10u") << std::endl;
-    std::cout << EngStr::strToDouble("1.e-10u") << std::endl;
-    std::cout << EngStr::strToDouble("1.2345e1u") << std::endl;
-    std::cout << EngStr::strToDouble("1.2345e-1u") << std::endl;
-    std::cout << EngStr::strToDouble("-123 p") << std::endl;
-    std::cout << EngStr::strToDouble("-123    p") << std::endl;
-    std::cout << EngStr::strToDouble("-123p") << std::endl;
-    std::cout << EngStr::strToDouble("-123P") << std::endl;
-    std::cout << EngStr::strToDouble("-123n") << std::endl;
-    std::cout << EngStr::strToDouble("-123u") << std::endl;
-    std::cout << EngStr::strToDouble("-123m") << std::endl;
-    std::cout << EngStr::strToDouble("-123k") << std::endl;
-    std::cout << EngStr::strToDouble("-123M") << std::endl;
-    std::cout << EngStr::strToDouble("-123g") << std::endl;
-    std::cout << EngStr::strToDouble("-123t") << std::endl;
-    std::cout << EngStr::strToDouble("-123z") << std::endl;
-    std::cout << EngStr::strToDouble("-123Z") << std::endl;
-    std::cout << EngStr::strToDouble("-123m") << std::endl;
-    std::cout << EngStr::strToDouble("-123milli") << std::endl;
-    std::cout << EngStr::strToDouble("-123M") << std::endl;
-    std::cout << EngStr::strToDouble("-123Meg") << std::endl;
-    std::cout << EngStr::strToDouble("-.5u") << std::endl;
-    std::cout << EngStr::strToDouble("-1.u") << std::endl;
-    std::cout << EngStr::strToDouble("-1.e10u") << std::endl;
-    std::cout << EngStr::strToDouble("-1.e-10u") << std::endl;
-    std::cout << EngStr::strToDouble("-1.2345e1u") << std::endl;
-    std::cout << EngStr::strToDouble("-1.2345e-1u") << std::endl;
+    std::cout << "STRING TEST" << std::endl;
+    for (auto s1: testStrs) {
+        double d = EngStr::strToDouble(s1);
+        std::string s2 = EngStr::doubleToStr(d,5);
+        std::cout << s1 << " -> " << d << " -> " << s2 << std::endl;
+    }
+
+    
+
 
    w.show();
     return app.exec();
