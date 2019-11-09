@@ -3,10 +3,12 @@
 
 #include <string>
 
+
 class EngStr
 {
 public:
     EngStr();
+    static const std::string restr;
     static std::string doubleToStr(double, int);
     static double strToDouble(std::string);
 };

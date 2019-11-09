@@ -9,7 +9,10 @@
 #include <algorithm>
 #include "engstr.h"
 
+// Can be used by other modules
+
 EngStr::EngStr() {} 
+const std::string EngStr::restr = "((?:[+-]?(?:\\d+(?:\\.\\d*)?|\\.\\d+))(?:[eE][+-]?\\d+)?)\\s*(?:(?:([pP])|([nN])|([uU])|([m])|([k])|([M])|([gG])|([tT]))[a-zA-Z]*)?";
 
 std::string EngStr::doubleToStr(double x, int prec) {
     // Convert x to string with prec digits
@@ -38,9 +41,11 @@ std::string EngStr::doubleToStr(double x, int prec) {
 
 double EngStr::strToDouble(std::string str) {
     using namespace std::regex_constants;
-    // Parses scientific and engineering notation, eg "1.234e6p" as 1.234e-3
-    std::regex pattern(
-        "((?:[+-]?(?:\\d+(?:\\.\\d*)?|\\.\\d+))(?:[eE][+-]?\\d+)?)\\s*(?:(?:([pP])|([nN])|([uU])|([m])|([k])|([M])|([gG])|([tT]))[a-zA-Z]*)?");
+    // Parses scientific and engineering notation, eg "1.234e6p" as 1.234e-3.
+    // The normal floating point number shows up in the first subgroup. Any
+    // engineering suffixes show up after that.  Each one gets its own subgroup,
+    // and hopefully at most one is found.
+    std::regex pattern(restr);        
     std::smatch match;
     double base = 0.0;
     double exp = 0;
@@ -49,8 +54,14 @@ double EngStr::strToDouble(std::string str) {
         base = double(std::stod(match[1].str()));
         for (size_t i=1; i < match.size(); i++) {
             if (match[i].length() > 0 && i > 1) {
-                if (i<6) exp = (int(i)-6) * 3;
-                else     exp = (int(i)-5) * 3;
+                if (i < 6) {
+                    exp = (int(i) - 6) * 3;
+                    break;
+                }
+                else {
+                    exp = (int(i) - 5) * 3;
+                    break;
+                }
             }   
         }
         result = base * pow(10.0, exp);

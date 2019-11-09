@@ -3,6 +3,9 @@
 #include <QStyle>
 #include <QSlider>
 #include <QPushButton>
+#include <QRegExp>
+#include <QRegExpValidator>
+#include <QString>
 
 #include <iostream>
 #include <iomanip>
@@ -67,12 +70,25 @@ int main(int argc, char *argv[])
     QObject::connect(w.R2Slider(),   &QSlider::sliderPressed, [=, &w]() {pbridge->setCoreValue(RCCore::R2,   w.R2Slider()->value());});
     QObject::connect(w.CurrSlider(), &QSlider::sliderPressed, [=, &w]() {pbridge->setCoreValue(RCCore::CURR, w.CurrSlider()->value());});
 
-    // crashes when R1 gets to about 250
+    // Set up validate-and-send on each line edit
+    auto vas = [=](QLineEdit * qle, RCCore::vartype vt) {
+        double x = EngStr::strToDouble(qle->text().toStdString());
+        if (isnan(x)) qle->setStyleSheet("background:red");
+        else          pbridge->setCoreValue(vt, x);
+    };
+    QObject::connect(w.VTopValEdit(), &QLineEdit::editingFinished, [=, &w]() {vas(w.VTopValEdit(), RCCore::VTOP);});
+    QObject::connect(w.VBotValEdit(), &QLineEdit::editingFinished, [=, &w]() {vas(w.VBotValEdit(), RCCore::VBOT);});
+    QObject::connect(w.VMidValEdit(), &QLineEdit::editingFinished, [=, &w]() {vas(w.VMidValEdit(), RCCore::VMID);});
+    QObject::connect(w.R1ValEdit(),   &QLineEdit::editingFinished, [=, &w]() {vas(w.R1ValEdit(),   RCCore::R1);});
+    QObject::connect(w.R2ValEdit(),   &QLineEdit::editingFinished, [=, &w]() {vas(w.R2ValEdit(),   RCCore::R2);});
+    QObject::connect(w.CurrValEdit(), &QLineEdit::editingFinished, [=, &w]() {vas(w.CurrValEdit(), RCCore::CURR);});
+
+    // Set some initial condition
     pbridge->setCore(pcore);
-    pbridge->setCoreValue(RCCore::VTOP, 20.0);
-    pbridge->setCoreValue(RCCore::VBOT, -5.0);
-    pbridge->setCoreValue(RCCore::R1,   230.0);
-    pbridge->setCoreValue(RCCore::CURR, 0.1);
+    pbridge->setCoreValue(RCCore::VTOP, 3.3);
+    pbridge->setCoreValue(RCCore::VBOT, -3.3);
+    pbridge->setCoreValue(RCCore::VMID,  2.5);
+    pbridge->setCoreValue(RCCore::CURR, 0.001);
 
     pbridge->setWindow(&w); // change to shared ptr
     pcore->setBridge(pbridge);
