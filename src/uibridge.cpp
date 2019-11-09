@@ -7,6 +7,7 @@
 #include <QSlider>
 #include <QPushButton>
 #include "uibridge.h"
+#include "engstr.h"
 
 //UIBridge::UIBridge(){}
 
@@ -21,54 +22,59 @@ void UIBridge::setOutputStates(Vals vals, Vals::constype ct) {
     forceSlider(w->R1Slider(),    doubleToSlider(RCCore::R1,   vals.r1));
     forceSlider(w->R2Slider(),    doubleToSlider(RCCore::R2,   vals.r2));
     forceSlider(w->CurrSlider(),  doubleToSlider(RCCore::CURR, vals.curr));
-    //forceSlider(w->RatioSlider(), doubleToSlider(RCCore::, vals.vtop));
+    //forceSlider(w->RatioSlider(), doubleToSlider(RCCore::RATIO, vals.ratio));
 
-    forceButton(w->VTopButton(), isin(vals.vtopd));
-    forceButton(w->VBotButton(), isin(vals.vbotd));
-    forceButton(w->VMidButton(), isin(vals.vmidd));
-    forceButton(w->R1Button(),   isin(vals.r1d));
-    forceButton(w->R2Button(),   isin(vals.r2d));
-    forceButton(w->CurrButton(), isin(vals.currd));
+//    forceButton(w->VTopButton(), isin(vals.vtopd));
+//    forceButton(w->VBotButton(), isin(vals.vbotd));
+//    forceButton(w->VMidButton(), isin(vals.vmidd));
+//    forceButton(w->R1Button(),   isin(vals.r1d));
+//    forceButton(w->R2Button(),   isin(vals.r2d));
+//    forceButton(w->CurrButton(), isin(vals.currd));
 
-    w->VTopValLabel()->setText(QString::asprintf("%6.4f", vals.vtop));
-    w->VBotValLabel()->setText(QString::asprintf("%6.4f", vals.vbot));
-    w->VMidValLabel()->setText(QString::asprintf("%6.4f", vals.vmid));
-    w->R1ValLabel()->setText(QString::asprintf("%6.4f", vals.r1));
-    w->R2ValLabel()->setText(QString::asprintf("%6.4f", vals.r2));
-    w->RatioValLabel()->setText(QString::asprintf("%6.4f", vals.ratio));
-    w->CurrValLabel()->setText(QString::asprintf("%6.4f", vals.curr));
+//    w->VTopValLabel()->setText(QString::fromStdString(EngStr::doubleToStr(vals.vtop, 4)));
+//    w->VBotValLabel()->setText(QString::fromStdString(EngStr::doubleToStr(vals.vbot, 4)));
+//    w->VMidValLabel()->setText(QString::fromStdString(EngStr::doubleToStr(vals.vmid, 4)));
+//    w->R1ValLabel()->setText(QString::fromStdString(EngStr::doubleToStr(vals.r1, 4)));
+//    w->R2ValLabel()->setText(QString::fromStdString(EngStr::doubleToStr(vals.r2, 4)));
+//    w->CurrValLabel()->setText(QString::fromStdString(EngStr::doubleToStr(vals.curr, 4)));
+//    w->RatioValLabel()->setText(QString::fromStdString(EngStr::doubleToStr(vals.ratio, 4)));
 
-    w->VTopValEdit()->setText(QString::asprintf("%6.4f", vals.vtop));
-    w->VBotValEdit()->setText(QString::asprintf("%6.4f", vals.vbot));
-    w->VMidValEdit()->setText(QString::asprintf("%6.4f", vals.vmid));
-    w->R1ValEdit()->setText(QString::asprintf("%6.4f", vals.r1));
-    w->R2ValEdit()->setText(QString::asprintf("%6.4f", vals.r2));
-    w->RatioValEdit()->setText(QString::asprintf("%6.4f", vals.ratio));
-    w->CurrValEdit()->setText(QString::asprintf("%6.4f", vals.curr));
+    w->VTopValEdit()->setText(QString::fromStdString(EngStr::doubleToStr(vals.vtop, 4)));
+    w->VBotValEdit()->setText(QString::fromStdString(EngStr::doubleToStr(vals.vbot, 4)));
+    w->VMidValEdit()->setText(QString::fromStdString(EngStr::doubleToStr(vals.vmid, 4)));
+    w->R1ValEdit()->setText(QString::fromStdString(EngStr::doubleToStr(vals.r1, 4)));
+    w->R2ValEdit()->setText(QString::fromStdString(EngStr::doubleToStr(vals.r2, 4)));
+    w->CurrValEdit()->setText(QString::fromStdString(EngStr::doubleToStr(vals.curr, 4)));
+    w->RatioValEdit()->setText(QString::fromStdString(EngStr::doubleToStr(vals.ratio, 4)));
 
 
     // Sets label color red if constraints are in error
-    QPalette palette;
-    palette.setColor(QPalette::WindowText, QColor(ct==Vals::PROPER ? Qt::black : Qt::red));
-    w->VTopValLabel()->setPalette(palette);
-    w->VBotValLabel()->setPalette(palette);
-    w->VMidValLabel()->setPalette(palette);
-    w->R1ValLabel()->setPalette(palette);
-    w->R2ValLabel()->setPalette(palette);
-    w->RatioValLabel()->setPalette(palette);
-    w->CurrValLabel()->setPalette(palette);
-
-    auto setDirColors = [=](QLineEdit * le, Vals::dir d) {
-        le->setStyleSheet(isin(d) ? 
-            "color: darkblue; background-color: #bffcc6" :
-            "color: darkblue; background-color: #b28dff" );
-    };
-    setDirColors(w->VTopValEdit(), vals.vtopd);
-    setDirColors(w->VBotValEdit(), vals.vbotd);
-    setDirColors(w->VMidValEdit(), vals.vmidd);
-    setDirColors(w->R1ValEdit(), vals.r1d);
-    setDirColors(w->R2ValEdit(), vals.r2d);
-    setDirColors(w->CurrValEdit(), vals.currd);
+    //QPalette palette;
+    //palette.setColor(QPalette::WindowText, QColor(ct==Vals::PROPER ? Qt::black : Qt::red));
+    if (ct == Vals::PROPER) {
+        auto setDirColors = [=](QLineEdit * le, Vals::dir d) {
+            le->setStyleSheet(isin(d) ?
+                "color: darkblue; background-color: #bffcc6" :
+                "color: darkblue; background-color: #b28dff" );
+        };
+        setDirColors(w->VTopValEdit(), vals.vtopd);
+        setDirColors(w->VBotValEdit(), vals.vbotd);
+        setDirColors(w->VMidValEdit(), vals.vmidd);
+        setDirColors(w->R1ValEdit(), vals.r1d);
+        setDirColors(w->R2ValEdit(), vals.r2d);
+        setDirColors(w->CurrValEdit(), vals.currd);
+    } else {
+        auto setErrorBackground = [=](QLineEdit * le) {
+            le->setStyleSheet("background-color: #ffabab");
+        };
+        setErrorBackground(w->VTopValEdit());
+        setErrorBackground(w->VBotValEdit());
+        setErrorBackground(w->VMidValEdit());
+        setErrorBackground(w->R1ValEdit());
+        setErrorBackground(w->R2ValEdit());
+        setErrorBackground(w->RatioValEdit());
+        setErrorBackground(w->CurrValEdit());
+    }
 
     std::string sstr(vals.str());
     w->TextEdit()->appendPlainText(QString::fromStdString(sstr));

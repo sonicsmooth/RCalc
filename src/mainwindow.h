@@ -27,13 +27,13 @@ public:
     QSlider * R2Slider();
     QSlider * RatioSlider();
     QSlider * CurrSlider();
-    QLabel * VTopValLabel();
-    QLabel * VBotValLabel();
-    QLabel * VMidValLabel();
-    QLabel * R1ValLabel();
-    QLabel * R2ValLabel();
-    QLabel * RatioValLabel();
-    QLabel * CurrValLabel();
+//    QLabel * VTopValLabel();
+//    QLabel * VBotValLabel();
+//    QLabel * VMidValLabel();
+//    QLabel * R1ValLabel();
+//    QLabel * R2ValLabel();
+//    QLabel * RatioValLabel();
+//    QLabel * CurrValLabel();
     QLineEdit * VTopValEdit();
     QLineEdit * VBotValEdit();
     QLineEdit * VMidValEdit();
@@ -41,12 +41,12 @@ public:
     QLineEdit * R2ValEdit();
     QLineEdit * RatioValEdit();
     QLineEdit * CurrValEdit();
-    QPushButton * VTopButton();
-    QPushButton * VBotButton();
-    QPushButton * VMidButton();
-    QPushButton * R1Button();
-    QPushButton * R2Button();
-    QPushButton * CurrButton();
+//    QPushButton * VTopButton();
+//    QPushButton * VBotButton();
+//    QPushButton * VMidButton();
+//    QPushButton * R1Button();
+//    QPushButton * R2Button();
+//    QPushButton * CurrButton();
     QPlainTextEdit * TextEdit();
     
 
