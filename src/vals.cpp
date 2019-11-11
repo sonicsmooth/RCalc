@@ -2,12 +2,14 @@
 #include <string>
 #include <sstream>
 #include <cassert>
+
+#include "rctypes.h"
 #include "vals.h"
 
 Vals::Vals() : vtop(0.0), vbot(0.0), vmid(0.0), r1(0.0), r2(0.0), curr(0.0), ratio(0.0),
                vtopd(UNDEFINED), vbotd(UNDEFINED), vmidd(UNDEFINED), 
                r1d(UNDEFINED), r2d(UNDEFINED), currd(UNDEFINED), 
-               ratiod(UNDEFINED)/*, _constraint(UNDER)*/ {}
+               ratiod(UNDEFINED) {}
 
 int Vals::numInputs() const {
     return isin(vtopd) + isin(vbotd) + isin(vmidd) +
@@ -65,25 +67,25 @@ int Vals::incode() const {
            isin(currd) << 0;
 }
 
-bool isin(Vals::dir d) {return d == Vals::INPUT;};
-bool isout(Vals::dir d) {return d == Vals::OUTPUT;};
-bool isdef(Vals::dir d) {return d != Vals::UNDEFINED;};
-std::string vstr(Vals::dir d) {
-    assert (d >= Vals::UNDEFINED && d <= Vals::OUTPUT);
+bool isin(dir d) {return d == INPUT;};
+bool isout(dir d) {return d == OUTPUT;};
+bool isdef(dir d) {return d != UNDEFINED;};
+std::string vstr(dir d) {
+    assert (d >= UNDEFINED && d <= OUTPUT);
     switch (d) {
-        case Vals::UNDEFINED: return "undefined";
-        case Vals::INPUT: return "input";
-        case Vals::OUTPUT: return "output";
+        case UNDEFINED: return "UNDEFINED";
+        case INPUT: return "input";
+        case OUTPUT: return "output";
         default: return "logic error";
     }
 }
-std::string vstr(Vals::constype c) {
-    assert (c >= Vals::UNDER && c <= Vals::MIXED);
+std::string vstr(constype c) {
+    assert (c >= UNDER && c <= MIXED);
     switch (c) {
-        case Vals::UNDER: return "under constrained";
-        case Vals::PROPER: return "properly constrained";
-        case Vals::OVER: return "over constrained";
-        case Vals::MIXED: return "mixed constrained";
+        case UNDER: return "under constrained";
+        case PROPER: return "properly constrained";
+        case OVER: return "over constrained";
+        case MIXED: return "mixed constrained";
         default: return "logic error";
     }
 }

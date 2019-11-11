@@ -28,6 +28,7 @@ HEADERS += \
     src/engstr.h \
     src/mainwindow.h \
     src/rccore.h \
+    src/rctypes.h \
     src/uibridge.h \
     src/uibridgeinterface.h \
     src/vals.h

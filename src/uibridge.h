@@ -18,7 +18,7 @@ private:
     // y=mx+b, for linear, where x is slider, y is output
     struct {double m, b;} vtopmxb, vbotmxb, vmidmxb;
     // y = a * 10^((x-x0)*r) where x is slider, y is output
-    struct {double a, x0, r;} r1exp, r2exp, currexp;
+    struct {double a, x0, r;} r1exp, r2exp, currexp, ratioexp;
     MainWindow *w;
     std::shared_ptr<RCCore> pcore;
 
@@ -27,16 +27,16 @@ private:
 
 public:
     //UIBridge();
-    double sliderToDouble(RCCore::vartype, int);
-    int doubleToSlider(RCCore::vartype, double);
+    double sliderToDouble(vartype, int);
+    int doubleToSlider(vartype, double);
     void setCore(std::shared_ptr<RCCore>) override;
-    void setOutputStates(Vals, Vals::constype) override;
+    void setOutputStates(Vals /*, vartype, constype*/) override;
     void setWindow(MainWindow *w);
-    void setRange(RCCore::vartype, int, int, double, double);
-    void setCoreValue(RCCore::vartype, int);
-    void setCoreValue(RCCore::vartype, double);
-    void setCoreValue(RCCore::vartype, std::string);
-    void setCoreDir(RCCore::vartype, Vals::dir);
+    void setRange(vartype, int, int, double, double);
+    void setCoreValue(vartype, int);
+    void setCoreValue(vartype, double);
+    void setCoreValue(vartype, std::string);
+    void setCoreDir(vartype, dir);
 
 
 };

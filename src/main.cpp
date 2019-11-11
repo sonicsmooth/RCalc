@@ -10,6 +10,7 @@
 #include <iostream>
 #include <iomanip>
 
+#include "rctypes.h"
 #include "vals.h"
 #include "rccore.h"
 #include "engstr.h"
@@ -40,55 +41,58 @@ int main(int argc, char *argv[])
     w.R2Slider()->setMaximum(steps);
     w.R1Slider()->setMaximum(steps);
     w.CurrSlider()->setMaximum(steps);
+    w.RatioSlider()->setMaximum(steps);
 
     // Set core limits
     pcore->setVul(20.0);
     pcore->setVbl(-5.0);
     pcore->setRmax(1e6);
     pcore->setCurrmax(3.0);
+    pcore->setRatiomax(1e6);
 
     // Update bridge ranges
-    pbridge->setRange(RCCore::VTOP, 0, steps, pcore->getVbl(), pcore->getVul());
-    pbridge->setRange(RCCore::VBOT, 0, steps, pcore->getVbl(), pcore->getVul());
-    pbridge->setRange(RCCore::VMID, 0, steps, pcore->getVbl(), pcore->getVul());
-    pbridge->setRange(RCCore::R1, 5, steps, 1e-3, pcore->getRmax());
-    pbridge->setRange(RCCore::R2, 5, steps, 1e-3, pcore->getRmax());
-    pbridge->setRange(RCCore::CURR, 5, steps, 1e-6, pcore->getCurrmax());
- 
-    // signals affect core directly using lambda; slid values become inputs, which goes to update, which sets the buttons
-    QObject::connect(w.VTopSlider(), &QSlider::valueChanged, [=](int x) {pbridge->setCoreValue(RCCore::VTOP, x);});
-    QObject::connect(w.VBotSlider(), &QSlider::valueChanged, [=](int x) {pbridge->setCoreValue(RCCore::VBOT, x);});
-    QObject::connect(w.VMidSlider(), &QSlider::valueChanged, [=](int x) {pbridge->setCoreValue(RCCore::VMID, x);});
-    QObject::connect(w.R1Slider(),   &QSlider::valueChanged, [=](int x) {pbridge->setCoreValue(RCCore::R1,   x);});
-    QObject::connect(w.R2Slider(),   &QSlider::valueChanged, [=](int x) {pbridge->setCoreValue(RCCore::R2,   x);});
-    QObject::connect(w.CurrSlider(), &QSlider::valueChanged, [=](int x) {pbridge->setCoreValue(RCCore::CURR, x);});
+    pbridge->setRange(VTOP, 0, steps, pcore->getVbl(), pcore->getVul());
+    pbridge->setRange(VBOT, 0, steps, pcore->getVbl(), pcore->getVul());
+    pbridge->setRange(VMID, 0, steps, pcore->getVbl(), pcore->getVul());
+    pbridge->setRange(R1, 5, steps, 1e-3, pcore->getRmax());
+    pbridge->setRange(R2, 5, steps, 1e-3, pcore->getRmax());
+    pbridge->setRange(CURR, 5, steps, 1e-6, pcore->getCurrmax());
+    pbridge->setRange(RATIO, 5, steps, 1e-6, pcore->getRatiomax());
 
-    QObject::connect(w.VTopSlider(), &QSlider::sliderPressed, [=, &w]() {pbridge->setCoreValue(RCCore::VTOP, w.VTopSlider()->value());});
-    QObject::connect(w.VBotSlider(), &QSlider::sliderPressed, [=, &w]() {pbridge->setCoreValue(RCCore::VBOT, w.VBotSlider()->value());});
-    QObject::connect(w.VMidSlider(), &QSlider::sliderPressed, [=, &w]() {pbridge->setCoreValue(RCCore::VMID, w.VMidSlider()->value());});
-    QObject::connect(w.R1Slider(),   &QSlider::sliderPressed, [=, &w]() {pbridge->setCoreValue(RCCore::R1,   w.R1Slider()->value());});
-    QObject::connect(w.R2Slider(),   &QSlider::sliderPressed, [=, &w]() {pbridge->setCoreValue(RCCore::R2,   w.R2Slider()->value());});
-    QObject::connect(w.CurrSlider(), &QSlider::sliderPressed, [=, &w]() {pbridge->setCoreValue(RCCore::CURR, w.CurrSlider()->value());});
+    // signals affect core directly using lambda; slid values become inputs, which goes to update, which sets the buttons
+    QObject::connect(w.VTopSlider(), &QSlider::valueChanged, [=](int x) {pbridge->setCoreValue(VTOP, x);});
+    QObject::connect(w.VBotSlider(), &QSlider::valueChanged, [=](int x) {pbridge->setCoreValue(VBOT, x);});
+    QObject::connect(w.VMidSlider(), &QSlider::valueChanged, [=](int x) {pbridge->setCoreValue(VMID, x);});
+    QObject::connect(w.R1Slider(),   &QSlider::valueChanged, [=](int x) {pbridge->setCoreValue(R1,   x);});
+    QObject::connect(w.R2Slider(),   &QSlider::valueChanged, [=](int x) {pbridge->setCoreValue(R2,   x);});
+    QObject::connect(w.CurrSlider(), &QSlider::valueChanged, [=](int x) {pbridge->setCoreValue(CURR, x);});
+
+    QObject::connect(w.VTopSlider(), &QSlider::sliderPressed, [=, &w]() {pbridge->setCoreValue(VTOP, w.VTopSlider()->value());});
+    QObject::connect(w.VBotSlider(), &QSlider::sliderPressed, [=, &w]() {pbridge->setCoreValue(VBOT, w.VBotSlider()->value());});
+    QObject::connect(w.VMidSlider(), &QSlider::sliderPressed, [=, &w]() {pbridge->setCoreValue(VMID, w.VMidSlider()->value());});
+    QObject::connect(w.R1Slider(),   &QSlider::sliderPressed, [=, &w]() {pbridge->setCoreValue(R1,   w.R1Slider()->value());});
+    QObject::connect(w.R2Slider(),   &QSlider::sliderPressed, [=, &w]() {pbridge->setCoreValue(R2,   w.R2Slider()->value());});
+    QObject::connect(w.CurrSlider(), &QSlider::sliderPressed, [=, &w]() {pbridge->setCoreValue(CURR, w.CurrSlider()->value());});
 
     // Set up validate-and-send on each line edit
-    auto vas = [=](QLineEdit * qle, RCCore::vartype vt) {
+    auto vas = [=](QLineEdit * qle, vartype vt) {
         double x = EngStr::strToDouble(qle->text().toStdString());
         if (isnan(x)) qle->setStyleSheet("background:red");
         else          pbridge->setCoreValue(vt, x);
     };
-    QObject::connect(w.VTopValEdit(), &QLineEdit::editingFinished, [=, &w]() {vas(w.VTopValEdit(), RCCore::VTOP);});
-    QObject::connect(w.VBotValEdit(), &QLineEdit::editingFinished, [=, &w]() {vas(w.VBotValEdit(), RCCore::VBOT);});
-    QObject::connect(w.VMidValEdit(), &QLineEdit::editingFinished, [=, &w]() {vas(w.VMidValEdit(), RCCore::VMID);});
-    QObject::connect(w.R1ValEdit(),   &QLineEdit::editingFinished, [=, &w]() {vas(w.R1ValEdit(),   RCCore::R1);});
-    QObject::connect(w.R2ValEdit(),   &QLineEdit::editingFinished, [=, &w]() {vas(w.R2ValEdit(),   RCCore::R2);});
-    QObject::connect(w.CurrValEdit(), &QLineEdit::editingFinished, [=, &w]() {vas(w.CurrValEdit(), RCCore::CURR);});
+    QObject::connect(w.VTopValEdit(), &QLineEdit::editingFinished, [=, &w]() {vas(w.VTopValEdit(), VTOP);});
+    QObject::connect(w.VBotValEdit(), &QLineEdit::editingFinished, [=, &w]() {vas(w.VBotValEdit(), VBOT);});
+    QObject::connect(w.VMidValEdit(), &QLineEdit::editingFinished, [=, &w]() {vas(w.VMidValEdit(), VMID);});
+    QObject::connect(w.R1ValEdit(),   &QLineEdit::editingFinished, [=, &w]() {vas(w.R1ValEdit(),   R1);});
+    QObject::connect(w.R2ValEdit(),   &QLineEdit::editingFinished, [=, &w]() {vas(w.R2ValEdit(),   R2);});
+    QObject::connect(w.CurrValEdit(), &QLineEdit::editingFinished, [=, &w]() {vas(w.CurrValEdit(), CURR);});
 
     // Set some initial condition
     pbridge->setCore(pcore);
-    pbridge->setCoreValue(RCCore::VTOP, 3.3);
-    pbridge->setCoreValue(RCCore::VBOT, -3.3);
-    pbridge->setCoreValue(RCCore::VMID,  2.5);
-    pbridge->setCoreValue(RCCore::CURR, 0.001);
+    pbridge->setCoreValue(VTOP, 3.3);
+    pbridge->setCoreValue(VBOT, -3.3);
+    pbridge->setCoreValue(VMID,  2.5);
+    pbridge->setCoreValue(CURR, 0.001);
 
     pbridge->setWindow(&w); // change to shared ptr
     pcore->setBridge(pbridge);
@@ -98,45 +102,45 @@ int main(int argc, char *argv[])
     double b;
     
     a = 0;
-    b = pbridge->sliderToDouble(RCCore::VTOP, a);
-    c = pbridge->doubleToSlider(RCCore::VTOP, b);
+    b = pbridge->sliderToDouble(VTOP, a);
+    c = pbridge->doubleToSlider(VTOP, b);
     std::cout << a << " -> " << b << " -> " << c << std::endl;
 
     a = 50;
-    b = pbridge->sliderToDouble(RCCore::VTOP, a);
-    c = pbridge->doubleToSlider(RCCore::VTOP, b);
+    b = pbridge->sliderToDouble(VTOP, a);
+    c = pbridge->doubleToSlider(VTOP, b);
     std::cout << a << " -> " << b << " -> " << c << std::endl;
 
     a = 100;
-    b = pbridge->sliderToDouble(RCCore::VTOP, a);
-    c = pbridge->doubleToSlider(RCCore::VTOP, b);
+    b = pbridge->sliderToDouble(VTOP, a);
+    c = pbridge->doubleToSlider(VTOP, b);
     std::cout << a << " -> " << b << " -> " << c << std::endl;
 
 ////////
 
     a = 0;
-    b = pbridge->sliderToDouble(RCCore::R1, a);
-    c = pbridge->doubleToSlider(RCCore::R1, b);
+    b = pbridge->sliderToDouble(R1, a);
+    c = pbridge->doubleToSlider(R1, b);
     std::cout << a << " -> " << b << " -> " << c << std::endl;
 
     a = 4;
-    b = pbridge->sliderToDouble(RCCore::R1, a);
-    c = pbridge->doubleToSlider(RCCore::R1, b);
+    b = pbridge->sliderToDouble(R1, a);
+    c = pbridge->doubleToSlider(R1, b);
     std::cout << a << " -> " << b << " -> " << c << std::endl;
 
     a = 5;
-    b = pbridge->sliderToDouble(RCCore::R1, a);
-    c = pbridge->doubleToSlider(RCCore::R1, b);
+    b = pbridge->sliderToDouble(R1, a);
+    c = pbridge->doubleToSlider(R1, b);
     std::cout << a << " -> " << b << " -> " << c << std::endl;
 
     a = 50;
-    b = pbridge->sliderToDouble(RCCore::R1, a);
-    c = pbridge->doubleToSlider(RCCore::R1, b);
+    b = pbridge->sliderToDouble(R1, a);
+    c = pbridge->doubleToSlider(R1, b);
     std::cout << a << " -> " << b << " -> " << c << std::endl;
 
     a = 100;
-    b = pbridge->sliderToDouble(RCCore::R1, a);
-    c = pbridge->doubleToSlider(RCCore::R1, b);
+    b = pbridge->sliderToDouble(R1, a);
+    c = pbridge->doubleToSlider(R1, b);
     std::cout << a << " -> " << b << " -> " << c << std::endl;
 
     // Legit strings
@@ -173,125 +177,125 @@ void test(RCCore *pcore) {
     if (0) // 0x0f //ok
     {//        vtop vbot vmid  r1  r2 curr
     // 0x0f      0    0    1   1   1   1
-    //pcore->update(RCCore::VTOP, 3.3);
-    //pcore->update(RCCore::VBOT, 0.5);
-    pcore->update(RCCore::VMID, 1.2);
-    pcore->update(RCCore::R1,   20.0);
-    pcore->update(RCCore::R2,   20.0);
-    pcore->update(RCCore::CURR, 0.1);}
+    //pcore->update(VTOP, 3.3);
+    //pcore->update(VBOT, 0.5);
+    pcore->update(VMID, 1.2);
+    pcore->update(R1,   20.0);
+    pcore->update(R2,   20.0);
+    pcore->update(CURR, 0.1);}
     if (0) // 0x17 //ok
     {//        vtop vbot vmid  r1  r2 curr
     // 0x17      0    1    0   1   1   1
-    //pcore->update(RCCore::VTOP, 3.3);
-    pcore->update(RCCore::VBOT, 0.5);
-    //pcore->update(RCCore::VMID, 1.2);
-    pcore->update(RCCore::R1,   20.0);
-    pcore->update(RCCore::R2,   20.0);
-    pcore->update(RCCore::CURR, 0.1);}
+    //pcore->update(VTOP, 3.3);
+    pcore->update(VBOT, 0.5);
+    //pcore->update(VMID, 1.2);
+    pcore->update(R1,   20.0);
+    pcore->update(R2,   20.0);
+    pcore->update(CURR, 0.1);}
     if (0) // 0x1d //ok
     {//        vtop vbot vmid  r1  r2 curr
     // 0x1d      0    1    1   1   0   1
-    //pcore->update(RCCore::VTOP, 3.3);
-    pcore->update(RCCore::VBOT, 0.5);
-    pcore->update(RCCore::VMID, 1.2);
-    pcore->update(RCCore::R1,   20.0);
-    //pcore->update(RCCore::R2,   20.0);
-    pcore->update(RCCore::CURR, 0.1);}
+    //pcore->update(VTOP, 3.3);
+    pcore->update(VBOT, 0.5);
+    pcore->update(VMID, 1.2);
+    pcore->update(R1,   20.0);
+    //pcore->update(R2,   20.0);
+    pcore->update(CURR, 0.1);}
     if (0) // 0x1e //ok
     {//        vtop vbot vmid  r1  r2 curr
     // 0x1e      0    1    1   1   1   0
-    //pcore->update(RCCore::VTOP, 3.3);
-    pcore->update(RCCore::VBOT, 0.5);
-    pcore->update(RCCore::VMID, 1.2);
-    pcore->update(RCCore::R1,   20.0);
-    pcore->update(RCCore::R2,   20.0);
-    //pcore->update(RCCore::CURR, 0.1);
+    //pcore->update(VTOP, 3.3);
+    pcore->update(VBOT, 0.5);
+    pcore->update(VMID, 1.2);
+    pcore->update(R1,   20.0);
+    pcore->update(R2,   20.0);
+    //pcore->update(CURR, 0.1);
     }
     if (0) // 0x27 //ok
     {//        vtop vbot vmid  r1  r2 curr
     // 0x27      1    0    0   1   1   1
-    pcore->update(RCCore::VTOP, 3.3);
-    //pcore->update(RCCore::VBOT, 0.5);
-    //pcore->update(RCCore::VMID, 1.2);
-    pcore->update(RCCore::R1,   20.0);
-    pcore->update(RCCore::R2,   20.0);
-    pcore->update(RCCore::CURR, 0.1);}
+    pcore->update(VTOP, 3.3);
+    //pcore->update(VBOT, 0.5);
+    //pcore->update(VMID, 1.2);
+    pcore->update(R1,   20.0);
+    pcore->update(R2,   20.0);
+    pcore->update(CURR, 0.1);}
     if (0) // 0x2b //ok
     {//        vtop vbot vmid  r1  r2 curr
     // 0x2b      1    0    1   0   1   1
-    pcore->update(RCCore::VTOP, 3.3);
-    //pcore->update(RCCore::VBOT, 0.5);
-    pcore->update(RCCore::VMID, 1.2);
-    //pcore->update(RCCore::R1,   20.0);
-    pcore->update(RCCore::R2,   20.0);
-    pcore->update(RCCore::CURR, 0.1);}
+    pcore->update(VTOP, 3.3);
+    //pcore->update(VBOT, 0.5);
+    pcore->update(VMID, 1.2);
+    //pcore->update(R1,   20.0);
+    pcore->update(R2,   20.0);
+    pcore->update(CURR, 0.1);}
     if (1) // 0x2e //ok
     {//        vtop vbot vmid  r1  r2 curr
     // 0x2e      1    0    1   1   1   0
-    pcore->update(RCCore::VTOP, 3.3);
-    //pcore->update(RCCore::VBOT, 0.5);
-    pcore->update(RCCore::VMID, 1.2);
-    pcore->update(RCCore::R1,   20.0);
-    pcore->update(RCCore::R2,   20.0);
-    //pcore->update(RCCore::CURR, 0.1);
+    pcore->update(VTOP, 3.3);
+    //pcore->update(VBOT, 0.5);
+    pcore->update(VMID, 1.2);
+    pcore->update(R1,   20.0);
+    pcore->update(R2,   20.0);
+    //pcore->update(CURR, 0.1);
     }
     if (0) // 0x33 //ok
     {//        vtop vbot vmid  r1  r2 curr
     // 0x33      1    1    0   0   1   1
-    pcore->update(RCCore::VTOP, 3.3);
-    pcore->update(RCCore::VBOT, 0.5);
-    //pcore->update(RCCore::VMID, 1.2);
-    //pcore->update(RCCore::R1,   20.0);
-    pcore->update(RCCore::R2,   20.0);
-    pcore->update(RCCore::CURR, 0.1);}
+    pcore->update(VTOP, 3.3);
+    pcore->update(VBOT, 0.5);
+    //pcore->update(VMID, 1.2);
+    //pcore->update(R1,   20.0);
+    pcore->update(R2,   20.0);
+    pcore->update(CURR, 0.1);}
     if (0) // 0x35 //ok
     {//        vtop vbot vmid  r1  r2 curr
     // 0x35      1    1    0   1   0   1
-    pcore->update(RCCore::VTOP, 3.3);
-    pcore->update(RCCore::VBOT, 0.5);
-    //pcore->update(RCCore::VMID, 1.2);
-    pcore->update(RCCore::R1,   20.0);
-    //pcore->update(RCCore::R2,   20.0);
-    pcore->update(RCCore::CURR, 0.1);}
+    pcore->update(VTOP, 3.3);
+    pcore->update(VBOT, 0.5);
+    //pcore->update(VMID, 1.2);
+    pcore->update(R1,   20.0);
+    //pcore->update(R2,   20.0);
+    pcore->update(CURR, 0.1);}
     if (0) // 0x36 //ok
     {//        vtop vbot vmid  r1  r2 curr
     // 0x36      1    1    0   1   1   0
-    pcore->update(RCCore::VTOP, 5.0);
-    pcore->update(RCCore::VBOT, 5.0);
-    //pcore->update(RCCore::VMID, 1.2);
-    pcore->update(RCCore::R1,   20.0);
-    pcore->update(RCCore::R2,   20.0);
-    pcore->update(RCCore::VBOT, 9.06);
-    //pcore->update(RCCore::CURR, 0.1);
+    pcore->update(VTOP, 5.0);
+    pcore->update(VBOT, 5.0);
+    //pcore->update(VMID, 1.2);
+    pcore->update(R1,   20.0);
+    pcore->update(R2,   20.0);
+    pcore->update(VBOT, 9.06);
+    //pcore->update(CURR, 0.1);
     }
     if (0) // 0x39 //ok
     {//        vtop vbot vmid  r1  r2 curr
     // 0x39      1    1    1   0   0   1
-    pcore->update(RCCore::VTOP, 3.3);
-    pcore->update(RCCore::VBOT, 0.5);
-    pcore->update(RCCore::VMID, 1.2);
-    //pcore->update(RCCore::R1,   20.0);
-    //pcore->update(RCCore::R2,   20.0);
-    pcore->update(RCCore::CURR, 0.1);}
+    pcore->update(VTOP, 3.3);
+    pcore->update(VBOT, 0.5);
+    pcore->update(VMID, 1.2);
+    //pcore->update(R1,   20.0);
+    //pcore->update(R2,   20.0);
+    pcore->update(CURR, 0.1);}
     if (0) // 0x3a //ok
     {//        vtop vbot vmid  r1  r2 curr
     // 0x3a      1    1    1   0   1   0
-    pcore->update(RCCore::VTOP, 5.0);
-    pcore->update(RCCore::VBOT, 0.75);
-    pcore->update(RCCore::VMID, 2.0);
-    //pcore->update(RCCore::R1, 20.0);
-    pcore->update(RCCore::R2,   20);
-    //pcore->update(RCCore::CURR, 0.1);
+    pcore->update(VTOP, 5.0);
+    pcore->update(VBOT, 0.75);
+    pcore->update(VMID, 2.0);
+    //pcore->update(R1, 20.0);
+    pcore->update(R2,   20);
+    //pcore->update(CURR, 0.1);
     }
     if (0) // 0x3c //ok
     {//        vtop vbot vmid  r1  r2 curr
     // 0x3c      1    1    1   1   0   0
-    pcore->update(RCCore::VTOP, 5);
-    pcore->update(RCCore::VBOT, 0.0);
-    pcore->update(RCCore::VMID, 2.0);
-    pcore->update(RCCore::R1,   20.0);
-    //pcore->update(RCCore::R2,   20.0);
-    //pcore->update(RCCore::CURR, 0.1);
+    pcore->update(VTOP, 5);
+    pcore->update(VBOT, 0.0);
+    pcore->update(VMID, 2.0);
+    pcore->update(R1,   20.0);
+    //pcore->update(R2,   20.0);
+    //pcore->update(CURR, 0.1);
     }
 #endif
 
