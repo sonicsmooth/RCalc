@@ -24,29 +24,73 @@
 // From 1b, when you set a 0 to 1, another 1 becomes 0
 // set bit 5 to 1 and see 4 possible outcomes, then set bit 2 to 1 and 4 more outcomes
 //            tb m12c
-// From 3a    11 1010 // 3a -> vtop last, disable curr
-// to   1b,   01 1011,
 
-// From 39    11 1001 // 39 -> vtop last, disable r2
-// to   1b,   01 1011,
-
-// From 33    11 0011 // 33 -> vtop last, disable vmid
-// to   1b,   01 1011,
-
-// From 2b    10 1011 // 2b -> vtop last, disable vbot
-// to   1b,   01 1011,
-
+// bit 2 down (r1), bit 0 up
 // From 1e    01 1110 // 1e -> r1 last, disable curr
 // to   1b    01 1011
 
+// bit 2 down (r1), bit 1 up
 // From 1d    01 1101 // 1d -> r1 last, disable r2
 // to   1b    01 1011
 
+// bit 2 down (r1), bit 3 up
 // From 17    01 0111 // 17 -> r1 last, disable vmid
 // to   1b    01 1011
 
+// bit 2 down (r1), bit 4 up
 // From 0f    00 1111 // 0f -> r1 last, disable vbot
 // to   1b    01 1011
+
+// bit 5 (vtop) down, bit 0 up
+// From 3a    11 1010 // 3a -> vtop last, disable curr
+// to   1b,   01 1011,
+
+// bit 5 down (vtop), bit 1 up
+// From 39    11 1001 // 39 -> vtop last, disable r2
+// to   1b,   01 1011,
+
+// bit 5 down (vtop), bit 3 up
+// From 33    11 0011 // 33 -> vtop last, disable vmid
+// to   1b,   01 1011,
+
+// bit 5 down (vtop), bit 4 up
+// From 2b    10 1011 // 2b -> vtop last, disable vbot
+// to   1b,   01 1011,
+
+
+
+// bit 1 down (r2), bit 0 up (curr)
+// from 2e    10 1110
+// to   2d    10 1101
+
+// bit 1 down (r2), bit 2 up (r1)
+// from 2b    10 1011
+// to   2d    10 1101
+
+// bit 1 down (r2), bit 3 up (vmid)
+// from 27    10 0111
+// to   2d    10 1101
+
+// bit 1 down (r2), bit 5 up (vtop)
+// from 0f    00 1111
+// to   2d    10 1101
+
+// bit 4 down (vbot), bit 0 up (curr)
+// from 3c    11 1100
+// to   2d    10 1101
+
+// bit 4 down (vbot), bit 2 up (r1)
+// from 39    11 1001
+// to   2d    10 1101
+
+// bit 4 down (vbot), bit 3 up (vmid)
+// from 35    11 0101
+// to   2d    10 1101
+
+// bit 4 down (vbot), bit 5 up (vtop)
+// from 1d      01 1101
+// to   2d    10 1101
+
 
 //
 /*      INPUTS

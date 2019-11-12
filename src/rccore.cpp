@@ -114,7 +114,7 @@ Vals RCCore::calc_group(vartype latestvt, Vals invals) const {
                 // out.vmid = out.vbot + out.curr * out.r2;
                 // out.r2 = (out.vmid - out.vbot) / out.curr;
                 // out.curr = (out.vbmid - out.vbot) / out.r2;
-                out.disable = latest4.front() == R1 ? VBOT : NONE;
+                out.disable = latest4.front() == R2 ? VTOP : NONE;
             };
             int ctr;
             for (ctr = 0; ctr < 10; ctr++) {
@@ -235,6 +235,7 @@ Vals RCCore::calc_group(vartype latestvt, Vals invals) const {
                 // out.vmid = (out.r2 * out.curr) + out.vbot;
                 // out.curr = (out.vmid - out.vbot) / out.r2;
                 out.disable = latest4.front() == R1 ? R2 : NONE;
+                out.disable = latest4.front() == VBOT ? VTOP : NONE;
             };
             int ctr;
             for (ctr = 0; ctr < 10; ctr++) {
@@ -349,6 +350,7 @@ Vals RCCore::calc_group(vartype latestvt, Vals invals) const {
                 // out.vtop = out.vmid + out.curr * out.r1;
                 // out.r1 = (out.vtop - out.vmid) / out.curr;
                 // out.curr = (out.vtop - out.vmid) / out.r1;
+                out.disable = latest4.front() == R2 ? VMID : NONE;
             };
             int ctr;
             for (ctr = 0; ctr < 10; ctr++) {
@@ -407,6 +409,8 @@ Vals RCCore::calc_group(vartype latestvt, Vals invals) const {
                 // out.vmid = out.vtop - (out.r1 * out.curr);
                 // out.curr = (out.vtop - out.vmid) / out.r1;
                 out.disable = latest4.front() == VTOP ? VBOT : NONE;
+                out.disable = latest4.front() == R2 ? R1 : NONE;
+
             };
             int ctr;
             for (ctr = 0; ctr < 10; ctr++) {
@@ -463,7 +467,7 @@ Vals RCCore::calc_group(vartype latestvt, Vals invals) const {
                 // out.vtop = out.curr * out.r1 + out.vmid;
                 // out.vmid = out.vtop - (out.curr * out.r1);
                 // out.r1 = (out.vtop - out.vmid) / out.curr;
-
+                out.disable = latest4.front() == R2 ? CURR : NONE;
             };
             int ctr;
             for (ctr = 0; ctr < 10; ctr++) {
@@ -581,6 +585,7 @@ Vals RCCore::calc_group(vartype latestvt, Vals invals) const {
                 // out.vbot = out.vtop - out.curr * (out.r1 + out.r2);
                 // out.r1   = (out.vtop - out.vbot) / out.curr - out.r2;
                 // out.curr = (out.vtop - out.vbot) / (out.r1 + out.r2);
+                out.disable = latest4.front() == VBOT ? VMID : NONE;
                 };
             int ctr;
             for (ctr = 0; ctr < 10; ctr++) {
@@ -702,7 +707,8 @@ Vals RCCore::calc_group(vartype latestvt, Vals invals) const {
                 // out.vmid = out.r2 * out.curr + out.vbot
                 // out.curr = (out.vmid - out.vbot) / out.r2
                 out.disable = latest4.front() == VTOP ? R2 : NONE;
-                };
+                out.disable = latest4.front() == VBOT ? R1 : NONE;
+};
             int ctr;
             for (ctr = 0; ctr < 10; ctr++) {
                 compute();
@@ -815,6 +821,7 @@ Vals RCCore::calc_group(vartype latestvt, Vals invals) const {
                 // out.vtop = out.vmid + out.curr * out.r1;
                 // out.vmid = out.vtop - out.curr * out.r1;
                 // out.r1 = (out.vtop - out.vmid) / out.curr;
+                out.disable = latest4.front() == VBOT ? CURR : NONE;
                 };
             int ctr;
             for (ctr = 0; ctr < 10; ctr++) {

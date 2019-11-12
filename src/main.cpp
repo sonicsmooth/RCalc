@@ -98,74 +98,6 @@ int main(int argc, char *argv[])
     pcore->setBridge(pbridge);
     pcore->update();
 
-    int a,c;
-    double b;
-    
-    a = 0;
-    b = pbridge->sliderToDouble(VTOP, a);
-    c = pbridge->doubleToSlider(VTOP, b);
-    std::cout << a << " -> " << b << " -> " << c << std::endl;
-
-    a = 50;
-    b = pbridge->sliderToDouble(VTOP, a);
-    c = pbridge->doubleToSlider(VTOP, b);
-    std::cout << a << " -> " << b << " -> " << c << std::endl;
-
-    a = 100;
-    b = pbridge->sliderToDouble(VTOP, a);
-    c = pbridge->doubleToSlider(VTOP, b);
-    std::cout << a << " -> " << b << " -> " << c << std::endl;
-
-////////
-
-    a = 0;
-    b = pbridge->sliderToDouble(R1, a);
-    c = pbridge->doubleToSlider(R1, b);
-    std::cout << a << " -> " << b << " -> " << c << std::endl;
-
-    a = 4;
-    b = pbridge->sliderToDouble(R1, a);
-    c = pbridge->doubleToSlider(R1, b);
-    std::cout << a << " -> " << b << " -> " << c << std::endl;
-
-    a = 5;
-    b = pbridge->sliderToDouble(R1, a);
-    c = pbridge->doubleToSlider(R1, b);
-    std::cout << a << " -> " << b << " -> " << c << std::endl;
-
-    a = 50;
-    b = pbridge->sliderToDouble(R1, a);
-    c = pbridge->doubleToSlider(R1, b);
-    std::cout << a << " -> " << b << " -> " << c << std::endl;
-
-    a = 100;
-    b = pbridge->sliderToDouble(R1, a);
-    c = pbridge->doubleToSlider(R1, b);
-    std::cout << a << " -> " << b << " -> " << c << std::endl;
-
-    // Legit strings
-    std::string testStrs[] = {
-        "0","-0","0e4","-0e4","-0e-4","0.0","-0.0","0.0e4","-0.0e4","-0.0e-4",
-        "123", ".5", "1.","1.e10","1.e+10","1.e-10","1.5","1.2345","1.2345e",
-        "1.2345e1","1.2345e+1","1.2345e-1","1.2345e+12","1.2345e+13","1.2345e-12",
-        "1.2345e-13","123 p","123    p","123p","123P","123n","123u","123m",
-        "123k","123M","123g","123t","123z","123Z","123m","123milli","123M",
-        "123Meg",".5u","1.u","1.e10u","1.e-10u","1.2345e1u","1.2345e-1u","-123 p",
-        "-123    p","-123p","-123P","-123n","-123u","-123m","-123k","-123M",
-        "-123g","-123t","-123z","-123Z","-123m","-123milli","-123M","-123Meg",
-        "-.5u","-1.u","-1.e10u","-1.e-10u","-1.2345e1u","-1.2345e-1u"
-    };
-
-    std::cout << "STRING TEST" << std::endl;
-    for (auto s1: testStrs) {
-        double d = EngStr::strToDouble(s1);
-        std::string s2 = EngStr::doubleToStr(d,4);
-        std::cout << s1 << " -> " << d << " -> " << s2 << std::endl;
-    }
-
-    
-
-
    w.show();
     return app.exec();
 }
@@ -298,5 +230,77 @@ void test(RCCore *pcore) {
     //pcore->update(CURR, 0.1);
     }
 #endif
+
+}
+
+void testConversions(UIBridge *pbridge) {
+    int a,c;
+    double b;
+    
+    a = 0;
+    b = pbridge->sliderToDouble(VTOP, a);
+    c = pbridge->doubleToSlider(VTOP, b);
+    std::cout << a << " -> " << b << " -> " << c << std::endl;
+
+    a = 50;
+    b = pbridge->sliderToDouble(VTOP, a);
+    c = pbridge->doubleToSlider(VTOP, b);
+    std::cout << a << " -> " << b << " -> " << c << std::endl;
+
+    a = 100;
+    b = pbridge->sliderToDouble(VTOP, a);
+    c = pbridge->doubleToSlider(VTOP, b);
+    std::cout << a << " -> " << b << " -> " << c << std::endl;
+
+////////
+
+    a = 0;
+    b = pbridge->sliderToDouble(R1, a);
+    c = pbridge->doubleToSlider(R1, b);
+    std::cout << a << " -> " << b << " -> " << c << std::endl;
+
+    a = 4;
+    b = pbridge->sliderToDouble(R1, a);
+    c = pbridge->doubleToSlider(R1, b);
+    std::cout << a << " -> " << b << " -> " << c << std::endl;
+
+    a = 5;
+    b = pbridge->sliderToDouble(R1, a);
+    c = pbridge->doubleToSlider(R1, b);
+    std::cout << a << " -> " << b << " -> " << c << std::endl;
+
+    a = 50;
+    b = pbridge->sliderToDouble(R1, a);
+    c = pbridge->doubleToSlider(R1, b);
+    std::cout << a << " -> " << b << " -> " << c << std::endl;
+
+    a = 100;
+    b = pbridge->sliderToDouble(R1, a);
+    c = pbridge->doubleToSlider(R1, b);
+    std::cout << a << " -> " << b << " -> " << c << std::endl;
+
+}
+
+void testStrings() {
+    // Legit strings
+    std::string testStrs[] = {
+        "0","-0","0e4","-0e4","-0e-4","0.0","-0.0","0.0e4","-0.0e4","-0.0e-4",
+        "123", ".5", "1.","1.e10","1.e+10","1.e-10","1.5","1.2345","1.2345e",
+        "1.2345e1","1.2345e+1","1.2345e-1","1.2345e+12","1.2345e+13","1.2345e-12",
+        "1.2345e-13","123 p","123    p","123p","123P","123n","123u","123m",
+        "123k","123M","123g","123t","123z","123Z","123m","123milli","123M",
+        "123Meg",".5u","1.u","1.e10u","1.e-10u","1.2345e1u","1.2345e-1u","-123 p",
+        "-123    p","-123p","-123P","-123n","-123u","-123m","-123k","-123M",
+        "-123g","-123t","-123z","-123Z","-123m","-123milli","-123M","-123Meg",
+        "-.5u","-1.u","-1.e10u","-1.e-10u","-1.2345e1u","-1.2345e-1u"
+    };
+
+    std::cout << "STRING TEST" << std::endl;
+    for (auto s1: testStrs) {
+        double d = EngStr::strToDouble(s1);
+        std::string s2 = EngStr::doubleToStr(d,4);
+        std::cout << s1 << " -> " << d << " -> " << s2 << std::endl;
+    }
+
 
 }
