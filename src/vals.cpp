@@ -66,6 +66,16 @@ int Vals::incode() const {
            isin(r2d)   << 1 |
            isin(currd) << 0;
 }
+bool Vals::operator==(const Vals & other) {
+    return vtop == other.vtop &&
+           vbot == other.vbot &&
+           vmid == other.vmid &&
+           r1   == other.r1   &&
+           r2   == other.r2   &&
+           curr == other.curr;
+           // not comparing ratio
+}
+
 
 bool isin(dir d) {return d == INPUT;};
 bool isout(dir d) {return d == OUTPUT;};

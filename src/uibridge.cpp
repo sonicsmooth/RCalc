@@ -88,7 +88,7 @@
 // to   2d    10 1101
 
 // bit 4 down (vbot), bit 5 up (vtop)
-// from 1d      01 1101
+// from 1d    01 1101
 // to   2d    10 1101
 
 

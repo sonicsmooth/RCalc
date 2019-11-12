@@ -64,12 +64,12 @@ Vals RCCore::clip(Vals ivals, int icode) const {
 
 bool gtb(double a, double b) {
     // return true if a > b by a certain amount
-    const double eps = 1e-12;
+    const double eps = 1e-8;
     return ((a - b) >= eps);
 }
 bool ltb(double a, double b) {
     // return true if a < b by a certain amount
-    const double eps = 1e-12;
+    const double eps = 1e-8;
     return ((b - a) >= eps);
 }
 
@@ -114,7 +114,8 @@ Vals RCCore::calc_group(vartype latestvt, Vals invals) const {
                 // out.vmid = out.vbot + out.curr * out.r2;
                 // out.r2 = (out.vmid - out.vbot) / out.curr;
                 // out.curr = (out.vbmid - out.vbot) / out.r2;
-                out.disable = latest4.front() == R2 ? VTOP : NONE;
+                out.disable = latest4.front() == R1 ? VBOT : 
+                              latest4.front() == R2 ? VTOP : NONE;
             };
             int ctr;
             for (ctr = 0; ctr < 10; ctr++) {
@@ -234,8 +235,8 @@ Vals RCCore::calc_group(vartype latestvt, Vals invals) const {
                 // out.vbot = out.vmid - (out.r2 * out.curr);
                 // out.vmid = (out.r2 * out.curr) + out.vbot;
                 // out.curr = (out.vmid - out.vbot) / out.r2;
-                out.disable = latest4.front() == R1 ? R2 : NONE;
-                out.disable = latest4.front() == VBOT ? VTOP : NONE;
+                out.disable = latest4.front() == R1   ? R2 : 
+                              latest4.front() == VBOT ? VTOP : NONE;
             };
             int ctr;
             for (ctr = 0; ctr < 10; ctr++) {
@@ -340,7 +341,7 @@ Vals RCCore::calc_group(vartype latestvt, Vals invals) const {
             // vbot, vmid = f(vtop, r1, r2 curr)
             out.vbotd = OUTPUT;
             out.vmidd = OUTPUT;
-            auto compute = [&out]() {
+            auto compute = [&]() {
                 out.vbot = out.vtop - out.curr * (out.r1 + out.r2);
                 // out.vtop = out.vbot + out.curr * (out.r1 + out.r2);
                 // out.r1 = ((out.vtop - out.vbot) / out.curr) - out.r2;
@@ -408,9 +409,8 @@ Vals RCCore::calc_group(vartype latestvt, Vals invals) const {
                 // out.vtop = out.r1 * out.curr + out.vmid;
                 // out.vmid = out.vtop - (out.r1 * out.curr);
                 // out.curr = (out.vtop - out.vmid) / out.r1;
-                out.disable = latest4.front() == VTOP ? VBOT : NONE;
-                out.disable = latest4.front() == R2 ? R1 : NONE;
-
+                out.disable = latest4.front() == VTOP ? VBOT : 
+                              latest4.front() == R2 ? R1 : NONE;
             };
             int ctr;
             for (ctr = 0; ctr < 10; ctr++) {
@@ -457,7 +457,7 @@ Vals RCCore::calc_group(vartype latestvt, Vals invals) const {
             // vbot, curr = f(vtop, vmid, r1, r2)
             out.vbotd = OUTPUT;
             out.currd = OUTPUT;
-            auto compute = [&out]() {
+            auto compute = [&]() {
                 out.vbot = out.vmid - (out.r2 / out.r1) * (out.vtop - out.vmid);
                 // out.vtop = (out.vmid - out.vbot) * (out.r1 / out.r2) + out.vmid;
                 // out.vmid = (out.vbot + out.vtop * out.r2 / out.r1) / (1+ out.r2 / out.r1);
@@ -575,7 +575,7 @@ Vals RCCore::calc_group(vartype latestvt, Vals invals) const {
             // vmid, r2 = f(vtop, vbot r1, curr)
             out.vmidd = OUTPUT;
             out.r2d   = OUTPUT;
-            auto compute = [&out]() {
+            auto compute = [&]() {
                 out.vmid = out.vtop - out.curr * out.r1;
                 // out.vtop = out.vmid + out.curr * out.r1
                 // out.r1 = (out.vtop - out.vmid) / out.curr
@@ -706,9 +706,9 @@ Vals RCCore::calc_group(vartype latestvt, Vals invals) const {
                 // out.vbot = out.vmid - out.r2 * out.curr
                 // out.vmid = out.r2 * out.curr + out.vbot
                 // out.curr = (out.vmid - out.vbot) / out.r2
-                out.disable = latest4.front() == VTOP ? R2 : NONE;
-                out.disable = latest4.front() == VBOT ? R1 : NONE;
-};
+                out.disable = latest4.front() == VTOP ? R2 : 
+                              latest4.front() == VBOT ? R1 : NONE;                
+                };
             int ctr;
             for (ctr = 0; ctr < 10; ctr++) {
                 compute();
@@ -752,6 +752,7 @@ Vals RCCore::calc_group(vartype latestvt, Vals invals) const {
             // r1, curr = f(vtop, vbot, vmid, r2)
             out.r1d   = OUTPUT;
             out.currd = OUTPUT;
+            Vals lastout;
             auto compute = [&]() {
                 out.r1   = out.r2 * (out.vtop - out.vmid) / (out.vmid - out.vbot);
                 // out.vtop = (out.r1 / out.r2) * (out.vmid - out.vbot) + out.vmid;
@@ -766,6 +767,8 @@ Vals RCCore::calc_group(vartype latestvt, Vals invals) const {
                 };
             int ctr;
             for (ctr = 0; ctr < 10; ctr++) {
+                if (out == lastout) break; // stop the obsession
+                lastout = out;
                 compute();
                 // Special case at the root of r1<0, r2<0, or curr<0 problems
                 if (out.vbot > out.vmid) {
@@ -808,10 +811,13 @@ Vals RCCore::calc_group(vartype latestvt, Vals invals) const {
             check_ctr(ctr);
             break;}
         case 0x3c:{
+            // TODO: DEBUG ERRORS IN 0x3C and 0x3A!!
+            // TODO: Pause loop after a few rounds, but before breaking out of loop
             // r2, curr = f(vtop, vbot, vmid, r1)
             out.r2d   = OUTPUT;
             out.currd = OUTPUT;
-            auto compute = [&out]() {
+            Vals lastout;
+            auto compute = [&]() {
                 out.r2   = out.r1 * (out.vmid - out.vbot) / (out.vtop - out.vmid);
                 // out.vtop = (out.r1 / out.r2) * (out.vmid - out.vbot) + out.vmid;
                 // out.vbot = out.vmid - (out.vtop - out.vmid) * (out.r2 / out.r1);
@@ -825,6 +831,8 @@ Vals RCCore::calc_group(vartype latestvt, Vals invals) const {
                 };
             int ctr;
             for (ctr = 0; ctr < 10; ctr++) {
+                if (out == lastout) break; // stop the obsession
+                lastout = out;
                 compute();
                 // Special case at the root of r1<0, r2<0, or curr<0 problems
                 if (out.vbot > out.vmid) {
@@ -836,7 +844,7 @@ Vals RCCore::calc_group(vartype latestvt, Vals invals) const {
                         throw_line("Shouldn't get here");}
                 else if (out.vtop < out.vmid) {
                     if (latestvt == VTOP)
-                        out.vtop = out.vtop = (out.r1 / rmax) * (out.vmid - out.vbot) + out.vmid;
+                        out.vtop = (out.r1 / rmax) * (out.vmid - out.vbot) + out.vmid;
                     else if (latestvt == VMID)
                         out.vmid = (out.vtop * rmax + out.vbot * out.r1) / (out.r1 + rmax);
                     else
@@ -867,7 +875,6 @@ Vals RCCore::calc_group(vartype latestvt, Vals invals) const {
             break;}
         default:
             throw_line( "Error in logic" );
-
     }
     out.ratio = out.r1 / out.r2;
     out.ratiod = OUTPUT;

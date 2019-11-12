@@ -14,6 +14,7 @@ class Vals {
         bool isDefined() const;
         std::string str() const;
         int incode() const;
+        bool operator==(const Vals &);
 };
 
 bool isin(dir);

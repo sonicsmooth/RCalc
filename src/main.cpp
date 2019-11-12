@@ -89,10 +89,10 @@ int main(int argc, char *argv[])
 
     // Set some initial condition
     pbridge->setCore(pcore);
-    pbridge->setCoreValue(VTOP, 3.3);
-    pbridge->setCoreValue(VBOT, -3.3);
-    pbridge->setCoreValue(VMID,  2.5);
-    pbridge->setCoreValue(CURR, 0.001);
+    pbridge->setCoreValue(VTOP, 3.9);
+    pbridge->setCoreValue(VBOT, 1.475);
+    pbridge->setCoreValue(VMID,  3.775);
+    pbridge->setCoreValue(R1, 405.5461);
 
     pbridge->setWindow(&w); // change to shared ptr
     pcore->setBridge(pbridge);
