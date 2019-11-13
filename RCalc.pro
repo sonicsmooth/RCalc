@@ -17,23 +17,28 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     src/engstr.cpp \
+    src/form.cpp \
     src/main.cpp \
     src/mainwindow.cpp \
     src/rccore.cpp \
+    src/rdivider.cpp \
     src/uibridge.cpp \
     src/uibridgeinterface.cpp \
     src/vals.cpp
 
 HEADERS += \
     src/engstr.h \
+    src/form.h \
     src/mainwindow.h \
     src/rccore.h \
     src/rctypes.h \
+    src/rdivider.h \
     src/uibridge.h \
     src/uibridgeinterface.h \
     src/vals.h
 
 FORMS += \
+    src/form.ui \
     src/mainwindow.ui
 
 # Default rules for deployment.

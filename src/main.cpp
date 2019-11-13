@@ -16,6 +16,7 @@
 #include "engstr.h"
 #include "uibridge.h"
 #include "mainwindow.h"
+#include "ui_form.h"
 
 
 
@@ -98,7 +99,14 @@ int main(int argc, char *argv[])
     pcore->setBridge(pbridge);
     pcore->update();
 
-   w.show();
+
+    w.show();
+
+    QWidget *junkwidget = new QWidget;
+    Ui::Form junkform;
+    junkform.setupUi(junkwidget);
+    junkwidget->show();
+
     return app.exec();
 }
 
