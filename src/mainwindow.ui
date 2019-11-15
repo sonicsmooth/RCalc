@@ -14,36 +14,26 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QGridLayout" name="gridLayout">
-    <item row="1" column="0">
-     <widget class="QPlainTextEdit" name="plainTextEdit">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="font">
-       <font>
-        <family>Consolas</family>
-       </font>
-      </property>
-      <property name="cursor" stdset="0">
-       <cursorShape>ArrowCursor</cursorShape>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="0">
+   <layout class="QVBoxLayout" name="verticalLayout_9">
+    <item>
      <layout class="QHBoxLayout" name="horizontalLayout_9">
       <item>
-       <widget class="QWidget" name="widget" native="true">
-        <property name="minimumSize">
-         <size>
-          <width>75</width>
-          <height>0</height>
-         </size>
-        </property>
-       </widget>
+       <layout class="QVBoxLayout" name="verticalLayout_7">
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_7">
+          <item>
+           <widget class="RDivider" name="widget" native="true"/>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="RatioValEdit_2">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
       <item>
        <layout class="QVBoxLayout" name="verticalLayout_8">
@@ -274,9 +264,35 @@
       </item>
      </layout>
     </item>
+    <item>
+     <widget class="QPlainTextEdit" name="plainTextEdit">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="font">
+       <font>
+        <family>Consolas</family>
+       </font>
+      </property>
+      <property name="cursor" stdset="0">
+       <cursorShape>ArrowCursor</cursorShape>
+      </property>
+     </widget>
+    </item>
    </layout>
   </widget>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>RDivider</class>
+   <extends>QWidget</extends>
+   <header>src/rdivider.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>
