@@ -55,6 +55,13 @@ void UIBridge::setOutputStates(Vals vals /*, constype ct */)
     w->CurrValEdit()->setDisabled(vals.disable == CURR);
     w->RatioValEdit()->setDisabled(true);
 
+    // Set the RDivider
+    w->RDivider()->blockSignals(true);
+    w->RDivider()->setVTop(vals.vtop);
+    w->RDivider()->setVBot(vals.vbot);
+    w->RDivider()->setVMid(vals.vmid);
+    w->RDivider()->blockSignals(false);
+
     // Fill in the text with proper numbers.
     w->VTopValEdit()->setText(QString::fromStdString(EngStr::doubleToStr(vals.vtop, 4)));
     w->VBotValEdit()->setText(QString::fromStdString(EngStr::doubleToStr(vals.vbot, 4)));

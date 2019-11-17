@@ -17,8 +17,9 @@
     do { \
         std::ostringstream s; \
         s << msg << " " << __FILE__ << ":" << __LINE__; \
-        std::cout << s.str(); \
-        throw std::logic_error(s.str()); \
+        std::string errstr = s.str(); \
+        std::cout << errstr; \
+        throw std::logic_error(errstr); \
     } while (0)
  
 // PRIVATE

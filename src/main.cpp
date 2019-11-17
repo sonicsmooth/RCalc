@@ -61,6 +61,8 @@ int main(int argc, char *argv[])
     pbridge->setRange(RATIO, 5, steps, 1e-6, pcore->getRatiomax());
 
     // For now set Rdivider manually, later in bridge
+    w.RDivider()->setVMax(25);
+    w.RDivider()->setVMin(-25);
 
 
     // signals affect core directly using lambda; slid values become inputs, which goes to update, which sets the buttons
@@ -78,6 +80,10 @@ int main(int argc, char *argv[])
     QObject::connect(w.R2Slider(),   &QSlider::sliderPressed, [=, &w]() {pbridge->setCoreValue(R2,   w.R2Slider()->value());});
     QObject::connect(w.CurrSlider(), &QSlider::sliderPressed, [=, &w]() {pbridge->setCoreValue(CURR, w.CurrSlider()->value());});
 
+    QObject::connect(w.RDivider(), &RDivider::vtopChanged, [=](double x) {pbridge->setCoreValue(VTOP, x);});
+    QObject::connect(w.RDivider(), &RDivider::vbotChanged, [=](double x) {pbridge->setCoreValue(VBOT, x);});
+    QObject::connect(w.RDivider(), &RDivider::vmidChanged, [=](double x) {pbridge->setCoreValue(VMID, x);});
+
     // Set up validate-and-send on each line edit
     auto vas = [=](QLineEdit * qle, vartype vt) {
         double x = EngStr::strToDouble(qle->text().toStdString());
@@ -91,12 +97,12 @@ int main(int argc, char *argv[])
     QObject::connect(w.R2ValEdit(),   &QLineEdit::editingFinished, [=, &w]() {vas(w.R2ValEdit(),   R2);});
     QObject::connect(w.CurrValEdit(), &QLineEdit::editingFinished, [=, &w]() {vas(w.CurrValEdit(), CURR);});
 
-    // Set some initial condition
+    // Set some initial conditions
     pbridge->setCore(pcore);
-    pbridge->setCoreValue(VTOP, 3.9);
-    pbridge->setCoreValue(VBOT, 1.475);
-    pbridge->setCoreValue(VMID,  3.775);
-    pbridge->setCoreValue(R1, 405.5461);
+    pbridge->setCoreValue(VTOP, 5.0);
+    pbridge->setCoreValue(VBOT, 1.0);
+    pbridge->setCoreValue(VMID, 3.3);
+    pbridge->setCoreValue(R1, 1000);
 
     pbridge->setWindow(&w); // change to shared ptr
     pcore->setBridge(pbridge);

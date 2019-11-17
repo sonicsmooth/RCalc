@@ -2,6 +2,7 @@
 #include <iostream>
 #include <QPainter>
 #include <QPen>
+#include <QMouseEvent>
 
 
 /* assume there is margin from each of top and bottom
@@ -17,18 +18,20 @@ then:
 void RDivider::updateSlope() {
     // arguments are the min and max voltages represented
     m_slope = -(height() - 2 * (1 + m_margin)) / (m_vmax - m_vmin);
+    update();
 }
 void RDivider::updateOffset() {
     // vmin is the minimum voltage
     // top is the minimum pixel (top of box), typically margin
     m_offset = (height() - 1 - m_margin) - m_slope * m_vmin;
+    update();
 }
-int RDivider::voltToPixel(double volt) {
+int RDivider::voltToPixel(double volt) const {
     // Returns vertical pixel location given voltage
     // Uses member variables for slope and offset
     return int(m_slope * volt + m_offset); 
 }
-double RDivider::pixelToVolt(int pixel) {
+double RDivider::pixelToVolt(int pixel) const {
     // Return voltage given vertical pixel location
     // uses member variables for slope and offset
     return (pixel - m_offset ) / m_slope;
@@ -44,6 +47,7 @@ RDivider::RDivider(QWidget *parent) : QWidget(parent)
     m_vmid = 5;
     updateSlope();
     updateOffset();
+    m_clickMargin = 3;
 }
 
 double RDivider::VMax() const {
@@ -52,6 +56,7 @@ double RDivider::VMax() const {
 void RDivider::setVMax(double x) {
     m_vmax = x;
     emit vmaxChanged(x);
+    update();
 }
 double RDivider::VMin() const {
     return m_vmin;
@@ -59,6 +64,7 @@ double RDivider::VMin() const {
 void RDivider::setVMin(double x) {
     m_vmin = x;
     emit vminChanged(x);
+    update();
 }
 double RDivider::VTop() const {
     return m_vtop;
@@ -66,6 +72,7 @@ double RDivider::VTop() const {
 void RDivider::setVTop(double x) {
     m_vtop = x;
     emit vtopChanged(x);
+    update();
 }
 double RDivider::VBot() const {
     return m_vbot;
@@ -73,6 +80,7 @@ double RDivider::VBot() const {
 void RDivider::setVBot(double x) {
     m_vbot = x;
     emit vbotChanged(x);
+    update();
 }
 double RDivider::VMid() const {
     return m_vmid;
@@ -80,6 +88,7 @@ double RDivider::VMid() const {
 void RDivider::setVMid(double x) {
     m_vmid = x;
     emit vmidChanged(x);
+    update();
 }
 
 void RDivider::paintEvent(QPaintEvent *event) {
@@ -102,17 +111,49 @@ void RDivider::paintEvent(QPaintEvent *event) {
 }
 
 void RDivider::mouseMoveEvent(QMouseEvent *event) {
-    std::cout << "Move" << std::endl;
+    if (state == NO_DRAG)
+        return;
+    int mousey = event->y();
+    if (state == VTOP_DRAG)
+        setVTop(pixelToVolt(mousey));
+    else if (state == VBOT_DRAG)
+        setVBot(pixelToVolt(mousey));
+    else if (state == VMID_DRAG)
+        setVMid(pixelToVolt(mousey));
 }
 
 void RDivider::mousePressEvent(QMouseEvent *event) {
-    std::cout << "press" << std::endl;
+    if (!(event->buttons() & Qt::LeftButton)) {
+        state = RDivider::NO_DRAG;
+        std::cout << "no drag" << std::endl;
+        return;
+    }
+
+    auto within = [=](int rc) {return abs(event->y() - rc) < m_clickMargin;};
+    if (within(voltToPixel(m_vtop))) {
+        state = VTOP_DRAG;
+        std::cout << "vtop drag" << std::endl;
+    }
+    else if (within(voltToPixel(m_vbot))) {
+        state = VBOT_DRAG;
+        std::cout << "vbot drag" << std::endl;
+    }
+    else if (within(voltToPixel(m_vmid))) {
+        state = VMID_DRAG;
+        std::cout << "vmid drag" << std::endl;
+    }
+}
+void RDivider::mouseReleaseEvent(QMouseEvent * event) {
+    if (!(event->buttons() & Qt::LeftButton)) {
+        state = RDivider::NO_DRAG;
+        std::cout << "no drag" << std::endl;
+        return;
+    }
 }
 
 void RDivider::resizeEvent(QResizeEvent *event) {
     updateSlope();
     updateOffset();
-//    std::cout << "resize" << std::endl;
     std::cout << width() << "x" << height() << "-> ";
     std::cout << "slope|offset = " << m_slope << "|" << m_offset << "\t";
     std::cout << "vmin|vmax = " << m_vmin << "|" << m_vmax << "\t";

@@ -15,14 +15,17 @@ class RDivider : public QWidget
     Q_PROPERTY(double VBot READ VBot WRITE setVBot NOTIFY vbotChanged)
     Q_PROPERTY(double VMid READ VMid WRITE setVMid NOTIFY vmidChanged)
 
+    typedef enum {NO_DRAG, VTOP_DRAG, VBOT_DRAG, VMID_DRAG} drag;
+    drag state;
     double m_vmax, m_vmin, m_vtop, m_vbot, m_vmid;
     double m_slope, m_offset;
-    double m_margin;
+    int m_margin;
+    int m_clickMargin;
 
     void updateSlope();
     void updateOffset();
-    int voltToPixel(double);
-    double pixelToVolt(int);
+    int voltToPixel(double) const;
+    double pixelToVolt(int) const;
 
 public:
     explicit RDivider(QWidget *parent = nullptr);
@@ -40,6 +43,7 @@ protected:
     void paintEvent(QPaintEvent *) override;
     void mouseMoveEvent(QMouseEvent *) override;
     void mousePressEvent(QMouseEvent *) override;
+    void mouseReleaseEvent(QMouseEvent *) override;
     void resizeEvent(QResizeEvent *) override;
     
 signals:
