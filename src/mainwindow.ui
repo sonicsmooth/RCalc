@@ -22,7 +22,7 @@
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_7">
           <item>
-           <widget class="RDivider" name="widget" native="true"/>
+           <widget class="RDivider" name="rDivider" native="true"/>
           </item>
          </layout>
         </item>

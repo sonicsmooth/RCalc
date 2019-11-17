@@ -14,24 +14,36 @@ then:
 
 */
 
-double RDivider::calculateSlope(double x0, double x1) {
-    // x0 and x1 represent the min and max voltages represented
-    return (height() + 1) / (x1 - x0);
+void RDivider::updateSlope() {
+    // arguments are the min and max voltages represented
+    m_slope = -(height() - 2 * (1 + m_margin)) / (m_vmax - m_vmin);
 }
-double RDivider::calculateOffset(double slope, double x0, double y0) {
-    // x0 is the minimum voltage
-    // y0 is the minimum pixel (top of box)
-    return y0 - slope * x0;
+void RDivider::updateOffset() {
+    // vmin is the minimum voltage
+    // top is the minimum pixel (top of box), typically margin
+    m_offset = (height() - 1 - m_margin) - m_slope * m_vmin;
 }
-
+int RDivider::voltToPixel(double volt) {
+    // Returns vertical pixel location given voltage
+    // Uses member variables for slope and offset
+    return int(m_slope * volt + m_offset); 
+}
+double RDivider::pixelToVolt(int pixel) {
+    // Return voltage given vertical pixel location
+    // uses member variables for slope and offset
+    return (pixel - m_offset ) / m_slope;
+}
 
 RDivider::RDivider(QWidget *parent) : QWidget(parent)
 {
     m_vmax = 10;
     m_vmin = 0;
-    m_margin = 10;
-    m_slope = calculateSlope(0, 10);
-    m_offset = calculateOffset(m_slope, 0, m_margin);
+    m_margin = 5;
+    m_vtop = 10;
+    m_vbot = 0;
+    m_vmid = 5;
+    updateSlope();
+    updateOffset();
 }
 
 double RDivider::VMax() const {
@@ -76,6 +88,17 @@ void RDivider::paintEvent(QPaintEvent *event) {
     QPainter painter(this);
     painter.setPen(QPen(Qt::blue));
     painter.drawRect(0,0, width()-1, height()-1);
+
+    int vtopp = voltToPixel(m_vtop);
+    int vbotp = voltToPixel(m_vbot);
+    int vmidp = voltToPixel(m_vmid);
+    painter.setPen(QPen(Qt::red));
+    painter.drawLine(m_margin, vtopp, width()-1-m_margin, vtopp);
+    painter.drawLine(m_margin, vbotp, width()-1-m_margin, vbotp);
+    painter.drawLine(m_margin, vmidp, width()-1-m_margin, vmidp);
+
+    painter.end();
+
 }
 
 void RDivider::mouseMoveEvent(QMouseEvent *event) {
@@ -87,9 +110,11 @@ void RDivider::mousePressEvent(QMouseEvent *event) {
 }
 
 void RDivider::resizeEvent(QResizeEvent *event) {
-    m_slope = calculateSlope(m_vmin, m_vmax);
-    m_offset = calculateOffset(m_slope, m_vmin, m_margin);
+    updateSlope();
+    updateOffset();
 //    std::cout << "resize" << std::endl;
-//    std::cout << width() << " " << height() << std::endl;
-    std::cout << m_slope << " " << m_offset << std::endl;
+    std::cout << width() << "x" << height() << "-> ";
+    std::cout << "slope|offset = " << m_slope << "|" << m_offset << "\t";
+    std::cout << "vmin|vmax = " << m_vmin << "|" << m_vmax << "\t";
+    std::cout << "pxmin|pxmax = " << voltToPixel(m_vmin) << "|" << voltToPixel(m_vmax) << std::endl;
 }

@@ -19,8 +19,10 @@ class RDivider : public QWidget
     double m_slope, m_offset;
     double m_margin;
 
-    double calculateSlope(double x0, double x1);
-    double calculateOffset(double slope, double x0, double y0);
+    void updateSlope();
+    void updateOffset();
+    int voltToPixel(double);
+    double pixelToVolt(int);
 
 public:
     explicit RDivider(QWidget *parent = nullptr);

@@ -47,4 +47,4 @@ QLineEdit * MainWindow::CurrValEdit() {return m_ui->CurrValEdit;}
 //QPushButton * MainWindow::R2Button() {return m_ui->R2Button;}
 //QPushButton * MainWindow::CurrButton() {return m_ui->CurrButton;}
 QPlainTextEdit * MainWindow::TextEdit() {return m_ui->plainTextEdit;}
-
+RDivider * MainWindow::RDivider() {return m_ui->rDivider;}

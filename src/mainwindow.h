@@ -7,10 +7,18 @@
 #include <QLineEdit>
 #include <QPlainTextEdit>
 #include <QPushButton>
+#include "rdivider.h"
 
+// Forward declares Ui::MainWindow
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
+
+
+// So at the end of this, there is a
+// MainWindow:QMainWindow which owns a Ui::MainWindow:Ui_MainWindow
+// At compile time, the Ui::MainWindow doesn't exist fully yet
+// So cannot access members directly
 
 class MainWindow : public QMainWindow
 {
@@ -48,8 +56,7 @@ public:
 //    QPushButton * R2Button();
 //    QPushButton * CurrButton();
     QPlainTextEdit * TextEdit();
-    
-
+    RDivider * MainWindow::RDivider();
 
 private:
     Ui::MainWindow *m_ui;

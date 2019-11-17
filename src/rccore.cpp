@@ -345,8 +345,8 @@ Vals RCCore::calc_group(vartype latestvt, Vals invals) const {
                         out.vbot = out.vmid - (0.0 * out.curr);
                     else if (latestvt == VMID) 
                         out.vmid = (0.0 * out.curr) + out.vbot;
-                    else if (latestvt == CURR) 
-                        out.curr = (out.vmid - out.vbot) / 0.0;
+                    //else if (latestvt == CURR)
+                        //out.curr = (out.vmid - out.vbot) / 0.0;
 
                 }
                 else break;
@@ -405,8 +405,8 @@ Vals RCCore::calc_group(vartype latestvt, Vals invals) const {
                         out.vbot = out.vmid - 0.0 * out.r2;
                     else if (latestvt == VMID)
                         out.vmid = 0.0 * out.r2 + out.vbot;
-                    else if (latestvt == R2)
-                        out.r2 = (out.vmid - out.vbot) / 0.0;
+                    //else if (latestvt == R2);
+                        //out.r2 = (out.vmid - out.vbot) / 0.0;
                 }
                 else break;
             }
@@ -519,8 +519,8 @@ Vals RCCore::calc_group(vartype latestvt, Vals invals) const {
                         out.vtop = 0.0 * out.curr + out.vmid;
                     else if (latestvt == VMID)
                         out.vmid = out.vtop - (0.0 * out.curr);
-                    else if (latestvt == CURR)
-                        out.curr = (out.vtop - out.vmid) / 0.0;
+                    //else if (latestvt == CURR);
+                        //out.curr = (out.vtop - out.vmid) / 0.0;
                 }
                 else break;
             }
@@ -580,8 +580,8 @@ Vals RCCore::calc_group(vartype latestvt, Vals invals) const {
                         out.vtop = 0.0 * out.r1 + out.vmid;
                     else if (latestvt == VMID)
                         out.vmid = out.vtop - (0.0 * out.r1);
-                    else if (latestvt == R1)
-                        out.r1 = (out.vtop - out.vmid) / 0.0;
+                    //else if (latestvt == R1);
+                        //out.r1 = (out.vtop - out.vmid) / 0.0;
                 }
                 else break;
             }
@@ -759,10 +759,10 @@ Vals RCCore::calc_group(vartype latestvt, Vals invals) const {
                 		out.vtop = 0.0 * (out.r1 + out.r2) + out.vbot;
                     else if (latestvt == VBOT)
                 		out.vbot = out.vtop - 0.0 * (out.r1 + out.r2);
-                    else if (latestvt == R1)
-                		out.r1 = (out.vtop - out.vbot) / 0.0 - out.r2;
-                    else if (latestvt == R2)
-                		out.r2 = (out.vtop - out.vbot) / 0.0 - out.r1;
+                    else if (latestvt == R1);
+                        //out.r1 = (out.vtop - out.vbot) / 0.0 - out.r2;
+                    else if (latestvt == R2);
+                        //out.r2 = (out.vtop - out.vbot) / 0.0 - out.r1;
                     else break;}
                 else break;
             }
@@ -800,8 +800,8 @@ Vals RCCore::calc_group(vartype latestvt, Vals invals) const {
                 		out.vtop = 0.0 * out.curr + out.vmid;
                     else if (latestvt == VMID)
                 		out.vmid = out.vtop - 0.0 * out.curr;
-                    else if (latestvt == CURR)
-                		out.curr = (out.vtop - out.vmid) / 0.0;
+                    else if (latestvt == CURR);
+                        // out.curr = (out.vtop - out.vmid) / 0.0;
                     else break;}
                 else if (gtb(out.r2, rmax)) {
                     if      (latestvt == VBOT)
@@ -816,8 +816,8 @@ Vals RCCore::calc_group(vartype latestvt, Vals invals) const {
                 		out.vbot = out.vmid - 0.0 * out.curr;
                     else if (latestvt == VMID)
                 		out.vmid = 0.0 * out.curr + out.vbot;
-                    else if (latestvt == CURR)
-                		out.curr = (out.vmid - out.vbot) / 0.0;
+                    else if (latestvt == CURR);
+                        // out.curr = (out.vmid - out.vbot) / 0.0;
                     else break;}
                 else break;
             }

@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
     std::shared_ptr<UIBridge> pbridge = std::make_shared<UIBridge>();
     MainWindow w;
 
-    // Each slider has this many steps
+    // Each slider has this many steps + 1
     int steps = 1000;
     w.VTopSlider()->setMinimum(0);
     w.VBotSlider()->setMinimum(0);
@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
     pcore->setCurrmax(3.0);
     pcore->setRatiomax(1e6);
 
-    // Update bridge ranges
+    // Update bridge ranges so it knows how to interpret slider values
     pbridge->setRange(VTOP, 0, steps, pcore->getVbl(), pcore->getVul());
     pbridge->setRange(VBOT, 0, steps, pcore->getVbl(), pcore->getVul());
     pbridge->setRange(VMID, 0, steps, pcore->getVbl(), pcore->getVul());
@@ -59,6 +59,9 @@ int main(int argc, char *argv[])
     pbridge->setRange(R2, 5, steps, 1e-3, pcore->getRmax());
     pbridge->setRange(CURR, 5, steps, 1e-6, pcore->getCurrmax());
     pbridge->setRange(RATIO, 5, steps, 1e-6, pcore->getRatiomax());
+
+    // For now set Rdivider manually, later in bridge
+
 
     // signals affect core directly using lambda; slid values become inputs, which goes to update, which sets the buttons
     QObject::connect(w.VTopSlider(), &QSlider::valueChanged, [=](int x) {pbridge->setCoreValue(VTOP, x);});
@@ -102,10 +105,10 @@ int main(int argc, char *argv[])
 
     w.show();
 
-    QWidget *junkwidget = new QWidget;
-    Ui::Form junkform;
-    junkform.setupUi(junkwidget);
-    junkwidget->show();
+//    QWidget *junkwidget = new QWidget;
+//    Ui::Form junkform;
+//    junkform.setupUi(junkwidget);
+//    junkwidget->show();
 
     return app.exec();
 }
