@@ -30,16 +30,16 @@ public:
     void setInputs(Vals);
     Vals getInput() const;
     Vals getOutput() const;
-    double getVul() const;
-    double getVbl() const;
-    double getRmax() const;
-    double getCurrmax() const;
-    double getRatiomax() const;
-    void setVul(double);
-    void setVbl(double);
-    void setRmax(double);
-    void setCurrmax(double);
-    void setRatiomax(double);
+    double VMax() const;
+    double VMin() const;
+    double RMax() const;
+    double CurrMax() const;
+    double RatioMax() const;
+    void setVMax(double);
+    void setVMin(double);
+    void setRMax(double);
+    void setCurrMax(double);
+    void setRatioMax(double);
     void setBridge(std::shared_ptr<UIBridgeInterface> const &);
 };
 

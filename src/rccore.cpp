@@ -1037,13 +1037,13 @@ Vals RCCore::getOutput() const {
     return outVals;
 }
 
-double RCCore::getVul() const {return vul;}
-double RCCore::getVbl() const {return vbl;}
-double RCCore::getRmax() const {return rmax;}
-double RCCore::getCurrmax() const {return currmax;}
-double RCCore::getRatiomax() const {return ratiomax;}
-void   RCCore::setVul(double x) {vul = x;}
-void   RCCore::setVbl(double x) {vbl = x; }
-void   RCCore::setRmax(double x) {rmax = x;}
-void   RCCore::setCurrmax(double x) {currmax = x; }
-void   RCCore::setRatiomax(double x) {ratiomax = x;}
+double RCCore::VMax() const {return vul;}
+double RCCore::VMin() const {return vbl;}
+double RCCore::RMax() const {return rmax;}
+double RCCore::CurrMax() const {return currmax;}
+double RCCore::RatioMax() const {return ratiomax;}
+void   RCCore::setVMax(double x) {vul = x;}
+void   RCCore::setVMin(double x) {vbl = x; }
+void   RCCore::setRMax(double x) {rmax = x;}
+void   RCCore::setCurrMax(double x) {currmax = x; }
+void   RCCore::setRatioMax(double x) {ratiomax = x;}

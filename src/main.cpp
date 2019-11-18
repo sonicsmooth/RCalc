@@ -45,24 +45,24 @@ int main(int argc, char *argv[])
     w.RatioSlider()->setMaximum(steps);
 
     // Set core limits
-    pcore->setVul(20.0);
-    pcore->setVbl(-5.0);
-    pcore->setRmax(1e6);
-    pcore->setCurrmax(3.0);
-    pcore->setRatiomax(1e6);
+    pcore->setVMax(20.0);
+    pcore->setVMin(-5.0);
+    pcore->setRMax(1e6);
+    pcore->setCurrMax(3.0);
+    pcore->setRatioMax(1e6);
 
     // Update bridge ranges so it knows how to interpret slider values
-    pbridge->setRange(VTOP, 0, steps, pcore->getVbl(), pcore->getVul());
-    pbridge->setRange(VBOT, 0, steps, pcore->getVbl(), pcore->getVul());
-    pbridge->setRange(VMID, 0, steps, pcore->getVbl(), pcore->getVul());
-    pbridge->setRange(R1, 5, steps, 1e-3, pcore->getRmax());
-    pbridge->setRange(R2, 5, steps, 1e-3, pcore->getRmax());
-    pbridge->setRange(CURR, 5, steps, 1e-6, pcore->getCurrmax());
-    pbridge->setRange(RATIO, 5, steps, 1e-6, pcore->getRatiomax());
+    pbridge->setRange(VTOP, 0, steps, pcore->VMin(), pcore->VMax());
+    pbridge->setRange(VBOT, 0, steps, pcore->VMin(), pcore->VMax());
+    pbridge->setRange(VMID, 0, steps, pcore->VMin(), pcore->VMax());
+    pbridge->setRange(R1, 5, steps, 1e-3, pcore->RMax());
+    pbridge->setRange(R2, 5, steps, 1e-3, pcore->RMax());
+    pbridge->setRange(CURR, 5, steps, 1e-6, pcore->CurrMax());
+    pbridge->setRange(RATIO, 5, steps, 1e-6, pcore->RatioMax());
 
-    // For now set Rdivider manually, later in bridge
-    w.RDivider()->setVMax(25);
-    w.RDivider()->setVMin(-25);
+    // For now set Rdivider manually, later maybe in bridge
+    w.RDivider()->setVMax(pcore->VMax());
+    w.RDivider()->setVMin(pcore->VMin());
 
 
     // signals affect core directly using lambda; slid values become inputs, which goes to update, which sets the buttons
