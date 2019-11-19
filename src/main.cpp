@@ -63,6 +63,9 @@ int main(int argc, char *argv[])
     // For now set Rdivider manually, later maybe in bridge
     w.RDivider()->setVMax(pcore->VMax());
     w.RDivider()->setVMin(pcore->VMin());
+    w.RDivider()->setCurrMin(1e-6);
+    w.RDivider()->setCurrMax(pcore->CurrMax());
+    
 
 
     // signals affect core directly using lambda; slid values become inputs, which goes to update, which sets the buttons

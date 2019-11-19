@@ -15,17 +15,21 @@ then:
 
 */
 
+int RDivider::maxWidth() const {
+    return width() - 1 - 2 * m_margin;
+}
+
 void RDivider::updateVFunc() {
     m_slope = -(height() - 2 * (1 + m_margin)) / (m_vmax - m_vmin);
     m_offset = (height() - 1 - m_margin) - m_slope * m_vmin;
     update();
 }
 void RDivider::updateCFunc() {
-    // Calculates m_lcoeff and m_ldiff such that
+    // Calculates m_acoeff and m_bcoeff such that
     // When curr == m_currMin, then return is m_resMinWidth
     // when curr == m_currMax, then return is width() - 1 - 2 * m_margin;
-
-
+    m_acoeff = m_currMin;
+    m_bcoeff = log10(m_currMax / m_acoeff) / (maxWidth() - m_resMinWidth);
 }
 int RDivider::voltToPixel(double volt) const {
     // Returns vertical pixel location given voltage
@@ -38,11 +42,15 @@ double RDivider::pixelToVolt(int pixel) const {
     return (pixel - m_offset ) / m_slope;
 }
 int RDivider::currToPixel(double curr) const {
-    // returns pixels given current.
-    // When curr == m_currMin, then return is m_resMinWidth
-    // when curr == m_currMax, then return is width() - 1 - 2 * m_margin;
-    //double logc = m_lcoeff * log10(curr * m_ldiv);
-    return 30;
+    // returns pixel width of resistor given current.
+    // When curr < m_currMin, then return is m_resMinWidth
+    // when curr > m_currMax, then return is width() - 1 - 2 * m_margin;
+    // otherwise return the log of the current such that 
+    // the minimum current maps to the minimum resistor width,
+    // and the max of the currnt maps to the maximum window width
+    if (curr < m_currMin) return m_resMinWidth;
+    if (curr > m_currMax) return maxWidth();
+    return log10(curr / m_acoeff) / m_bcoeff;
 }
 
 RDivider::RDivider(QWidget *parent) : 
@@ -60,7 +68,8 @@ RDivider::RDivider(QWidget *parent) :
     m_barHThick(7),
     m_barVThick(3),
     m_barVLong(15),
-    m_resThick(3)
+    m_resThick(3),
+    m_resMinWidth(10)
 {
     updateVFunc();
     updateCFunc();
@@ -142,24 +151,28 @@ void RDivider::paintEvent(QPaintEvent *event) {
     //painter.drawRect(0,0, width()-1, height()-1);
 
     // Draw power bars
-    int vtopp = voltToPixel(m_vtop);
+    int vtopp = voltToPixel(m_vtop);// - 2* m_barVLong;
     int vbotp = voltToPixel(m_vbot);
-    int vmidp = voltToPixel(m_vmid);
+    int vmidp = voltToPixel(m_vmid);// + 2* m_barVLong;
     int midpt = (width() - 1) / 2;
 
+    // Horiz bars
     painter.setPen(QPen(Qt::red, m_barHThick));
     painter.drawLine(m_margin, vtopp, width() - 1 - m_margin, vtopp);
     painter.drawLine(m_margin, vbotp, width() - 1 - m_margin, vbotp);
     painter.drawLine(m_margin, vmidp, width() - 1 - m_margin, vmidp);
+
+    // Vert bars
     painter.setPen(QPen(Qt::red, m_barVThick));
     painter.drawLine(midpt, vtopp,              midpt, vtopp + m_barVLong);
     painter.drawLine(midpt, vmidp - m_barVLong, midpt, vmidp + m_barVLong);
     painter.drawLine(midpt, vbotp - m_barVLong, midpt, vbotp);
 
+    int reswidth = currToPixel(m_curr);
+    int resstart = (width() - 1 - reswidth) / 2;
     painter.setPen(QPen(Qt::gray, 1));
-    painter.drawRect(m_margin, vtopp+m_barVLong, width()-1-2*m_margin, vmidp - m_barVLong - vtopp-m_barVLong);
-    painter.drawRect(m_margin, vmidp+m_barVLong, width()-1-2*m_margin, vbotp - m_barVLong - vmidp - m_barVLong);
-
+    painter.drawRect(resstart, vtopp + m_barVLong, currToPixel(m_curr), vmidp - m_barVLong - vtopp-m_barVLong);
+    painter.drawRect(resstart, vmidp + m_barVLong, currToPixel(m_curr), vbotp - m_barVLong - vmidp - m_barVLong);
 
     painter.end();
 
@@ -180,37 +193,29 @@ void RDivider::mouseMoveEvent(QMouseEvent *event) {
 void RDivider::mousePressEvent(QMouseEvent *event) {
     if (!(event->buttons() & Qt::LeftButton)) {
         state = RDivider::NO_DRAG;
-        std::cout << "no drag" << std::endl;
         return;
     }
 
-    auto within = [=](int rc) {return abs(event->y() - rc) < (m_clickMargin + m_barHThick/2);};
-    if (within(voltToPixel(m_vtop))) {
+    auto within = [=](int rc, int voffset) {
+        return abs(event->y() - (rc+voffset)) < (m_clickMargin + m_barHThick/2);
+        };
+    if (within(voltToPixel(m_vtop), 0))
         state = VTOP_DRAG;
-        std::cout << "vtop drag" << std::endl;
-    }
-    else if (within(voltToPixel(m_vbot))) {
+    else if (within(voltToPixel(m_vbot), 0))
         state = VBOT_DRAG;
-        std::cout << "vbot drag" << std::endl;
-    }
-    else if (within(voltToPixel(m_vmid))) {
+    else if (within(voltToPixel(m_vmid), 0))
         state = VMID_DRAG;
-        std::cout << "vmid drag" << std::endl;
-    }
 }
 void RDivider::mouseReleaseEvent(QMouseEvent * event) {
-    if (!(event->buttons() & Qt::LeftButton)) {
+    if (!(event->buttons() & Qt::LeftButton))
         state = RDivider::NO_DRAG;
-        std::cout << "no drag" << std::endl;
-        return;
-    }
 }
 
 void RDivider::resizeEvent(QResizeEvent *event) {
     updateVFunc();
     updateCFunc();
-    std::cout << width() << "x" << height() << "-> ";
-    std::cout << "slope|offset = " << m_slope << "|" << m_offset << "\t";
-    std::cout << "vmin|vmax = " << m_vmin << "|" << m_vmax << "\t";
-    std::cout << "pxmin|pxmax = " << voltToPixel(m_vmin) << "|" << voltToPixel(m_vmax) << std::endl;
+    //std::cout << width() << "x" << height() << "-> ";
+    //std::cout << "slope|offset = " << m_slope << "|" << m_offset << "\t";
+    //std::cout << "vmin|vmax = " << m_vmin << "|" << m_vmax << "\t";
+    //std::cout << "pxmin|pxmax = " << voltToPixel(m_vmin) << "|" << voltToPixel(m_vmax) << std::endl;
 }

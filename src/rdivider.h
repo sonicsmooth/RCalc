@@ -23,7 +23,7 @@ class RDivider : public QWidget
     double m_vmax, m_vmin, m_vtop, m_vbot, m_vmid;
     double m_currMax, m_currMin, m_curr;
     double m_slope, m_offset; // used for voltage mapping
-    double m_lcoeff, m_ldiv; // used for current mapping
+    double m_acoeff, m_bcoeff; // used for current mapping
     int m_margin;
     int m_clickMargin;
     int m_barHThick;
@@ -32,6 +32,7 @@ class RDivider : public QWidget
     int m_resThick;
     int m_resMinWidth;
 
+    int maxWidth() const;
     void updateVFunc(); // y=mx+b for voltages
     void updateCFunc(); // y=log(curr) for currents
     int voltToPixel(double) const;
