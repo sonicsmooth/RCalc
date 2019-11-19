@@ -57,9 +57,9 @@ RDivider::RDivider(QWidget *parent) :
     m_curr(0.01),
     m_margin (20),
     m_clickMargin(2),
-    m_barHThick(10),
-    m_barVThick(5),
-    m_barVLong(10),
+    m_barHThick(7),
+    m_barVThick(3),
+    m_barVLong(15),
     m_resThick(3)
 {
     updateVFunc();
@@ -138,8 +138,8 @@ void RDivider::setCurrMin(double x) {
 void RDivider::paintEvent(QPaintEvent *event) {
     (void) event;
     QPainter painter(this);
-    painter.setPen(QPen(Qt::blue));
-    painter.drawRect(0,0, width()-1, height()-1);
+    //painter.setPen(QPen(Qt::blue));
+    //painter.drawRect(0,0, width()-1, height()-1);
 
     // Draw power bars
     int vtopp = voltToPixel(m_vtop);
@@ -156,7 +156,7 @@ void RDivider::paintEvent(QPaintEvent *event) {
     painter.drawLine(midpt, vmidp - m_barVLong, midpt, vmidp + m_barVLong);
     painter.drawLine(midpt, vbotp - m_barVLong, midpt, vbotp);
 
-    painter.setPen(QPen(Qt::black, m_resThick));
+    painter.setPen(QPen(Qt::gray, 1));
     painter.drawRect(m_margin, vtopp+m_barVLong, width()-1-2*m_margin, vmidp - m_barVLong - vtopp-m_barVLong);
     painter.drawRect(m_margin, vmidp+m_barVLong, width()-1-2*m_margin, vbotp - m_barVLong - vmidp - m_barVLong);
 
