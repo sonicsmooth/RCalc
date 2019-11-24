@@ -56,7 +56,7 @@ public:
 //    QPushButton * R2Button();
 //    QPushButton * CurrButton();
     QPlainTextEdit * TextEdit();
-    RDivider * MainWindow::RDivider();
+    RDivider * RDivider();
 
 private:
     Ui::MainWindow *m_ui;

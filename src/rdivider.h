@@ -2,7 +2,7 @@
 #define RDIVIDER_H
 
 #include <QWidget>
-
+#include "rctypes.h"
 
 
 
@@ -22,21 +22,22 @@ class RDivider : public QWidget
     drag state;
     double m_vmax, m_vmin, m_vtop, m_vbot, m_vmid;
     double m_currMax, m_currMin, m_curr;
-    double m_slope, m_offset; // used for voltage mapping
+    double m_slope, m_offsetVtop, m_offsetVbot, m_offsetVmid; // used for voltage mapping
     double m_acoeff, m_bcoeff; // used for current mapping
-    int m_margin;
+    int m_hMargin, m_vMargin;
     int m_clickMargin;
     int m_barHThick;
     int m_barVThick;
     int m_barVLong;
     int m_resThick;
     int m_resMinWidth;
+    vartype m_disabled;
 
     int maxWidth() const;
     void updateVFunc(); // y=mx+b for voltages
     void updateCFunc(); // y=log(curr) for currents
-    int voltToPixel(double) const;
-    double pixelToVolt(int) const;
+    int voltToPixel(double, vartype) const;
+    double pixelToVolt(int, vartype) const;
     int currToPixel(double) const;
 
 public:
@@ -57,6 +58,7 @@ public:
     void setCurrMin(double);
     double Curr() const;
     void setCurr(double);
+    void setDisabled(vartype);
 protected:
     void paintEvent(QPaintEvent *) override;
     void mouseMoveEvent(QMouseEvent *) override;

@@ -46,6 +46,7 @@ void UIBridge::setOutputStates(Vals vals /*, constype ct */)
     w->R2Slider()->setDisabled(vals.disable == R2);
     w->CurrSlider()->setDisabled(vals.disable == CURR);
     w->RatioSlider()->setDisabled(true);
+    w->RDivider()->setDisabled(vals.disable);
 
     w->VTopValEdit()->setDisabled(vals.disable == VTOP);
     w->VBotValEdit()->setDisabled(vals.disable == VBOT);

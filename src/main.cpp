@@ -66,8 +66,6 @@ int main(int argc, char *argv[])
     w.RDivider()->setCurrMin(1e-6);
     w.RDivider()->setCurrMax(pcore->CurrMax());
     
-
-
     // signals affect core directly using lambda; slid values become inputs, which goes to update, which sets the buttons
     QObject::connect(w.VTopSlider(), &QSlider::valueChanged, [=](int x) {pbridge->setCoreValue(VTOP, x);});
     QObject::connect(w.VBotSlider(), &QSlider::valueChanged, [=](int x) {pbridge->setCoreValue(VBOT, x);});
