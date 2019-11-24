@@ -165,7 +165,9 @@ void RDivider::paintEvent(QPaintEvent *event) {
     (void) event;
     QPainter painter(this);
     QPen HNormal(Qt::red, m_barHThick, Qt::SolidLine, Qt::FlatCap);
+    QPen HDisabled(Qt::gray, m_barHThick, Qt::SolidLine, Qt::FlatCap);
     QPen VNormal(Qt::red, m_barVThick, Qt::SolidLine, Qt::FlatCap);
+    QPen VDisabled(Qt::gray, m_barVThick, Qt::SolidLine, Qt::FlatCap);
     QPen RNormal(Qt::gray, 1);
     //painter.setPen(QPen(Qt::blue));
     //painter.drawRect(0,0, width()-1, height()-1);
@@ -176,17 +178,24 @@ void RDivider::paintEvent(QPaintEvent *event) {
     int vmidp = voltToPixel(m_vmid, VMID);
     int midpt = (width() - 1) / 2;
 
-    // Horiz bars
-    painter.setPen(HNormal);
+    // VTOP
+    painter.setPen(m_disabled == VTOP ? HDisabled : HNormal);
     painter.drawLine(m_hMargin, vtopp, width() - 1 - m_hMargin, vtopp);
-    painter.drawLine(m_hMargin, vbotp, width() - 1 - m_hMargin, vbotp);
-    painter.drawLine(m_hMargin, vmidp, width() - 1 - m_hMargin, vmidp);
+    painter.setPen(m_disabled == VTOP ? VDisabled : VNormal);
+    painter.drawLine(midpt, vtopp, midpt, vtopp + m_barVLong);
 
-    // Vert bars
-    painter.setPen(VNormal);
-    painter.drawLine(midpt, vtopp,              midpt, vtopp + m_barVLong);
+    // VBOT
+    painter.setPen(m_disabled == VBOT ? HDisabled : HNormal);
+    painter.drawLine(m_hMargin, vbotp, width() - 1 - m_hMargin, vbotp);
+    painter.setPen(m_disabled == VBOT ? VDisabled : VNormal);
     painter.drawLine(midpt, vbotp - m_barVLong, midpt, vbotp);
+
+    // VMID
+    painter.setPen(m_disabled == VMID ? HDisabled : HNormal);
+    painter.drawLine(m_hMargin, vmidp, width() - 1 - m_hMargin, vmidp);
+    painter.setPen(m_disabled == VMID ? VDisabled : VNormal);
     painter.drawLine(midpt, vmidp - m_barVLong, midpt, vmidp + m_barVLong);
+
 
     // Resistors
     int reswidth = currToPixel(m_curr);
@@ -216,14 +225,14 @@ void RDivider::mousePressEvent(QMouseEvent *event) {
         state = RDivider::NO_DRAG;
         return;
     }
-    auto within = [=](int rc, int voffset) {
-        return abs(event->y() - (rc+voffset)) < (m_clickMargin + m_barHThick/2);
+    auto within = [=](int rc) {
+        return abs(event->y() - rc) < (m_clickMargin + m_barHThick/2);
         };
-    if (within(voltToPixel(m_vtop, VTOP), 0) && m_disabled != VTOP)
+    if (within(voltToPixel(m_vtop, VTOP)) && m_disabled != VTOP)
         state = VTOP_DRAG;
-    else if (within(voltToPixel(m_vbot, VBOT), 0) && m_disabled != VBOT)
+    else if (within(voltToPixel(m_vbot, VBOT)) && m_disabled != VBOT)
         state = VBOT_DRAG;
-    else if (within(voltToPixel(m_vmid, VMID), 0) && m_disabled != VMID)
+    else if (within(voltToPixel(m_vmid, VMID)) && m_disabled != VMID)
         state = VMID_DRAG;
 }
 void RDivider::mouseReleaseEvent(QMouseEvent * event) {
