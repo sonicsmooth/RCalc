@@ -1,5 +1,7 @@
 #include "rdivider.h"
 #include <iostream>
+#include <cmath>
+#include <algorithm>
 #include <QPainter>
 #include <QPen>
 #include <QMouseEvent>
@@ -88,49 +90,51 @@ RDivider::RDivider(QWidget *parent) :
     updateCFunc();
 }
 
-double RDivider::VMax() const {
-    return m_vmax;
-}
+double RDivider::VMax() const {return m_vmax;}
+double RDivider::VMin() const {return m_vmin;}
+double RDivider::VTop() const {return m_vtop;}
+double RDivider::VBot() const {return m_vbot;}
+double RDivider::VMid() const {return m_vmid;}
+double RDivider::R1() const {return m_r1;}
+double RDivider::R2() const {return m_r2;}
+double RDivider::Curr() const {return m_curr;}
+double RDivider::CurrMax() const {return m_currMax;}
+double RDivider::CurrMin() const {return m_currMin;}
+
 void RDivider::setVMax(double x) {
     m_vmax = x;
     emit vmaxChanged(x);
     update();
-}
-double RDivider::VMin() const {
-    return m_vmin;
 }
 void RDivider::setVMin(double x) {
     m_vmin = x;
     emit vminChanged(x);
     update();
 }
-double RDivider::VTop() const {
-    return m_vtop;
-}
 void RDivider::setVTop(double x) {
     m_vtop = x;
     emit vtopChanged(x);
     update();
-}
-double RDivider::VBot() const {
-    return m_vbot;
 }
 void RDivider::setVBot(double x) {
     m_vbot = x;
     emit vbotChanged(x);
     update();
 }
-double RDivider::VMid() const {
-    return m_vmid;
-}
 void RDivider::setVMid(double x) {
     m_vmid = x;
     emit vmidChanged(x);
     update();
 }
-
-double RDivider::Curr() const {
-    return m_curr;
+void RDivider::setR1(double x) {
+    m_r1 = x;
+    emit r1Changed(x);
+    update();
+}
+void RDivider::setR2(double x) {
+    m_r2 = x;
+    emit r2Changed(x);
+    update();
 }
 void RDivider::setCurr(double x) {
     m_curr = x;
@@ -140,19 +144,10 @@ void RDivider::setCurr(double x) {
 void RDivider::setDisabled(vartype vt) {
     m_disabled = vt;
 }
-
-
-double RDivider::CurrMax() const {
-    return m_currMax;
-}
 void RDivider::setCurrMax(double x) {
     m_currMax = x;
     emit currMaxChanged(x);
     update();
-}
-
-double RDivider::CurrMin() const {
-    return m_currMin;
 }
 void RDivider::setCurrMin(double x) {
     m_currMin = x;
@@ -160,6 +155,51 @@ void RDivider::setCurrMin(double x) {
     update();
 }
 
+void RDivider::drawResistor(QPainter *p, int x, int y, int width, int height, int tail, int zags) const {
+    // The x, y, width, height define the bounding box. The resistor drops down
+    // from the top by tail amount, then does zags full cycles back and forth,
+    // starting and stopping at x + width / 2, then drops down another tail to
+    // reach the bottom.  Length may be added to tails as needed to ensure the
+    // exact integer number of zags, or perhaps the pixel period of each zag is
+    // calculated as needed. There are two variables to represent -- resistance
+    // and current. Potentially there is also power, but we aren't doing power
+    // yet. These should map somehow in an intuitive way to things like the
+    // number of zags, the thickness of the line, the color of the line, and
+    // also the width of the bounding box.  For now the width of the bounding
+    // box represents current, and line thickness and color are fixed. There may
+    // also be the need to represent whether the resistor is disabled, meaning
+    // you can't click on it to change it. In any case, these things are
+    // controlled by the caller; this function is strictly to draw the top and
+    // bottom tail, and the zags, using the provided bounding box and QPen.
+    
+    // Just the bounding box
+    //p->drawRect(x, y, width, height);
+
+    // For zags...
+    int xleft   = x;
+    int xmid    = x + width / 2;
+    int xright  = x + width;
+    int zspace = height - 2 * tail;
+    double zperiod = double(zspace) / double(zags); // in pixels
+    double p1by4 = zperiod / 4.0;
+    double p2by4 = zperiod / 2.0;
+    double zstart = y + tail;
+
+    p->drawLine(xmid, y , xmid, int(zstart));
+    for (int i=0; i < zags; i++) {
+        p->drawLine(xmid, int(round(zstart)), xright, int(round(zstart + p1by4)));
+        zstart += p1by4;
+        p->drawLine(xright, int(round(zstart)), xleft, int(round(zstart + p2by4)));
+        zstart += p2by4;
+        p->drawLine(xleft, int(round(zstart)), xmid, int(round(zstart + p1by4)));
+        zstart += p1by4;
+    }
+    p->drawLine(xmid, int(round(zstart)), xmid, y+height);
+
+
+
+
+}
 
 void RDivider::paintEvent(QPaintEvent *event) {
     (void) event;
@@ -168,11 +208,9 @@ void RDivider::paintEvent(QPaintEvent *event) {
     QPen HDisabled(Qt::gray, m_barHThick, Qt::SolidLine, Qt::FlatCap);
     QPen VNormal(Qt::red, m_barVThick, Qt::SolidLine, Qt::FlatCap);
     QPen VDisabled(Qt::gray, m_barVThick, Qt::SolidLine, Qt::FlatCap);
-    QPen RNormal(Qt::gray, 1);
-    //painter.setPen(QPen(Qt::blue));
-    //painter.drawRect(0,0, width()-1, height()-1);
+    QPen RNormal(Qt::gray, 3);
 
-    // Set pixel levels based on voltage
+    // Set pixel levels based on voltage, includes offset for vbar
     int vtopp = voltToPixel(m_vtop, VTOP);
     int vbotp = voltToPixel(m_vbot, VBOT);
     int vmidp = voltToPixel(m_vmid, VMID);
@@ -198,12 +236,24 @@ void RDivider::paintEvent(QPaintEvent *event) {
 
 
     // Resistors
-    int reswidth = currToPixel(m_curr);
-    int resstart = (width() - 1 - reswidth) / 2;
+    int w = currToPixel(m_curr);
+    int x = (width() - 1 - w) / 2;
+    int y1 = vtopp + m_barVLong;
+    int y2 = vmidp + m_barVLong;
+    int h1 = vmidp - vtopp - 2 * m_barVLong;
+    int h2 = vbotp - vmidp - 2 * m_barVLong;
+    int resuse1 = std::min(int(round(6.0 * w / sqrt(3))), h1);
+    int resuse2 = std::min(int(round(6.0 * w / sqrt(3))), h2);
+    int tail1 = (h1 - resuse1)/2;
+    int tail2 = (h2 - resuse2)/2;
+    int zags1 = 3;//int(round(std::min(std::max(log10(m_r1) + 1.0, 1.0), 12.0)));
+    int zags2 = 3;//int(round(std::min(std::max(log10(m_r2) + 1.0, 1.0), 12.0)));
     painter.setPen(RNormal);
-    painter.drawRect(resstart, vtopp + m_barVLong, currToPixel(m_curr), vmidp - m_barVLong - vtopp - m_barVLong);
-    painter.drawRect(resstart, vmidp + m_barVLong, currToPixel(m_curr), vbotp - m_barVLong - vmidp - m_barVLong);
-
+    //drawResistor(&painter, x, y1+tail1, w, resuse1, tail1, zags1);
+    //drawResistor(&painter, x, y2+tail2, w, resuse2, tail2, zags2);
+    drawResistor(&painter, x, y1, w, h1, tail1, zags1);
+    drawResistor(&painter, x, y2, w, h2, tail2, zags2);
+    
     painter.end();
 
 }

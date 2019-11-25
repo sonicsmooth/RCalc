@@ -62,6 +62,8 @@ void UIBridge::setOutputStates(Vals vals /*, constype ct */)
     w->RDivider()->setVBot(vals.vbot);
     w->RDivider()->setVMid(vals.vmid);
     w->RDivider()->setCurr(vals.curr);
+    w->RDivider()->setR1(vals.r1);
+    w->RDivider()->setR2(vals.r2);
     w->RDivider()->blockSignals(false);
 
     // Fill in the text with proper numbers.

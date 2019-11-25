@@ -14,13 +14,15 @@ class RDivider : public QWidget
     Q_PROPERTY(double VTop    READ VTop    WRITE setVTop    NOTIFY vtopChanged)
     Q_PROPERTY(double VBot    READ VBot    WRITE setVBot    NOTIFY vbotChanged)
     Q_PROPERTY(double VMid    READ VMid    WRITE setVMid    NOTIFY vmidChanged)
+    Q_PROPERTY(double R1      READ R1      WRITE setR1      NOTIFY r1Changed)
+    Q_PROPERTY(double R2      READ R1      WRITE setR2      NOTIFY r2Changed)
     Q_PROPERTY(double CurrMax READ CurrMax WRITE setCurrMax NOTIFY currMaxChanged)
     Q_PROPERTY(double CurrMin READ CurrMin WRITE setCurrMin NOTIFY currMinChanged)
     Q_PROPERTY(double Curr    READ Curr    WRITE setCurr    NOTIFY currChanged)
 
     typedef enum {NO_DRAG, VTOP_DRAG, VBOT_DRAG, VMID_DRAG} drag;
     drag state;
-    double m_vmax, m_vmin, m_vtop, m_vbot, m_vmid;
+    double m_vmax, m_vmin, m_vtop, m_vbot, m_vmid, m_r1, m_r2;
     double m_currMax, m_currMin, m_curr;
     double m_slope, m_offsetVtop, m_offsetVbot, m_offsetVmid; // used for voltage mapping
     double m_acoeff, m_bcoeff; // used for current mapping
@@ -39,24 +41,29 @@ class RDivider : public QWidget
     int voltToPixel(double, vartype) const;
     double pixelToVolt(int, vartype) const;
     int currToPixel(double) const;
+    void drawResistor(QPainter *, int x, int y, int width, int height, int tail, int zags) const;
 
 public:
     explicit RDivider(QWidget *parent = nullptr);
     double VMax() const;
-    void setVMax(double);
     double VMin() const;
-    void setVMin(double);
     double VTop() const;
-    void setVTop(double);
     double VBot() const;
-    void setVBot(double);
     double VMid() const;
-    void setVMid(double);
+    double R1() const;
+    double R2() const;
     double CurrMax() const;
-    void setCurrMax(double);
     double CurrMin() const;
-    void setCurrMin(double);
     double Curr() const;
+    void setVMax(double);
+    void setVMin(double);
+    void setVTop(double);
+    void setVBot(double);
+    void setVMid(double);
+    void setR1(double);
+    void setR2(double);
+    void setCurrMax(double);
+    void setCurrMin(double);
     void setCurr(double);
     void setDisabled(vartype);
 protected:
@@ -72,6 +79,8 @@ signals:
     void vtopChanged(double);
     void vbotChanged(double);
     void vmidChanged(double);
+    void r1Changed(double);
+    void r2Changed(double);
     void currMaxChanged(double);
     void currMinChanged(double);
     void currChanged(double);

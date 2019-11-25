@@ -4,6 +4,7 @@
             "name": "Win32",
             "includePath": [
                 "${workspaceFolder}/**",
+                //"${workspaceFolder}/src/**",
                 "C:/Qt/5.12.5/msvc2017_64/include/**"
             ],
             "defines": [
