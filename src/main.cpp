@@ -103,7 +103,8 @@ int main(int argc, char *argv[])
     pbridge->setCoreValue(VTOP, 5.0);
     pbridge->setCoreValue(VBOT, 1.0);
     pbridge->setCoreValue(VMID, 3.3);
-    pbridge->setCoreValue(R1, 1000);
+    pbridge->setCoreValue(R1, 100);
+    pbridge->setCoreValue(CURR, "60 mA");
 
     pbridge->setWindow(&w); // change to shared ptr
     pcore->setBridge(pbridge);

@@ -155,7 +155,7 @@ void RDivider::setCurrMin(double x) {
     update();
 }
 
-void RDivider::drawResistor(QPainter *p, int x, int y, int width, int height, int tail, int zags) const {
+void RDivider::drawResistor(QPainter *p, int x, int y, int width, int height, int tail, double zags) const {
     // The x, y, width, height define the bounding box. The resistor drops down
     // from the top by tail amount, then does zags full cycles back and forth,
     // starting and stopping at x + width / 2, then drops down another tail to
@@ -179,36 +179,50 @@ void RDivider::drawResistor(QPainter *p, int x, int y, int width, int height, in
     int xleft   = x;
     int xmid    = x + width / 2;
     int xright  = x + width;
-    int zspace = height - 2 * tail;
-    double zperiod = double(zspace) / double(zags); // in pixels
-    double p1by4 = zperiod / 4.0;
-    double p2by4 = zperiod / 2.0;
-    double zstart = y + tail;
+    int yspace = height - 2 * tail;
+    double yperiod = double(yspace) / double(zags); // in pixels
+    double p1by4 = yperiod / 4.0;
+    double p2by4 = yperiod / 2.0;
+    double ystart = y + tail;
 
-    p->drawLine(xmid, y , xmid, int(zstart));
-    for (int i=0; i < zags; i++) {
-        p->drawLine(xmid, int(round(zstart)), xright, int(round(zstart + p1by4)));
-        zstart += p1by4;
-        p->drawLine(xright, int(round(zstart)), xleft, int(round(zstart + p2by4)));
-        zstart += p2by4;
-        p->drawLine(xleft, int(round(zstart)), xmid, int(round(zstart + p1by4)));
-        zstart += p1by4;
+    if (yperiod == 0.0)
+        p->drawLine(xleft, int(round(ystart)), xright, int(round(ystart)));
+    else {
+         p->drawLine(xmid, y , xmid, int(ystart));
+        //for (int i=0; i < int(zags)+1; i++)
+        int lastx;
+        while (true) {
+            lastx = xmid;
+            if (ystart + p1by4 > y + height) break;
+            p->drawLine(xmid, int(round(ystart)), xright, int(round(ystart + p1by4)));
+            ystart += p1by4;
+
+            lastx = xright;
+            if (ystart + p2by4 > y + height) break;
+            p->drawLine(xright, int(round(ystart)), xleft, int(round(ystart + p2by4)));
+            ystart += p2by4;
+
+            lastx = xleft;
+            if (ystart + p1by4 > y + height) break;
+            p->drawLine(xleft, int(round(ystart)), xmid, int(round(ystart + p1by4)));
+            ystart += p1by4;
+        }
+        p->drawLine(lastx, int(round(ystart)), xmid, y+height);
     }
-    p->drawLine(xmid, int(round(zstart)), xmid, y+height);
-
-
-
-
 }
 
 void RDivider::paintEvent(QPaintEvent *event) {
+
     (void) event;
     QPainter painter(this);
     QPen HNormal(Qt::red, m_barHThick, Qt::SolidLine, Qt::FlatCap);
     QPen HDisabled(Qt::gray, m_barHThick, Qt::SolidLine, Qt::FlatCap);
     QPen VNormal(Qt::red, m_barVThick, Qt::SolidLine, Qt::FlatCap);
     QPen VDisabled(Qt::gray, m_barVThick, Qt::SolidLine, Qt::FlatCap);
-    QPen RNormal(Qt::gray, 3);
+
+
+    double rthick = (log10(m_curr)-1 + 6.0) * 3;
+    QPen RNormal(Qt::gray, int(round(rthick)), Qt::SolidLine, Qt::RoundCap);
 
     // Set pixel levels based on voltage, includes offset for vbar
     int vtopp = voltToPixel(m_vtop, VTOP);
@@ -233,24 +247,22 @@ void RDivider::paintEvent(QPaintEvent *event) {
     painter.drawLine(m_hMargin, vmidp, width() - 1 - m_hMargin, vmidp);
     painter.setPen(m_disabled == VMID ? VDisabled : VNormal);
     painter.drawLine(midpt, vmidp - m_barVLong, midpt, vmidp + m_barVLong);
-
-
     // Resistors
-    int w = currToPixel(m_curr);
+    int w = int(width() * 0.35); //currToPixel(m_curr);
     int x = (width() - 1 - w) / 2;
     int y1 = vtopp + m_barVLong;
     int y2 = vmidp + m_barVLong;
     int h1 = vmidp - vtopp - 2 * m_barVLong;
     int h2 = vbotp - vmidp - 2 * m_barVLong;
-    int resuse1 = std::min(int(round(6.0 * w / sqrt(3))), h1);
-    int resuse2 = std::min(int(round(6.0 * w / sqrt(3))), h2);
-    int tail1 = (h1 - resuse1)/2;
-    int tail2 = (h2 - resuse2)/2;
-    int zags1 = 3;//int(round(std::min(std::max(log10(m_r1) + 1.0, 1.0), 12.0)));
-    int zags2 = 3;//int(round(std::min(std::max(log10(m_r2) + 1.0, 1.0), 12.0)));
+    //int zags1 = int(round(std::min(std::max(log10(m_r1) + 1.0, 1.0), 12.0)));
+    //int zags2 = int(round(std::min(std::max(log10(m_r2) + 1.0, 1.0), 12.0)));
+    double zags1 = std::min(std::max(log10(m_r1) + 1.0, 1.0), 12.0);
+    double zags2 = std::min(std::max(log10(m_r2) + 1.0, 1.0), 12.0);
+    //int resuse1 = std::min(int(round(6.0 * w / sqrt(zags1))), h1);
+    //int resuse2 = std::min(int(round(6.0 * w / sqrt(zags2))), h2);
+    int tail1 = 0; //(h1 - resuse1)/2;
+    int tail2 = 0; //(h2 - resuse2)/2;
     painter.setPen(RNormal);
-    //drawResistor(&painter, x, y1+tail1, w, resuse1, tail1, zags1);
-    //drawResistor(&painter, x, y2+tail2, w, resuse2, tail2, zags2);
     drawResistor(&painter, x, y1, w, h1, tail1, zags1);
     drawResistor(&painter, x, y2, w, h2, tail2, zags2);
     

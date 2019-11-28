@@ -87,22 +87,9 @@ void UIBridge::setOutputStates(Vals vals /*, constype ct */)
     setDirColors(w->R2ValEdit(), vals.r2d);
     setDirColors(w->CurrValEdit(), vals.currd);
     setDirColors(w->RatioValEdit(), vals.ratiod);
-    // } else
-    // {
-    //     auto setErrorBackground = [=](QLineEdit * le) {
-    //         le->setStyleSheet("background-color: #ffabab");
-    //     };
-    //     if (!isin(vals.vtopd)) setErrorBackground(w->VTopValEdit());
-    //     if (!isin(vals.vbotd)) setErrorBackground(w->VBotValEdit());
-    //     if (!isin(vals.vmidd)) setErrorBackground(w->VMidValEdit());
-    //     if (!isin(vals.r1d)) setErrorBackground(w->R1ValEdit());
-    //     if (!isin(vals.r2d)) setErrorBackground(w->R2ValEdit());
-    //     if (!isin(vals.currd)) setErrorBackground(w->CurrValEdit());
-    //     if (!isin(vals.ratiod)) setErrorBackground(w->RatioValEdit());
-    // }
 
     std::string sstr(vals.str());
-    w->TextEdit()->appendPlainText(QString::fromStdString(sstr));
+    w->TextEdit()->setPlainText(QString::fromStdString(sstr));
 }
 
 void UIBridge::forceSlider(QSlider *slider, int val) const
