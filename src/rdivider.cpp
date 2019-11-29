@@ -220,9 +220,9 @@ void RDivider::paintEvent(QPaintEvent *event) {
     QPen VNormal(Qt::red, m_barVThick, Qt::SolidLine, Qt::FlatCap);
     QPen VDisabled(Qt::gray, m_barVThick, Qt::SolidLine, Qt::FlatCap);
 
-
-    double rthick = (log10(m_curr)-1 + 6.0) * 3;
-    QPen RNormal(Qt::gray, int(round(rthick)), Qt::SolidLine, Qt::RoundCap);
+    //double rthick = (log10(m_curr)-1 + 6.0) * 3;
+    //QPen RNormal(Qt::gray, int(round(rthick)), Qt::SolidLine, Qt::SquareCap, Qt::RoundJoin);
+    QPen RNormal(Qt::gray, 10, Qt::SolidLine, Qt::SquareCap, Qt::MiterJoin);
 
     // Set pixel levels based on voltage, includes offset for vbar
     int vtopp = voltToPixel(m_vtop, VTOP);
@@ -254,12 +254,8 @@ void RDivider::paintEvent(QPaintEvent *event) {
     int y2 = vmidp + m_barVLong;
     int h1 = vmidp - vtopp - 2 * m_barVLong;
     int h2 = vbotp - vmidp - 2 * m_barVLong;
-    //int zags1 = int(round(std::min(std::max(log10(m_r1) + 1.0, 1.0), 12.0)));
-    //int zags2 = int(round(std::min(std::max(log10(m_r2) + 1.0, 1.0), 12.0)));
     double zags1 = std::min(std::max(log10(m_r1) + 1.0, 1.0), 12.0);
     double zags2 = std::min(std::max(log10(m_r2) + 1.0, 1.0), 12.0);
-    //int resuse1 = std::min(int(round(6.0 * w / sqrt(zags1))), h1);
-    //int resuse2 = std::min(int(round(6.0 * w / sqrt(zags2))), h2);
     int tail1 = 0; //(h1 - resuse1)/2;
     int tail2 = 0; //(h2 - resuse2)/2;
     painter.setPen(RNormal);
