@@ -41,7 +41,7 @@ class RDivider : public QWidget
     int voltToPixel(double, vartype) const;
     double pixelToVolt(int, vartype) const;
     int currToPixel(double) const;
-    void drawResistor(QPainter *, int x, int y, int width, int height, int tail, double zags) const;
+    void drawResistor(QPainter *, int x, int y, int width, int height, double mintail, double zags) const;
 
 public:
     explicit RDivider(QWidget *parent = nullptr);

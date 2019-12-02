@@ -3,6 +3,8 @@
 #include <cmath>
 #include <algorithm>
 #include <QPainter>
+#include <QPolygonF>
+#include <QPointF>
 #include <QPen>
 #include <QMouseEvent>
 
@@ -155,74 +157,64 @@ void RDivider::setCurrMin(double x) {
     update();
 }
 
-void RDivider::drawResistor(QPainter *p, int x, int y, int width, int height, int tail, double zags) const {
-    // The x, y, width, height define the bounding box. The resistor drops down
-    // from the top by tail amount, then does zags full cycles back and forth,
-    // starting and stopping at x + width / 2, then drops down another tail to
-    // reach the bottom.  Length may be added to tails as needed to ensure the
-    // exact integer number of zags, or perhaps the pixel period of each zag is
-    // calculated as needed. There are two variables to represent -- resistance
-    // and current. Potentially there is also power, but we aren't doing power
-    // yet. These should map somehow in an intuitive way to things like the
-    // number of zags, the thickness of the line, the color of the line, and
-    // also the width of the bounding box.  For now the width of the bounding
-    // box represents current, and line thickness and color are fixed. There may
-    // also be the need to represent whether the resistor is disabled, meaning
-    // you can't click on it to change it. In any case, these things are
-    // controlled by the caller; this function is strictly to draw the top and
-    // bottom tail, and the zags, using the provided bounding box and QPen.
-    
-    // Just the bounding box
-    //p->drawRect(x, y, width, height);
+void RDivider::drawResistor(QPainter *p, int x, int y, int width, int height, double mintail, double zags) const {
+    //int xleft   = x;
+    //int xmid    = x + width / 2;
+    //int xright  = x + width;
+    int numpts = int(std::floor(double(zags) * 4.0) + 1.0);
+    int usableheight = height - 2 * mintail;
+    double nomperiod = 2.0 * width / sqrt(3);
+    double idealuse = nomperiod * zags;
+    double actualuse = std::min(idealuse, double(usableheight));
+    double actualperiod = actualuse / zags;
+    double qperiod = actualperiod / 4.0;
+    double actualtail = (height - actualuse) / 2.0;
 
-    // For zags...
-    int xleft   = x;
-    int xmid    = x + width / 2;
-    int xright  = x + width;
-    int yspace = height - 2 * tail;
-    double yperiod = double(yspace) / double(zags); // in pixels
-    double p1by4 = yperiod / 4.0;
-    double p2by4 = yperiod / 2.0;
-    double ystart = y + tail;
+    double corners[] = {0.0, width/2.0, 0.0, -width/2.0};
+    double xos = double(x) + width/2.0;
+    double thisx, thisy;
+    double lastx, lasty;
+    double slope;
 
-    if (yperiod == 0.0)
-        p->drawLine(xleft, int(round(ystart)), xright, int(round(ystart)));
-    else {
-         p->drawLine(xmid, y , xmid, int(ystart));
-        //for (int i=0; i < int(zags)+1; i++)
-        int lastx;
-        while (true) {
-            lastx = xmid;
-            if (ystart + p1by4 > y + height) break;
-            p->drawLine(xmid, int(round(ystart)), xright, int(round(ystart + p1by4)));
-            ystart += p1by4;
-
-            lastx = xright;
-            if (ystart + p2by4 > y + height) break;
-            p->drawLine(xright, int(round(ystart)), xleft, int(round(ystart + p2by4)));
-            ystart += p2by4;
-
-            lastx = xleft;
-            if (ystart + p1by4 > y + height) break;
-            p->drawLine(xleft, int(round(ystart)), xmid, int(round(ystart + p1by4)));
-            ystart += p1by4;
-        }
-        p->drawLine(lastx, int(round(ystart)), xmid, y+height);
+    QPolygonF pts;
+    pts << QPointF(xos, y);
+    lastx = xos;
+    lasty = y;
+    thisy = y + actualtail;
+    for (int i = 0; i < numpts; i++) {
+        int idx = i & 0x3;
+        thisx = corners[idx] + double(xos);
+        slope = (thisx - lastx) / (thisy - lasty); // weird
+        pts << QPointF(thisx, thisy);
+        lastx = thisx;
+        lasty = thisy;
+        thisy += qperiod;
     }
+    slope = lastx == xos ? slope : -slope;
+    thisy = y + height - actualtail;
+    thisx = lastx + slope * (thisy - lasty);
+    pts << QPointF(thisx, thisy);
+    pts << QPointF(xos, thisy);
+    pts << QPointF(xos, y + height);
+    p->drawPolyline(pts);
 }
 
 void RDivider::paintEvent(QPaintEvent *event) {
 
     (void) event;
     QPainter painter(this);
+    //painter.setRenderHint(QPainter::Antialiasing);
+    painter.drawRect(0,0,width()-1,height()-1);
+
+    double rthick = (log10(m_curr)-1 + 6.0) * 3;
+
     QPen HNormal(Qt::red, m_barHThick, Qt::SolidLine, Qt::FlatCap);
     QPen HDisabled(Qt::gray, m_barHThick, Qt::SolidLine, Qt::FlatCap);
-    QPen VNormal(Qt::red, m_barVThick, Qt::SolidLine, Qt::FlatCap);
+    QPen VNormal(Qt::red, rthick /*m_barVThick*/, Qt::SolidLine, Qt::FlatCap);
     QPen VDisabled(Qt::gray, m_barVThick, Qt::SolidLine, Qt::FlatCap);
 
-    //double rthick = (log10(m_curr)-1 + 6.0) * 3;
-    //QPen RNormal(Qt::gray, int(round(rthick)), Qt::SolidLine, Qt::SquareCap, Qt::RoundJoin);
-    QPen RNormal(Qt::gray, 10, Qt::SolidLine, Qt::SquareCap, Qt::MiterJoin);
+    QPen RNormal(Qt::gray, int(round(rthick)), Qt::SolidLine, Qt::FlatCap, Qt::MiterJoin);
+    //QPen RNormal(Qt::gray, 10, Qt::SolidLine, Qt::SquareCap, Qt::MiterJoin);
 
     // Set pixel levels based on voltage, includes offset for vbar
     int vtopp = voltToPixel(m_vtop, VTOP);
@@ -248,19 +240,21 @@ void RDivider::paintEvent(QPaintEvent *event) {
     painter.setPen(m_disabled == VMID ? VDisabled : VNormal);
     painter.drawLine(midpt, vmidp - m_barVLong, midpt, vmidp + m_barVLong);
     // Resistors
-    int w = int(width() * 0.35); //currToPixel(m_curr);
+    int w = int(width() * 0.25); //currToPixel(m_curr);
     int x = (width() - 1 - w) / 2;
+    double minzags = 2;
+    double maxzags = 12;
+    double zags1 = std::min(std::max(log10(m_r1) + 1.0, minzags), maxzags);
+    double zags2 = std::min(std::max(log10(m_r2) + 1.0, minzags), maxzags);
+    double mintail = 0;
     int y1 = vtopp + m_barVLong;
     int y2 = vmidp + m_barVLong;
     int h1 = vmidp - vtopp - 2 * m_barVLong;
     int h2 = vbotp - vmidp - 2 * m_barVLong;
-    double zags1 = std::min(std::max(log10(m_r1) + 1.0, 1.0), 12.0);
-    double zags2 = std::min(std::max(log10(m_r2) + 1.0, 1.0), 12.0);
-    int tail1 = 0; //(h1 - resuse1)/2;
-    int tail2 = 0; //(h2 - resuse2)/2;
     painter.setPen(RNormal);
-    drawResistor(&painter, x, y1, w, h1, tail1, zags1);
-    drawResistor(&painter, x, y2, w, h2, tail2, zags2);
+    //drawResistor(&painter, 0, 0, 100, 365, 10, 2.62);
+    drawResistor(&painter, x, y1, w, h1, mintail, zags1);
+    drawResistor(&painter, x, y2, w, h2, mintail, zags2);
     
     painter.end();
 
