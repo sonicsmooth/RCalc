@@ -9,7 +9,6 @@
 #include "uibridge.h"
 #include "engstr.h"
 
-//UIBridge::UIBridge(){}
 
 // TODO:
 // Each box can hove one of three bits set for color display:
@@ -64,6 +63,7 @@ void UIBridge::setOutputStates(Vals vals /*, constype ct */)
     w->RDivider()->setCurr(vals.curr);
     w->RDivider()->setR1(vals.r1);
     w->RDivider()->setR2(vals.r2);
+    w->RDivider()->setIncode(vals.incode());
     w->RDivider()->blockSignals(false);
 
     // Fill in the text with proper numbers.
@@ -80,6 +80,7 @@ void UIBridge::setOutputStates(Vals vals /*, constype ct */)
     auto setDirColors = [=](QLineEdit *le, dir d) {
         le->setStyleSheet(isin(d) ? "color: darkblue; background-color: #bffcc6" : "color: darkblue; background-color: #b28dff");
     };
+
     setDirColors(w->VTopValEdit(), vals.vtopd);
     setDirColors(w->VBotValEdit(), vals.vbotd);
     setDirColors(w->VMidValEdit(), vals.vmidd);

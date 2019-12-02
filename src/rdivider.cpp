@@ -1,8 +1,10 @@
 #include "rdivider.h"
+#include "vals.h"
 #include <iostream>
 #include <cmath>
 #include <algorithm>
 #include <QPainter>
+#include <QColor>
 #include <QPolygonF>
 #include <QPointF>
 #include <QPen>
@@ -86,6 +88,7 @@ RDivider::RDivider(QWidget *parent) :
     m_barVLong(15),
     m_resThick(3),
     m_resMinWidth(3),
+    m_inCode(0),
     m_disabled(NONE)
 {
     updateVFunc();
@@ -146,6 +149,10 @@ void RDivider::setCurr(double x) {
 void RDivider::setDisabled(vartype vt) {
     m_disabled = vt;
 }
+void RDivider::setIncode(int ic) {
+    m_inCode = ic;
+}
+
 void RDivider::setCurrMax(double x) {
     m_currMax = x;
     emit currMaxChanged(x);
@@ -158,11 +165,12 @@ void RDivider::setCurrMin(double x) {
 }
 
 void RDivider::drawResistor(QPainter *p, int x, int y, int width, int height, double mintail, double zags) const {
-    //int xleft   = x;
-    //int xmid    = x + width / 2;
-    //int xright  = x + width;
+    // Draws the resistor zig zags and vertical tails
+    // x,y,width,height are as though for a rectangle
+    // mintail is the shortest the tails will be
+    // zags is how many full cycles of zig-zag there are
     int numpts = int(std::floor(double(zags) * 4.0) + 1.0);
-    int usableheight = height - 2 * mintail;
+    int usableheight = height - int(round(2.0 * mintail));
     double nomperiod = 2.0 * width / sqrt(3);
     double idealuse = nomperiod * zags;
     double actualuse = std::min(idealuse, double(usableheight));
@@ -172,15 +180,18 @@ void RDivider::drawResistor(QPainter *p, int x, int y, int width, int height, do
 
     double corners[] = {0.0, width/2.0, 0.0, -width/2.0};
     double xos = double(x) + width/2.0;
-    double thisx, thisy;
-    double lastx, lasty;
-    double slope;
+    double lastx = xos;
+    double lasty = y;
+    double thisx = xos;
+    double thisy = y + actualtail;
+    double slope = 0.0;
 
     QPolygonF pts;
     pts << QPointF(xos, y);
-    lastx = xos;
-    lasty = y;
-    thisy = y + actualtail;
+    if (qperiod < 1.0) {
+        pts << QPointF(xos + corners[3], thisy);
+        pts << QPointF(xos + corners[1], thisy);
+    } else {
     for (int i = 0; i < numpts; i++) {
         int idx = i & 0x3;
         thisx = corners[idx] + double(xos);
@@ -189,6 +200,7 @@ void RDivider::drawResistor(QPainter *p, int x, int y, int width, int height, do
         lastx = thisx;
         lasty = thisy;
         thisy += qperiod;
+        }
     }
     slope = lastx == xos ? slope : -slope;
     thisy = y + height - actualtail;
@@ -203,18 +215,41 @@ void RDivider::paintEvent(QPaintEvent *event) {
 
     (void) event;
     QPainter painter(this);
-    //painter.setRenderHint(QPainter::Antialiasing);
+    painter.setRenderHint(QPainter::Antialiasing);
     painter.drawRect(0,0,width()-1,height()-1);
 
     double rthick = (log10(m_curr)-1 + 6.0) * 3;
 
-    QPen HNormal(Qt::red, m_barHThick, Qt::SolidLine, Qt::FlatCap);
-    QPen HDisabled(Qt::gray, m_barHThick, Qt::SolidLine, Qt::FlatCap);
-    QPen VNormal(Qt::red, rthick /*m_barVThick*/, Qt::SolidLine, Qt::FlatCap);
-    QPen VDisabled(Qt::gray, m_barVThick, Qt::SolidLine, Qt::FlatCap);
 
-    QPen RNormal(Qt::gray, int(round(rthick)), Qt::SolidLine, Qt::FlatCap, Qt::MiterJoin);
-    //QPen RNormal(Qt::gray, 10, Qt::SolidLine, Qt::SquareCap, Qt::MiterJoin);
+    QColor cinput("#bffcc6");
+    QColor coutput("#b28dff");
+    
+    QPen HInput   (cinput,    m_barHThick,   Qt::SolidLine, Qt::FlatCap);
+    QPen HOutput  (coutput,   m_barHThick,   Qt::SolidLine, Qt::FlatCap);
+    QPen HBg      (Qt::black, m_barHThick,   Qt::SolidLine, Qt::FlatCap);
+    QPen HDisabled(Qt::gray,  m_barHThick,   Qt::SolidLine, Qt::FlatCap);
+    HInput.setWidthF(rthick);
+    HOutput.setWidthF(rthick);
+    HBg.setWidthF(rthick * 1.05);
+    HDisabled.setWidthF(rthick);
+
+    QPen VInput   (cinput,    rthick,        Qt::SolidLine, Qt::FlatCap);
+    QPen VOutput  (coutput,   rthick,        Qt::SolidLine, Qt::FlatCap);
+    QPen VBg      (Qt::black, rthick,        Qt::SolidLine, Qt::FlatCap);
+    QPen VDisabled(Qt::gray,  rthick,        Qt::SolidLine, Qt::FlatCap);
+    VInput.setWidthF(rthick);
+    VOutput.setWidthF(rthick);
+    VBg.setWidthF(rthick * 1.05);
+    VDisabled.setWidthF(rthick);
+
+    QPen RInput   (cinput,    rthick, Qt::SolidLine, Qt::FlatCap, Qt::MiterJoin);
+    QPen ROutput  (coutput,   rthick, Qt::SolidLine, Qt::FlatCap, Qt::MiterJoin);
+    QPen RBg      (Qt::black, rthick, Qt::SolidLine, Qt::FlatCap, Qt::MiterJoin);
+    QPen RDisabled(Qt::gray,  rthick, Qt::SolidLine, Qt::FlatCap, Qt::MiterJoin);
+    RInput.setWidthF(rthick);
+    ROutput.setWidthF(rthick);
+    RBg.setWidthF(rthick * 1.05);
+    RDisabled.setWidthF(rthick);
 
     // Set pixel levels based on voltage, includes offset for vbar
     int vtopp = voltToPixel(m_vtop, VTOP);
@@ -223,39 +258,60 @@ void RDivider::paintEvent(QPaintEvent *event) {
     int midpt = (width() - 1) / 2;
 
     // VTOP
-    painter.setPen(m_disabled == VTOP ? HDisabled : HNormal);
+    painter.setPen(HBg);
     painter.drawLine(m_hMargin, vtopp, width() - 1 - m_hMargin, vtopp);
-    painter.setPen(m_disabled == VTOP ? VDisabled : VNormal);
+    painter.setPen(VBg);
+    painter.drawLine(midpt, vtopp, midpt, vtopp + m_barVLong);
+
+    painter.setPen(m_disabled == VTOP ? HDisabled : isin(m_inCode, VTOP) ? HInput : HOutput);
+    painter.drawLine(m_hMargin, vtopp, width() - 1 - m_hMargin, vtopp);
+    painter.setPen(m_disabled == VTOP ? VDisabled : isin(m_inCode, VTOP) ? VInput : VOutput);
     painter.drawLine(midpt, vtopp, midpt, vtopp + m_barVLong);
 
     // VBOT
-    painter.setPen(m_disabled == VBOT ? HDisabled : HNormal);
+    painter.setPen(HBg);
     painter.drawLine(m_hMargin, vbotp, width() - 1 - m_hMargin, vbotp);
-    painter.setPen(m_disabled == VBOT ? VDisabled : VNormal);
+    painter.setPen(VBg);
+    painter.drawLine(midpt, vbotp - m_barVLong, midpt, vbotp);
+
+    painter.setPen(m_disabled == VBOT ? HDisabled : isin(m_inCode, VBOT) ? HInput : HOutput);
+    painter.drawLine(m_hMargin, vbotp, width() - 1 - m_hMargin, vbotp);
+    painter.setPen(m_disabled == VBOT ? VDisabled : isin(m_inCode, VBOT) ? VInput : VOutput);
     painter.drawLine(midpt, vbotp - m_barVLong, midpt, vbotp);
 
     // VMID
-    painter.setPen(m_disabled == VMID ? HDisabled : HNormal);
+    painter.setPen(HBg);
     painter.drawLine(m_hMargin, vmidp, width() - 1 - m_hMargin, vmidp);
-    painter.setPen(m_disabled == VMID ? VDisabled : VNormal);
+    painter.setPen(VBg);
     painter.drawLine(midpt, vmidp - m_barVLong, midpt, vmidp + m_barVLong);
+
+    painter.setPen(m_disabled == VMID ? HDisabled : isin(m_inCode, VMID) ? HInput : HOutput);
+    painter.drawLine(m_hMargin, vmidp, width() - 1 - m_hMargin, vmidp);
+    painter.setPen(m_disabled == VMID ? VDisabled : isin(m_inCode, VMID) ? VInput : VOutput);
+    painter.drawLine(midpt, vmidp - m_barVLong, midpt, vmidp + m_barVLong);
+
     // Resistors
-    int w = int(width() * 0.25); //currToPixel(m_curr);
+    int w = int(width() * 0.25);
     int x = (width() - 1 - w) / 2;
     double minzags = 2;
     double maxzags = 12;
     double zags1 = std::min(std::max(log10(m_r1) + 1.0, minzags), maxzags);
     double zags2 = std::min(std::max(log10(m_r2) + 1.0, minzags), maxzags);
-    double mintail = 0;
+    double mintail = 2;
     int y1 = vtopp + m_barVLong;
     int y2 = vmidp + m_barVLong;
     int h1 = vmidp - vtopp - 2 * m_barVLong;
     int h2 = vbotp - vmidp - 2 * m_barVLong;
-    painter.setPen(RNormal);
-    //drawResistor(&painter, 0, 0, 100, 365, 10, 2.62);
+    painter.setPen(RBg);
     drawResistor(&painter, x, y1, w, h1, mintail, zags1);
+    painter.setPen(m_disabled == vartype::R1 ? RDisabled : isin(m_inCode, vartype::R1) ? RInput : ROutput);
+    drawResistor(&painter, x, y1, w, h1, mintail, zags1);
+
+    painter.setPen(RBg);
     drawResistor(&painter, x, y2, w, h2, mintail, zags2);
-    
+    painter.setPen(m_disabled == vartype::R2 ? RDisabled : isin(m_inCode, vartype::R2) ? RInput : ROutput);
+    drawResistor(&painter, x, y2, w, h2, mintail, zags2);
+
     painter.end();
 
 }

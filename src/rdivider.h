@@ -33,6 +33,7 @@ class RDivider : public QWidget
     int m_barVLong;
     int m_resThick;
     int m_resMinWidth;
+    int m_inCode;
     vartype m_disabled;
 
     int maxWidth() const;
@@ -66,6 +67,7 @@ public:
     void setCurrMin(double);
     void setCurr(double);
     void setDisabled(vartype);
+    void setIncode(int);
 protected:
     void paintEvent(QPaintEvent *) override;
     void mouseMoveEvent(QMouseEvent *) override;

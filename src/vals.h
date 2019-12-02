@@ -18,6 +18,7 @@ class Vals {
 };
 
 bool isin(dir);
+bool isin(int, vartype); // parses int as incode instead of just checking dir with ==
 bool isout(dir);
 bool isdef(dir);
 std::string vstr(dir);    

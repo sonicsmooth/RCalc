@@ -75,9 +75,18 @@ bool Vals::operator==(const Vals & other) {
            curr == other.curr;
            // not comparing ratio
 }
-
-
 bool isin(dir d) {return d == INPUT;};
+bool isin(int ic, vartype vt) {
+    switch(vt) {
+        case VTOP: return ((ic >> 5) & 0x1);
+        case VBOT: return ((ic >> 4) & 0x1);
+        case VMID: return ((ic >> 3) & 0x1);
+        case R1: return ((ic >> 2) & 0x1);
+        case R2: return ((ic >> 1) & 0x1);
+        case CURR: return ((ic >> 0) & 0x1);
+        default: return false;
+    }
+}
 bool isout(dir d) {return d == OUTPUT;};
 bool isdef(dir d) {return d != UNDEFINED;};
 std::string vstr(dir d) {
