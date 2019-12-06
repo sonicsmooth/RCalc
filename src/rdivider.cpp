@@ -219,36 +219,40 @@ void RDivider::paintEvent(QPaintEvent *event) {
     painter.drawRect(0,0,width()-1,height()-1);
 
     double rthick = (log10(m_curr)-1 + 6.0) * 3;
+    double borderp = 3.0; // adds to rthick
 
 
     QColor cinput("#bffcc6");
     QColor coutput("#b28dff");
     
-    QPen HInput   (cinput,    m_barHThick,   Qt::SolidLine, Qt::FlatCap);
-    QPen HOutput  (coutput,   m_barHThick,   Qt::SolidLine, Qt::FlatCap);
-    QPen HBg      (Qt::black, m_barHThick,   Qt::SolidLine, Qt::FlatCap);
-    QPen HDisabled(Qt::gray,  m_barHThick,   Qt::SolidLine, Qt::FlatCap);
+    // Horizontal bar pens
+    QPen HInput   (cinput,    rthick, Qt::SolidLine, Qt::FlatCap);
+    QPen HOutput  (coutput,   rthick, Qt::SolidLine, Qt::FlatCap);
+    QPen HBg      (Qt::black, rthick, Qt::SolidLine, Qt::FlatCap);
+    QPen HDisabled(Qt::gray,  rthick, Qt::SolidLine, Qt::FlatCap);
     HInput.setWidthF(rthick);
     HOutput.setWidthF(rthick);
-    HBg.setWidthF(rthick * 1.05);
+    HBg.setWidthF(rthick + 2*borderp);
     HDisabled.setWidthF(rthick);
 
-    QPen VInput   (cinput,    rthick,        Qt::SolidLine, Qt::FlatCap);
-    QPen VOutput  (coutput,   rthick,        Qt::SolidLine, Qt::FlatCap);
-    QPen VBg      (Qt::black, rthick,        Qt::SolidLine, Qt::FlatCap);
-    QPen VDisabled(Qt::gray,  rthick,        Qt::SolidLine, Qt::FlatCap);
+    // Vertical bar pens
+    QPen VInput   (cinput,    rthick, Qt::SolidLine, Qt::FlatCap);
+    QPen VOutput  (coutput,   rthick, Qt::SolidLine, Qt::FlatCap);
+    QPen VBg      (Qt::black, rthick, Qt::SolidLine, Qt::FlatCap);
+    QPen VDisabled(Qt::gray,  rthick, Qt::SolidLine, Qt::FlatCap);
     VInput.setWidthF(rthick);
     VOutput.setWidthF(rthick);
-    VBg.setWidthF(rthick * 1.05);
+    VBg.setWidthF(rthick + borderp);
     VDisabled.setWidthF(rthick);
 
+    // Resistor pens
     QPen RInput   (cinput,    rthick, Qt::SolidLine, Qt::FlatCap, Qt::MiterJoin);
     QPen ROutput  (coutput,   rthick, Qt::SolidLine, Qt::FlatCap, Qt::MiterJoin);
     QPen RBg      (Qt::black, rthick, Qt::SolidLine, Qt::FlatCap, Qt::MiterJoin);
     QPen RDisabled(Qt::gray,  rthick, Qt::SolidLine, Qt::FlatCap, Qt::MiterJoin);
     RInput.setWidthF(rthick);
     ROutput.setWidthF(rthick);
-    RBg.setWidthF(rthick * 1.05);
+    RBg.setWidthF(rthick + borderp);
     RDisabled.setWidthF(rthick);
 
     // Set pixel levels based on voltage, includes offset for vbar
@@ -258,22 +262,24 @@ void RDivider::paintEvent(QPaintEvent *event) {
     int midpt = (width() - 1) / 2;
 
     // VTOP
+    // background/border
     painter.setPen(HBg);
-    painter.drawLine(m_hMargin, vtopp, width() - 1 - m_hMargin, vtopp);
+    painter.drawLine(m_hMargin - borderp, vtopp, width() - 1 - m_hMargin + borderp, vtopp);
     painter.setPen(VBg);
-    painter.drawLine(midpt, vtopp, midpt, vtopp + m_barVLong);
-
+    painter.drawLine(midpt, vtopp - borderp, midpt, vtopp + m_barVLong + borderp);
+    // foreground/main
     painter.setPen(m_disabled == VTOP ? HDisabled : isin(m_inCode, VTOP) ? HInput : HOutput);
     painter.drawLine(m_hMargin, vtopp, width() - 1 - m_hMargin, vtopp);
     painter.setPen(m_disabled == VTOP ? VDisabled : isin(m_inCode, VTOP) ? VInput : VOutput);
     painter.drawLine(midpt, vtopp, midpt, vtopp + m_barVLong);
 
     // VBOT
+    // background
     painter.setPen(HBg);
-    painter.drawLine(m_hMargin, vbotp, width() - 1 - m_hMargin, vbotp);
+    painter.drawLine(m_hMargin - borderp, vbotp, width() - 1 - m_hMargin + borderp, vbotp);
     painter.setPen(VBg);
     painter.drawLine(midpt, vbotp - m_barVLong, midpt, vbotp);
-
+    // foreground
     painter.setPen(m_disabled == VBOT ? HDisabled : isin(m_inCode, VBOT) ? HInput : HOutput);
     painter.drawLine(m_hMargin, vbotp, width() - 1 - m_hMargin, vbotp);
     painter.setPen(m_disabled == VBOT ? VDisabled : isin(m_inCode, VBOT) ? VInput : VOutput);
@@ -281,7 +287,7 @@ void RDivider::paintEvent(QPaintEvent *event) {
 
     // VMID
     painter.setPen(HBg);
-    painter.drawLine(m_hMargin, vmidp, width() - 1 - m_hMargin, vmidp);
+    painter.drawLine(m_hMargin - borderp, vmidp, width() - 1 - m_hMargin + borderp, vmidp);
     painter.setPen(VBg);
     painter.drawLine(midpt, vmidp - m_barVLong, midpt, vmidp + m_barVLong);
 
