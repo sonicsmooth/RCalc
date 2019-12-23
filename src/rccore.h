@@ -15,6 +15,7 @@ private:
     std::shared_ptr<UIBridgeInterface> ibridge;
     std::list<vartype> latest4; // list of 4 inputs
     double vul,vbl,rmax,currmax, ratiomax;
+    bool engaged;
 
     void pushToList(vartype);
     void removeFromList(vartype);
@@ -41,6 +42,8 @@ public:
     void setCurrMax(double);
     void setRatioMax(double);
     void setBridge(std::shared_ptr<UIBridgeInterface> const &);
+    void setEngaged(bool);
+    bool getEngaged() const;
 };
 
 std::string cstr(vartype);

@@ -6,6 +6,7 @@
 #include <QPalette>
 #include <QSlider>
 #include <QPushButton>
+#include <QMessageBox>
 #include "uibridge.h"
 #include "engstr.h"
 
@@ -27,6 +28,8 @@ void UIBridge::setCore(std::shared_ptr<RCCore> pc)
 
 void UIBridge::setOutputStates(Vals vals /*, constype ct */)
 {
+    if (!w) return;
+
     // Sets the sliders positions.
     forceSlider(w->VTopSlider(), doubleToSlider(VTOP, vals.vtop));
     forceSlider(w->VBotSlider(), doubleToSlider(VBOT, vals.vbot));
@@ -91,6 +94,22 @@ void UIBridge::setOutputStates(Vals vals /*, constype ct */)
 
     std::string sstr(vals.str());
     w->TextEdit()->setPlainText(QString::fromStdString(sstr));
+}
+
+void UIBridge::setOutputEngaged(bool en) {
+    if (!w) return;
+    QPushButton* pb = w->EngagedButton();
+    if (pb) {
+        pb->blockSignals(en);
+        pb->setChecked(en);
+        pb->setText(en ? "Engaged" : "Not engaged");
+        pb->blockSignals(false);
+    }
+}
+void UIBridge::errorMsg(std::string errstr) const {
+    QMessageBox mb;
+    mb.setText(QString::fromStdString(errstr));
+    mb.exec();
 }
 
 void UIBridge::forceSlider(QSlider *slider, int val) const
@@ -260,4 +279,8 @@ void UIBridge::setCoreValue(vartype vt, std::string stringVal)
 {
     // Converts from string to double, then sets core value
     pcore->setInput(vt, EngStr::strToDouble(stringVal));
+}
+void UIBridge::setCoreEngaged(bool en) {
+    if (pcore) 
+        pcore->setEngaged(en);
 }

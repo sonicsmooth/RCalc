@@ -57,6 +57,7 @@ public:
 //    QPushButton * CurrButton();
     QPlainTextEdit * TextEdit();
     RDivider * RDivider();
+    QPushButton * EngagedButton();
 
 private:
     Ui::MainWindow *m_ui;

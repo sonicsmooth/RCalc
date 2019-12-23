@@ -36,7 +36,10 @@ public:
     void setCoreValue(vartype, int);
     void setCoreValue(vartype, double);
     void setCoreValue(vartype, std::string);
-    void setCoreDir(vartype, dir);
+    //void setCoreDir(vartype, dir);
+    void setCoreEngaged(bool); // called from main or button to set core value
+    void setOutputEngaged(bool); // called from core to set button state/text
+    void errorMsg(std::string) const;
 
 
 };

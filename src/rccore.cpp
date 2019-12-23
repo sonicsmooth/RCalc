@@ -12,15 +12,29 @@
 #include "rccore.h"
 
 
+void throw_line(std::string msg, const std::shared_ptr<UIBridgeInterface> b, int line) {
+    std::ostringstream s;
+    s << msg << " " << __FILE__ << ":" << line;
+    std::string errstr = s.str();
+    std::cout << errstr;
+    if (b)
+        b->errorMsg(errstr);
+        throw std::logic_error(errstr);
+}
 
-#define throw_line(msg) \
-    do { \
-        std::ostringstream s; \
-        s << msg << " " << __FILE__ << ":" << __LINE__; \
-        std::string errstr = s.str(); \
-        std::cout << errstr; \
-        throw std::logic_error(errstr); \
-    } while (0)
+#define throw_line(msg) throw_line(msg, ibridge, __LINE__);
+
+
+//#define throw_line(msg) \
+//    do { \
+//        std::ostringstream s; \
+//        s << msg << " " << __FILE__ << ":" << __LINE__; \
+//        std::string errstr = s.str(); \
+//        std::cout << errstr; \
+//        if (ibridge) \
+//            ibridge->errorMsg(errstr); \
+//        throw std::logic_error(errstr); \
+//    } while (0)
  
 // PRIVATE
 // For the list, keep at most 4 elements,
@@ -39,8 +53,18 @@ void RCCore::removeFromList(vartype v) {
 void RCCore::setBridge(const std::shared_ptr<UIBridgeInterface> & b) {
     ibridge = b;
 }
+void RCCore::setEngaged(bool en) {
+    engaged = en;
+    update();
+
+}
+bool RCCore::getEngaged() const {
+    return engaged;
+}
 Vals RCCore::swapInputs(Vals vals) const {
     // Set inputs according to list
+    // If a vartype is in the argument vals, then it is being set by someone,
+    // so it is considered an input
     Vals ovals = vals;
     auto find = [&](vartype vt) {return std::find(latest4.begin(), latest4.end(), vt) != latest4.end();};
     ovals.vtopd = find(VTOP) ? INPUT : OUTPUT;
@@ -171,7 +195,7 @@ Vals RCCore::calc_group(vartype latestvt, Vals invals) const {
 
     int icode = invals.incode();
     Vals out = clip(invals, icode);
-    auto check_ctr = [](int ctr) {
+    auto check_ctr = [this](int ctr) {
         if (ctr >= 10)
             throw_line("Too many counts");
     };
@@ -979,18 +1003,43 @@ constype RCCore::constraint(Vals vals) const {
 bool RCCore::_update(vartype latestvt) {
     // Calculate a what-if.
     // If the what-if violates anything, don't update the output
-    if (constraint(inVals) == PROPER) {
+
+    // If we are engaged, then check the constrainst, calculate, and update
+    // If not engaged, then just update based on inputs
+
+    if (ibridge)
+        ibridge->setOutputEngaged(engaged);
+
+    if (engaged && constraint(inVals) == PROPER) {
         outVals = calc_group(latestvt, inVals);
-        // Setting inVals to outVals prevents things from jumping after recovering from a limit
-        inVals = outVals;
-        if (ibridge) ibridge->setOutputStates(outVals /*, disable, constraint(outVals)*/);
+        inVals = outVals; // prevents jumping after recovering from a limit
+        if (ibridge)
+            ibridge->setOutputStates(outVals);
         return true;
     } else {
-        std::cout << "Improper input constraint!!!!!!!!!!! -- won't calculate" << std::endl;
         outVals = inVals;
-        if (ibridge) ibridge->setOutputStates(outVals /*, constraint(outVals)*/);
+        if (ibridge)
+            ibridge->setOutputStates(outVals);
         return false;
     }
+
+
+
+//    if (constraint(inVals) == PROPER) {
+//        if (engaged) {
+//            outVals = calc_group(latestvt, inVals);
+//            // Setting inVals to outVals prevents things from jumping after recovering from a limit
+//            inVals = outVals;
+//        }
+//        if (ibridge)
+//            ibridge->setOutputStates(outVals);
+//        return true;
+//    } else {
+//        std::cout << "Improper input constraint!!!!!!!!!!! -- won't calculate" << std::endl;
+//        outVals = inVals;
+//        if (ibridge) ibridge->setOutputStates(outVals /*, constraint(outVals)*/);
+//        return false;
+//    }
 }
 
 

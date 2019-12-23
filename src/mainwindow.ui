@@ -27,9 +27,21 @@
          </layout>
         </item>
         <item>
-         <widget class="QLineEdit" name="RatioValEdit_2">
-          <property name="enabled">
-           <bool>false</bool>
+         <widget class="QPushButton" name="EngagedButton">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>22</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>Unfilled</string>
+          </property>
+          <property name="checkable">
+           <bool>true</bool>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
           </property>
          </widget>
         </item>

@@ -23,6 +23,7 @@
 int main(int argc, char *argv[])
 {
     QApplication::setStyle("Fusion"); // Windows, windowsvista
+    QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     QApplication app(argc, argv);
     std::shared_ptr<RCCore> pcore = std::make_shared<RCCore>();
     std::shared_ptr<UIBridge> pbridge = std::make_shared<UIBridge>();
@@ -43,6 +44,8 @@ int main(int argc, char *argv[])
     w.R1Slider()->setMaximum(steps);
     w.CurrSlider()->setMaximum(steps);
     w.RatioSlider()->setMaximum(steps);
+    auto pb = w.EngagedButton();
+    pb->setText("what");
 
     // Set core limits
     pcore->setVMax(20.0);
@@ -85,6 +88,9 @@ int main(int argc, char *argv[])
     QObject::connect(w.RDivider(), &RDivider::vbotChanged, [=](double x) {pbridge->setCoreValue(VBOT, x);});
     QObject::connect(w.RDivider(), &RDivider::vmidChanged, [=](double x) {pbridge->setCoreValue(VMID, x);});
 
+    QObject::connect(w.EngagedButton(), &QPushButton::clicked, [=, &w] () {
+        pbridge->setCoreEngaged(w.EngagedButton()->isChecked());});
+    
     // Set up validate-and-send on each line edit
     auto vas = [=](QLineEdit * qle, vartype vt) {
         double x = EngStr::strToDouble(qle->text().toStdString());
@@ -99,7 +105,9 @@ int main(int argc, char *argv[])
     QObject::connect(w.CurrValEdit(), &QLineEdit::editingFinished, [=, &w]() {vas(w.CurrValEdit(), CURR);});
 
     // Set some initial conditions
+
     pbridge->setCore(pcore);
+    pbridge->setCoreEngaged(true);
     pbridge->setCoreValue(VTOP, 15.0);
     pbridge->setCoreValue(VBOT, -5.0);
     pbridge->setCoreValue(VMID, 15.0);
@@ -108,6 +116,8 @@ int main(int argc, char *argv[])
     pbridge->setWindow(&w); // change to shared ptr
     pcore->setBridge(pbridge);
     pcore->update();
+    //pbridge->setCoreEngaged(false);
+
 
 
     w.show();
