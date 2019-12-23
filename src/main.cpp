@@ -107,7 +107,7 @@ int main(int argc, char *argv[])
     // Set some initial conditions
 
     pbridge->setCore(pcore);
-    pbridge->setCoreEngaged(true);
+    pbridge->setCoreEngaged(false);
     pbridge->setCoreValue(VTOP, 15.0);
     pbridge->setCoreValue(VBOT, -5.0);
     pbridge->setCoreValue(VMID, 15.0);
@@ -115,8 +115,8 @@ int main(int argc, char *argv[])
 
     pbridge->setWindow(&w); // change to shared ptr
     pcore->setBridge(pbridge);
-    pcore->update();
-    //pbridge->setCoreEngaged(false);
+    //pcore->update();
+    pbridge->setCoreEngaged(true);
 
 
 

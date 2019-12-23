@@ -109,6 +109,7 @@ void UIBridge::setOutputEngaged(bool en) {
 void UIBridge::errorMsg(std::string errstr) const {
     QMessageBox mb;
     mb.setText(QString::fromStdString(errstr));
+    mb.setIcon(QMessageBox::Critical);
     mb.exec();
 }
 

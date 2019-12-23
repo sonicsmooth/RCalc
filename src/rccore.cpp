@@ -335,7 +335,7 @@ Vals RCCore::calc_group(vartype latestvt, Vals invals) const {
                 // out.vbot = out.vmid - (out.r2 * out.curr);
                 // out.vmid = (out.r2 * out.curr) + out.vbot;
                 // out.curr = (out.vmid - out.vbot) / out.r2;
-                out.disable = latest4.front() == R1   ? R2 : 
+                out.disable = latest4.front() == R1   ? R2 :
                               latest4.front() == VBOT ? VTOP : NONE;
             };
             int ctr;
@@ -509,7 +509,7 @@ Vals RCCore::calc_group(vartype latestvt, Vals invals) const {
                 // out.vtop = out.r1 * out.curr + out.vmid;
                 // out.vmid = out.vtop - (out.r1 * out.curr);
                 // out.curr = (out.vtop - out.vmid) / out.r1;
-                out.disable = latest4.front() == VTOP ? VBOT : 
+                out.disable = latest4.front() == VTOP ? VBOT :
                               latest4.front() == R2 ? R1 : NONE;
             };
             int ctr;
@@ -806,7 +806,7 @@ Vals RCCore::calc_group(vartype latestvt, Vals invals) const {
                 // out.vbot = out.vmid - out.r2 * out.curr
                 // out.vmid = out.r2 * out.curr + out.vbot
                 // out.curr = (out.vmid - out.vbot) / out.r2
-                out.disable = latest4.front() == VTOP ? R2 : 
+                out.disable = latest4.front() == VTOP ? R2 :
                               latest4.front() == VBOT ? R1 : NONE;                
                 };
             int ctr;
@@ -863,7 +863,7 @@ Vals RCCore::calc_group(vartype latestvt, Vals invals) const {
                 // out.vbot = out.vmid - out.curr * out.r2
                 // out.vmid = out.curr * out.r2 + out.vbot
                 // out.r2 = (out.vmid - out.vbot) / out.curr
-                out.disable = (latest4.front()) == VTOP ? CURR : NONE;
+                out.disable = latest4.front() == VTOP ? CURR : NONE;
                 };
             int ctr;
             for (ctr = 0; ctr < 10; ctr++) {
@@ -1007,39 +1007,27 @@ bool RCCore::_update(vartype latestvt) {
     // If we are engaged, then check the constrainst, calculate, and update
     // If not engaged, then just update based on inputs
 
-    if (ibridge)
-        ibridge->setOutputEngaged(engaged);
-
-    if (engaged && constraint(inVals) == PROPER) {
-        outVals = calc_group(latestvt, inVals);
-        inVals = outVals; // prevents jumping after recovering from a limit
-        if (ibridge)
-            ibridge->setOutputStates(outVals);
-        return true;
-    } else {
+    if (engaged) {
+        if (constraint(inVals) == PROPER) {
+            outVals = calc_group(latestvt, inVals);
+            inVals = outVals; // prevents jumping after recovering from a limit
+            if (ibridge)
+                ibridge->setOutputStates(outVals);
+            return true;
+        }
+        else {
+            throw_line("Should undo button press");
+            return false;
+        }
+    }
+    else {
         outVals = inVals;
+        outVals.disable = NONE;
         if (ibridge)
             ibridge->setOutputStates(outVals);
         return false;
+
     }
-
-
-
-//    if (constraint(inVals) == PROPER) {
-//        if (engaged) {
-//            outVals = calc_group(latestvt, inVals);
-//            // Setting inVals to outVals prevents things from jumping after recovering from a limit
-//            inVals = outVals;
-//        }
-//        if (ibridge)
-//            ibridge->setOutputStates(outVals);
-//        return true;
-//    } else {
-//        std::cout << "Improper input constraint!!!!!!!!!!! -- won't calculate" << std::endl;
-//        outVals = inVals;
-//        if (ibridge) ibridge->setOutputStates(outVals /*, constraint(outVals)*/);
-//        return false;
-//    }
 }
 
 
@@ -1073,6 +1061,9 @@ bool RCCore::setInput(vartype vt, double in) {
 
 }
 bool RCCore::update() {
+    if (ibridge)
+        ibridge->setOutputEngaged(engaged);
+
     return _update(NONE);
 }
 
