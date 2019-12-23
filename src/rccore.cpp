@@ -25,17 +25,6 @@ void throw_line(std::string msg, const std::shared_ptr<UIBridgeInterface> b, int
 #define throw_line(msg) throw_line(msg, ibridge, __LINE__);
 
 
-//#define throw_line(msg) \
-//    do { \
-//        std::ostringstream s; \
-//        s << msg << " " << __FILE__ << ":" << __LINE__; \
-//        std::string errstr = s.str(); \
-//        std::cout << errstr; \
-//        if (ibridge) \
-//            ibridge->errorMsg(errstr); \
-//        throw std::logic_error(errstr); \
-//    } while (0)
- 
 // PRIVATE
 // For the list, keep at most 4 elements,
 // and enable removing something from the middle
